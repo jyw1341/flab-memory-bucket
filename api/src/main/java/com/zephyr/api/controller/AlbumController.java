@@ -119,7 +119,7 @@ public class AlbumController {
         return response;
     }
 
-    @PostMapping("/albums/{albumId}/memories")
+    @PostMapping("/{albumId}/memories")
     public ResponseEntity<MemoryResponse> createMemory(@PathVariable Long albumId) {
         MemoryResponse response = MemoryResponse.builder()
                 .memoryTitle("title")
