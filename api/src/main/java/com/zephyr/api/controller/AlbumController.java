@@ -2,6 +2,7 @@ package com.zephyr.api.controller;
 
 import com.zephyr.api.request.AlbumCreate;
 import com.zephyr.api.request.AlbumUpdate;
+import com.zephyr.api.request.MemoryCreate;
 import com.zephyr.api.response.AlbumMemberResponse;
 import com.zephyr.api.response.AlbumResponse;
 import com.zephyr.api.response.MemoryResponse;
@@ -120,7 +121,7 @@ public class AlbumController {
     }
 
     @PostMapping("/{albumId}/memories")
-    public ResponseEntity<MemoryResponse> createMemory(@PathVariable Long albumId) {
+    public ResponseEntity<MemoryResponse> createMemory(@PathVariable Long albumId, @RequestBody MemoryCreate request) {
         MemoryResponse response = MemoryResponse.builder()
                 .memoryTitle("title")
                 .memoryDescription("description")
