@@ -3,6 +3,7 @@ package com.zephyr.api.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zephyr.api.request.AlbumCreate;
 import com.zephyr.api.request.AlbumUpdate;
+import com.zephyr.api.request.MemoryCreate;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -283,5 +285,61 @@ class AlbumControllerTest {
 
         mockMvc.perform(get("/{albumId}/memories", invalidAlbumId))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("유효 앨범 ID, 모든 필드가 존재 / 기억 생성 / 201 반환, 생성된 기억 반환")
+    public void givenValidAlbumIdAndValidRequestBody_whenCreateMemory_thenStatus201AndCorrectResponse() throws Exception {
+        Long validAlbumId = 1L;
+
+        MemoryCreate request = new MemoryCreate("제목", "내용", LocalDateTime.now(), LocalDateTime.now());
+        String json = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(post("/{albumId}/memories", validAlbumId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"))
+                .andExpect(jsonPath("$.memoryTitle").value("title"))
+                .andExpect(jsonPath("$.memoryDescription").value("description"));
+    }
+
+    @Test
+    @DisplayName("참여하지 않는 앨범 ID / 기억 생성 / 404 반환 ")
+    public void givenInvalidAlbumId_whenCreateMemory_thenStatus404() throws Exception {
+        Long invalidAlbumId = 999L;
+        MemoryCreate request = new MemoryCreate("제목", "내용", LocalDateTime.now(), LocalDateTime.now());
+        String json = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(post("/{albumId}/memories", invalidAlbumId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("참여하지 않는 앨범 ID / 기억 생성 / 403 반환 ")
+    public void givenNotMemberAlbumId_whenCreateMemory_thenStatus403() throws Exception {
+        Long invalidAlbumId = 999L;
+        MemoryCreate request = new MemoryCreate("제목", "내용", LocalDateTime.now(), LocalDateTime.now());
+        String json = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(post("/{albumId}/memories", invalidAlbumId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("필수 필드가 없는 경우 / 기억 생성 / 400 반환")
+    public void givenValidAlbumIdAndInvalidRequestBody_whenCreateMemory_thenStatus400() throws Exception {
+        Long validAlbumId = 1L;
+        MemoryCreate request = new MemoryCreate("제목", "내용", LocalDateTime.now(), LocalDateTime.now());
+        String json = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(post("/{albumId}/memories", validAlbumId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
     }
 }
