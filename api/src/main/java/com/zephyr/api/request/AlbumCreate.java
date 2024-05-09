@@ -9,13 +9,13 @@ import lombok.ToString;
 public class AlbumCreate {
 
     private final String ownerId;
-    private final String albumName;
+    private final String albumTitle;
     private final String albumDescription;
 
     @Builder
-    public AlbumCreate(String ownerId, String albumName, String albumDescription) {
+    public AlbumCreate(String ownerId, String albumTitle, String albumDescription) {
         this.ownerId = ownerId;
-        this.albumName = albumName;
+        this.albumTitle = albumTitle;
         this.albumDescription = albumDescription;
     }
 }

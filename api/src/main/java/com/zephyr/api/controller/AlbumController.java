@@ -54,7 +54,7 @@ public class AlbumController {
     public ResponseEntity<AlbumResponse> create(@RequestBody AlbumCreate request) {
         AlbumResponse response = AlbumResponse.builder()
                 .albumId(1L)
-                .albumName(request.getAlbumName())
+                .albumName(request.getAlbumTitle())
                 .albumDescription(request.getAlbumDescription())
                 .albumCover("url")
                 .createdAt(LocalDateTime.now())
@@ -73,7 +73,7 @@ public class AlbumController {
     public AlbumResponse update(@PathVariable Long albumId, @RequestBody AlbumUpdate request) {
         AlbumResponse response = AlbumResponse.builder()
                 .albumId(albumId)
-                .albumName(request.getAlbumName())
+                .albumName(request.getAlbumTitle())
                 .albumDescription(request.getAlbumDescription())
                 .albumCover("url")
                 .createdAt(LocalDateTime.now())
