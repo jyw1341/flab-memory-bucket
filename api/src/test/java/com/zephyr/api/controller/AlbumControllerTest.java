@@ -262,4 +262,26 @@ class AlbumControllerTest {
         mockMvc.perform(delete("/{albumId}/members/{memberId}", validAlbumId, invalidMemberId))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @DisplayName("유효 앨범 ID / 기억 목록 조회 / 200, 기억 목록 반환")
+    public void givenValidAlbumId_whenGetMemories_thenStatus200AndCorrectMemories() throws Exception {
+        Long validAlbumId = 1L;
+
+        mockMvc.perform(get("/{albumId}/memories", validAlbumId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isNotEmpty())
+                .andExpect(jsonPath("$.length()", Matchers.is(10)))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("없는 앨범 ID / 기억 목록 조회 / 404 반환")
+    public void givenInvalidAlbumId_whenGetMemories_thenStatus404() throws Exception {
+        Long invalidAlbumId = 999L;
+
+        mockMvc.perform(get("/{albumId}/memories", invalidAlbumId))
+                .andExpect(status().isNotFound());
+    }
 }
