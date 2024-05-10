@@ -2,10 +2,8 @@ package com.zephyr.api.controller;
 
 import com.zephyr.api.request.AlbumCreate;
 import com.zephyr.api.request.AlbumUpdate;
-import com.zephyr.api.request.MemoryCreate;
 import com.zephyr.api.response.AlbumMemberResponse;
 import com.zephyr.api.response.AlbumResponse;
-import com.zephyr.api.response.MemoryResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -105,30 +103,5 @@ public class AlbumController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteMember(@PathVariable Long albumId, @PathVariable Long memberId) {
 
-    }
-
-    @GetMapping("/{albumId}/memories")
-    public List<MemoryResponse> getMemories(@PathVariable Long albumId) {
-        List<MemoryResponse> response = LongStream.range(1, 11).mapToObj(value -> MemoryResponse.builder()
-                .memoryTitle("title" + value)
-                .memoryDescription("description" + value)
-                .startDate(LocalDateTime.now())
-                .endDate(LocalDateTime.now())
-                .build()
-        ).toList();
-
-        return response;
-    }
-
-    @PostMapping("/{albumId}/memories")
-    public ResponseEntity<MemoryResponse> createMemory(@PathVariable Long albumId, @RequestBody MemoryCreate request) {
-        MemoryResponse response = MemoryResponse.builder()
-                .memoryTitle("title")
-                .memoryDescription("description")
-                .startDate(LocalDateTime.now())
-                .endDate(LocalDateTime.now())
-                .build();
-
-        return ResponseEntity.created(URI.create("/memories/1")).body(response);
     }
 }
