@@ -63,7 +63,7 @@ class AlbumControllerTest {
     @Test
     @DisplayName("존재하지 않는 앨범 ID를 사용 / 앨범 단건 조회 / 404 상태코드 반환")
     void givenInvalidAlbumId_whenGetAlbum_thenStatus404() throws Exception {
-        mockMvc.perform(get("/posts/{postId}", 1L))
+        mockMvc.perform(get("/albums/{albumId}", 1L))
                 .andExpect(status().isNotFound())
                 .andDo(print());
     }
