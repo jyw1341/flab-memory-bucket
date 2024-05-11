@@ -13,9 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URI;
@@ -60,7 +58,7 @@ class AlbumControllerTest {
 
         //when
         ResponseEntity<AlbumResponse> resultEntity = restTemplate.getForEntity(
-                createUrl(LOCALHOST, port, location.toString()),
+                createUrl(LOCALHOST, port, location.getPath()),
                 AlbumResponse.class
         );
 
@@ -169,23 +167,50 @@ class AlbumControllerTest {
     }
 
     @Test
-    @DisplayName("존재하는 앨범 ID를 사용 / 앨범 삭제 / 204, 앨범 삭제 확인")
+    @DisplayName("앨범 생성 / 앨범 삭제 / 204, 생성된 앨범 삭제")
     public void givenValidAlbumId_whenDeleteAlbum_thenAlbumIsDeleted() throws Exception {
-        Long validAlbumId = 1L;
+        //given
+        AlbumCreate request = AlbumCreate.builder()
+                .ownerId("tester")
+                .albumTitle("test title")
+                .albumDescription("hello")
+                .build();
+        ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
+                createUrl(LOCALHOST, port, "/albums"),
+                request,
+                AlbumResponse.class
+        );
+        URI location = response.getHeaders().getLocation();
 
-        mockMvc.perform(delete("/albums/{albumId}", validAlbumId))
-                .andExpect(status().isNoContent());
+        //when
+        ResponseEntity<Void> result = restTemplate.exchange(
+                createUrl(LOCALHOST, port, location.getPath()),
+                HttpMethod.DELETE,
+                HttpEntity.EMPTY,
+                Void.class
+        );
+        //TODO 실제 조회?
 
-        //TODO: 삭제 후 해당 앨범이 더 이상 존재하지 않는지 테스트
+        //then
+        assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
     }
 
     @Test
-    @DisplayName("존재하지 않는 앨범 ID 사용 / 앨범 삭제 / 404 반환")
+    @DisplayName("없는 앨범 ID / 앨범 삭제 / 404 반환")
     public void givenInvalidAlbumId_whenDeleteAlbum_thenNotFound() throws Exception {
-        Long invalidAlbumId = 999L;
+        //given
+        String invalidPath = "albums/999";
 
-        mockMvc.perform(delete("/albums/{albumId}", invalidAlbumId))
-                .andExpect(status().isNotFound());
+        //when
+        ResponseEntity<Void> result = restTemplate.exchange(
+                createUrl(LOCALHOST, port, invalidPath),
+                HttpMethod.DELETE,
+                HttpEntity.EMPTY,
+                Void.class
+        );
+
+        //then
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
 
     @Test
