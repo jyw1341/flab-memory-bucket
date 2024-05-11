@@ -40,19 +40,28 @@ class AlbumControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private static String createUrl(String baseUrl, int port, String path) {
+        return baseUrl + port + path;
+    }
+
     @Test
     @DisplayName("존재하는 앨범 ID를 사용 / 앨범 단건 조회 / 200, 앨범 정보 반환")
     void givenValidAlbumId_whenGetAlbum_thenStatus200() throws Exception {
         //given
         String testTitle = "테스트 앨범";
-        String createUrl = LOCALHOST + port + "/albums";
         AlbumCreate request = AlbumCreate.builder().albumTitle(testTitle).build();
-        ResponseEntity<AlbumResponse> responseEntity = restTemplate.postForEntity(createUrl, request, AlbumResponse.class);
+        ResponseEntity<AlbumResponse> responseEntity = restTemplate.postForEntity(
+                createUrl(LOCALHOST, port, "/albums"),
+                request,
+                AlbumResponse.class
+        );
         URI location = responseEntity.getHeaders().getLocation();
 
         //when
-        String getUrl = LOCALHOST + port + location.toString();
-        ResponseEntity<AlbumResponse> resultEntity = restTemplate.getForEntity(getUrl, AlbumResponse.class);
+        ResponseEntity<AlbumResponse> resultEntity = restTemplate.getForEntity(
+                createUrl(LOCALHOST, port, location.toString()),
+                AlbumResponse.class
+        );
 
         //then
         assertEquals(HttpStatus.OK, resultEntity.getStatusCode());
@@ -68,14 +77,27 @@ class AlbumControllerTest {
     }
 
     @Test
-    @DisplayName("유효한 앨범 ID를 사용 / 앨범 목록 조회 / 200 상태코드, 앨범 목록이 반환")
+    @DisplayName("앨범을 10개 생성 / 앨범 목록 조회 / 200 상태코드, 앨범 10개 반환")
     public void givenValidRequest_whenGetList_thenStatus200AndCorrectAlbums() throws Exception {
-        mockMvc.perform(get("/albums"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$").isNotEmpty())
-                .andExpect(jsonPath("$.length()", Matchers.is(10)))
-                .andDo(print());
+        //given
+        int resultSize = 10;
+        for (int i = 0; i < resultSize; i++) {
+            AlbumCreate request = AlbumCreate.builder().albumTitle("테스트 앨범" + i).build();
+            restTemplate.postForEntity(
+                    createUrl(LOCALHOST, port, "/albums"),
+                    request,
+                    AlbumResponse.class
+            );
+        }
+
+        //when
+        ResponseEntity<AlbumResponse[]> resultEntity = restTemplate.getForEntity(
+                createUrl(LOCALHOST, port, "/albums"),
+                AlbumResponse[].class
+        );
+
+        //then
+        assertEquals(resultSize, resultEntity.getBody().length);
     }
 
     @Test
