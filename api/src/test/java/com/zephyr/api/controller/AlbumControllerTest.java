@@ -214,55 +214,93 @@ class AlbumControllerTest {
     }
 
     @Test
-    @DisplayName("존재하는 앨범 ID 사용 / 앨범 업데이트 / 200, 변경된 앨범 정보 반환")
+    @DisplayName("앨범 생성 / 생성한 앨범 수정 / 200, 변경된 앨범 정보 반환")
     public void givenValidAlbumIdAndValidRequestBody_whenUpdateAlbum_thenStatus200AndCorrectResponse() throws Exception {
-        Long validAlbumId = 1L;
-        AlbumUpdate request = AlbumUpdate.builder()
+        //given
+        AlbumCreate request = AlbumCreate.builder()
+                .ownerId("tester")
+                .albumTitle("test title")
+                .albumDescription("hello")
                 .build();
+        ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
+                createUrl(LOCALHOST, port, "/albums"),
+                request,
+                AlbumResponse.class
+        );
+        URI location = response.getHeaders().getLocation();
 
-        String json = objectMapper.writeValueAsString(request);
+        //when
+        AlbumUpdate updateRequest = AlbumUpdate.builder()
+                .ownerId("updated")
+                .albumTitle("updated title")
+                .albumDescription("updated hello")
+                .build();
+        ResponseEntity<AlbumResponse> result = restTemplate.exchange(
+                createUrl(LOCALHOST, port, location.getPath()),
+                HttpMethod.PATCH,
+                new HttpEntity<>(updateRequest),
+                AlbumResponse.class
+        );
 
-        mockMvc.perform(patch("/albums/{albumId}", validAlbumId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.albumId").value(validAlbumId))
-                .andExpect(jsonPath("$.albumName").value("Updated Album Name"))
-                .andExpect(jsonPath("$.albumDescription").value("Updated Album Description"))
-                .andExpect(jsonPath("$.albumCover").value("url"));
+        //then
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(updateRequest.getAlbumTitle(), result.getBody().getAlbumTitle());
+        //TODO : 엔티티 개발 후 추가
     }
 
     @Test
-    @DisplayName("없는 앨범 ID 사용 / 앨범 업데이트 / 404 반환")
+    @DisplayName("없는 앨범 ID / 앨범 수정 / 404")
     public void givenInvalidAlbumId_whenUpdateAlbum_thenStatus404() throws Exception {
-        Long invalidAlbumId = 999L;
+        //given
+        String invalidPath = "albums/999";
 
-        AlbumUpdate request = AlbumUpdate.builder()
-                .albumTitle("테스트 앨범")
+        //when
+        AlbumUpdate updateRequest = AlbumUpdate.builder()
+                .ownerId("updated")
+                .albumTitle("updated title")
+                .albumDescription("updated hello")
                 .build();
+        ResponseEntity<AlbumResponse> result = restTemplate.exchange(
+                createUrl(LOCALHOST, port, invalidPath),
+                HttpMethod.PATCH,
+                new HttpEntity<>(updateRequest),
+                AlbumResponse.class
+        );
 
-        String json = objectMapper.writeValueAsString(request);
-
-        mockMvc.perform(patch("/albums/{albumId}", invalidAlbumId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isNotFound());
+        //then
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
 
     @Test
-    @DisplayName("필수 필드인 앨범 제목 없음 / 앨범 업데이트 / 400 반환 ")
+    @DisplayName("필수 필드가 없는 수정 요청 / 앨범 수정 / 400")
     public void givenRequestBodyWithMissingData_whenUpdateAlbum_thenStatus400() throws Exception {
-        Long validAlbumId = 1L;
-
-        AlbumUpdate request = AlbumUpdate.builder()
+        //given
+        AlbumCreate request = AlbumCreate.builder()
+                .ownerId("tester")
+                .albumTitle("test title")
+                .albumDescription("hello")
                 .build();
+        ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
+                createUrl(LOCALHOST, port, "/albums"),
+                request,
+                AlbumResponse.class
+        );
+        URI location = response.getHeaders().getLocation();
 
-        String json = objectMapper.writeValueAsString(request);
+        //when
+        AlbumUpdate invalidUpdateRequest = AlbumUpdate.builder()
+                .ownerId("updated")
+                .albumDescription("updated hello")
+                .build();
+        ResponseEntity<AlbumResponse> result = restTemplate.exchange(
+                createUrl(LOCALHOST, port, location.getPath()),
+                HttpMethod.PATCH,
+                new HttpEntity<>(invalidUpdateRequest),
+                AlbumResponse.class
+        );
 
-        mockMvc.perform(patch("/albums/{albumId}", validAlbumId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isBadRequest()); // 적절한 오류 응답 확인
+        //then
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
     }
 
     @Test
