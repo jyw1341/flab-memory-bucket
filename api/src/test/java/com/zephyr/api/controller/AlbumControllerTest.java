@@ -4,41 +4,61 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zephyr.api.request.AlbumCreate;
 import com.zephyr.api.request.AlbumUpdate;
 import com.zephyr.api.request.MemoryCreate;
+import com.zephyr.api.response.AlbumResponse;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 class AlbumControllerTest {
 
+    public static final String LOCALHOST = "http://localhost:";
+    @Autowired
+    private TestRestTemplate restTemplate;
+    @LocalServerPort
+    private int port;
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private ObjectMapper objectMapper;
 
     @Test
     @DisplayName("존재하는 앨범 ID를 사용 / 앨범 단건 조회 / 200 상태 코드 반환")
     void givenValidAlbumId_whenGetAlbum_thenStatus200() throws Exception {
-        Long albumId = 1L;
+        //given
+        String testTitle = "테스트 앨범";
+        String createUrl = LOCALHOST + port + "/albums";
+        AlbumCreate request = AlbumCreate.builder().albumTitle(testTitle).build();
+        ResponseEntity<AlbumResponse> responseEntity = restTemplate.postForEntity(createUrl, request, AlbumResponse.class);
+        URI location = responseEntity.getHeaders().getLocation();
 
-        mockMvc.perform(get("/albums/{albumId}", albumId))
-                .andExpect(status().isOk())
-                .andDo(print());
+        //when
+        String getUrl = LOCALHOST + port + location.toString();
+        ResponseEntity<AlbumResponse> resultEntity = restTemplate.getForEntity(getUrl, AlbumResponse.class);
+
+        //then
+        assertEquals(HttpStatus.OK, resultEntity.getStatusCode());
+        assertEquals(testTitle, resultEntity.getBody().getAlbumTitle());
     }
 
     @Test
