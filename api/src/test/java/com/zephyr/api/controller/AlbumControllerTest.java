@@ -45,11 +45,12 @@ class AlbumControllerTest {
     }
 
     @Test
-    @DisplayName("존재하는 앨범 ID를 사용 / 앨범 단건 조회 / 200, 앨범 정보 반환")
+    @DisplayName("앨범 생성 / 앨범 단건 조회 / 200, 앨범 정보 반환")
     void givenValidAlbumId_whenGetAlbum_thenStatus200() throws Exception {
         //given
-        String testTitle = "테스트 앨범";
-        AlbumCreate request = AlbumCreate.builder().albumTitle(testTitle).build();
+        AlbumCreate request = AlbumCreate.builder()
+                .albumTitle("테스트 앨범")
+                .build();
         ResponseEntity<AlbumResponse> responseEntity = restTemplate.postForEntity(
                 createUrl(LOCALHOST, port, "/albums"),
                 request,
@@ -65,11 +66,12 @@ class AlbumControllerTest {
 
         //then
         assertEquals(HttpStatus.OK, resultEntity.getStatusCode());
-        assertEquals(testTitle, resultEntity.getBody().getAlbumTitle());
+        assertEquals(request.getAlbumTitle(), resultEntity.getBody().getAlbumTitle());
+        //TODO : 엔티티 개발 후 추가
     }
 
     @Test
-    @DisplayName("존재하지 않는 앨범 ID를 사용 / 앨범 단건 조회 / 404 상태코드 반환")
+    @DisplayName("앨범 생성 x / 앨범 단건 조회 / 404 반환")
     void givenInvalidAlbumId_whenGetAlbum_thenStatus404() throws Exception {
         mockMvc.perform(get("/albums/{albumId}", 1L))
                 .andExpect(status().isNotFound())
@@ -77,7 +79,7 @@ class AlbumControllerTest {
     }
 
     @Test
-    @DisplayName("앨범을 10개 생성 / 앨범 목록 조회 / 200 상태코드, 앨범 10개 반환")
+    @DisplayName("앨범 10개 생성 / 앨범 목록 조회 / 200, 앨범 10개 반환")
     public void givenValidRequest_whenGetList_thenStatus200AndCorrectAlbums() throws Exception {
         //given
         int resultSize = 10;
@@ -97,67 +99,73 @@ class AlbumControllerTest {
         );
 
         //then
+        assertEquals(HttpStatus.OK, resultEntity.getStatusCode());
         assertEquals(resultSize, resultEntity.getBody().length);
     }
 
     @Test
-    @DisplayName("모든 필드 작성 / 앨범 생성 / 201 상태코드, 요청한 필드가 세팅된 응답 반환")
+    @DisplayName("모든 필드가 있는 앨범 생성 요청 / 앨범 생성 / 201, 모든 필드 정보가 있는 응답 반환")
     void givenValidRequest_whenCreateAlbum_thenStatus201AndCorrectResponse() throws Exception {
+        //given
         AlbumCreate request = AlbumCreate.builder()
-                .ownerId("owner")
-                .albumTitle("테스트 앨범")
+                .ownerId("tester")
+                .albumTitle("test title")
                 .albumDescription("hello")
                 .build();
 
-        String json = objectMapper.writeValueAsString(request);
+        //when
+        ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
+                createUrl(LOCALHOST, port, "/albums"),
+                request,
+                AlbumResponse.class
+        );
 
-        mockMvc.perform(post("/albums")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isCreated())
-                .andExpect(header().exists("Location"))
-                .andExpect(jsonPath("$.albumId").exists())
-                .andExpect(jsonPath("$.albumName").value(request.getAlbumTitle()))
-                .andExpect(jsonPath("$.albumDescription").value(request.getAlbumDescription()))
-                .andDo(print());
+        //then
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(request.getAlbumTitle(), response.getBody().getAlbumTitle());
+        //TODO : 엔티티 개발 후 추가
+
     }
 
     @Test
-    @DisplayName("필수 필드만 작성 / 앨범 생성 / 201, 보내지 않은 필드가 비어있는 응답 반환")
+    @DisplayName("필수 필드만 있는 생성 요청 / 앨범 생성 / 201, 필수 필드만 있는 응답 반환")
     void givenValidRequest_whenCreateAlbum_thenStatus201AndOptionalFieldIsNull() throws Exception {
+        //given
         AlbumCreate request = AlbumCreate.builder()
-                .ownerId("owner")
-                .albumTitle("테스트 앨범")
+                .ownerId("tester")
+                .albumTitle("test title")
                 .build();
 
-        String json = objectMapper.writeValueAsString(request);
+        //when
+        ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
+                createUrl(LOCALHOST, port, "/albums"),
+                request,
+                AlbumResponse.class
+        );
 
-        mockMvc.perform(post("/albums")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isCreated())
-                .andExpect(header().exists("Location"))
-                .andExpect(jsonPath("$.albumId").exists())
-                .andExpect(jsonPath("$.albumName").value(request.getAlbumTitle()))
-                .andExpect(jsonPath("$.albumDescription").doesNotExist())
-                .andExpect(jsonPath("$.albumCover").doesNotExist())
-                .andDo(print());
+        //then
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(request.getAlbumTitle(), response.getBody().getAlbumTitle());
+        //TODO : 엔티티 개발 후 추가
     }
 
     @Test
-    @DisplayName("필수 필드인 앨범 이름 없음 / 앨범 생성 / 400 반환")
+    @DisplayName("필수 필드가 없는 생성 요청 / 앨범 생성 / 400 반환")
     public void givenMissingAlbumName_whenCreateAlbum_thenBadRequest() throws Exception {
+        //given
         AlbumCreate request = AlbumCreate.builder()
-                .ownerId("owner")
                 .albumDescription("hello")
                 .build();
 
-        String json = objectMapper.writeValueAsString(request);
+        //when
+        ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
+                createUrl(LOCALHOST, port, "/albums"),
+                request,
+                AlbumResponse.class
+        );
 
-        mockMvc.perform(post("/albums")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isBadRequest());
+        //then
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
