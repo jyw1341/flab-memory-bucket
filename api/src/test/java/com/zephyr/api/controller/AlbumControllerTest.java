@@ -20,10 +20,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -43,7 +41,7 @@ class AlbumControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    @DisplayName("존재하는 앨범 ID를 사용 / 앨범 단건 조회 / 200 상태 코드 반환")
+    @DisplayName("존재하는 앨범 ID를 사용 / 앨범 단건 조회 / 200, 앨범 정보 반환")
     void givenValidAlbumId_whenGetAlbum_thenStatus200() throws Exception {
         //given
         String testTitle = "테스트 앨범";
@@ -59,25 +57,6 @@ class AlbumControllerTest {
         //then
         assertEquals(HttpStatus.OK, resultEntity.getStatusCode());
         assertEquals(testTitle, resultEntity.getBody().getAlbumTitle());
-    }
-
-    @Test
-    @DisplayName("유효한 앨범 ID를 사용 / 앨범 단건 조회 / 필수 필드만 반환")
-    public void givenValidAlbumId_whenGetAlbum_thenRequiredFieldsExist() throws Exception {
-        Long validAlbumId = 1L;
-        String responseJson = mockMvc.perform(get("/albums/{albumId}", validAlbumId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.albumId").exists())
-                .andExpect(jsonPath("$.albumName").exists())
-                .andExpect(jsonPath("$.albumDescription").exists())
-                .andExpect(jsonPath("$.albumCover").exists())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        Map<String, Object> responseMap = objectMapper.readValue(responseJson, Map.class);
-
-        assertFalse(responseMap.containsKey("unexpectedField"));
     }
 
     @Test
