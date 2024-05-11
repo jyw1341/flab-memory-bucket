@@ -11,15 +11,15 @@ import java.time.LocalDateTime;
 public class AlbumResponse {
 
     private final Long albumId;
-    private final String albumName;
+    private final String albumTitle;
     private final String albumDescription;
     private final String albumCover;
     private final LocalDateTime createdAt;
 
     @Builder
-    public AlbumResponse(Long albumId, String albumName, String albumDescription, String albumCover, LocalDateTime createdAt) {
+    public AlbumResponse(Long albumId, String albumTitle, String albumDescription, String albumCover, LocalDateTime createdAt) {
         this.albumId = albumId;
-        this.albumName = albumName;
+        this.albumTitle = albumTitle;
         this.albumDescription = albumDescription;
         this.albumCover = albumCover;
         this.createdAt = createdAt;

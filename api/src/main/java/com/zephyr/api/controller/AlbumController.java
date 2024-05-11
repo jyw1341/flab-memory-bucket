@@ -25,7 +25,7 @@ public class AlbumController {
     public AlbumResponse get(@PathVariable Long albumId) {
         AlbumResponse response = AlbumResponse.builder()
                 .albumId(albumId)
-                .albumName("테스트 앨범")
+                .albumTitle("테스트 앨범")
                 .albumDescription("hello")
                 .albumCover("url")
                 .createdAt(LocalDateTime.now())
@@ -38,7 +38,7 @@ public class AlbumController {
     public List<AlbumResponse> getList() {
         List<AlbumResponse> response = LongStream.range(1, 11).mapToObj(value -> AlbumResponse.builder()
                 .albumId(value)
-                .albumName("테스트 앨범" + value)
+                .albumTitle("테스트 앨범" + value)
                 .albumDescription("hello" + value)
                 .albumCover("url" + value)
                 .createdAt(LocalDateTime.now())
@@ -52,9 +52,8 @@ public class AlbumController {
     public ResponseEntity<AlbumResponse> create(@RequestBody AlbumCreate request) {
         AlbumResponse response = AlbumResponse.builder()
                 .albumId(1L)
-                .albumName(request.getAlbumTitle())
+                .albumTitle(request.getAlbumTitle())
                 .albumDescription(request.getAlbumDescription())
-                .albumCover("url")
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -71,7 +70,7 @@ public class AlbumController {
     public AlbumResponse update(@PathVariable Long albumId, @RequestBody AlbumUpdate request) {
         AlbumResponse response = AlbumResponse.builder()
                 .albumId(albumId)
-                .albumName(request.getAlbumTitle())
+                .albumTitle(request.getAlbumTitle())
                 .albumDescription(request.getAlbumDescription())
                 .albumCover("url")
                 .createdAt(LocalDateTime.now())
