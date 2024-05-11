@@ -1,6 +1,7 @@
 package com.zephyr.api.controller;
 
 import com.zephyr.api.request.AlbumCreate;
+import com.zephyr.api.request.AlbumMemberRequest;
 import com.zephyr.api.request.AlbumUpdate;
 import com.zephyr.api.response.AlbumMemberResponse;
 import com.zephyr.api.response.AlbumResponse;
@@ -80,7 +81,7 @@ public class AlbumController {
     }
 
     @GetMapping("/{albumId}/members")
-    public List<AlbumMemberResponse> getMembers(@PathVariable Long albumId) {
+    public List<AlbumMemberResponse> getMembers(@PathVariable Long albumId, @RequestBody AlbumMemberRequest request) {
         List<AlbumMemberResponse> response = LongStream.range(1, 11).mapToObj(value -> AlbumMemberResponse.builder()
                 .memberId(value)
                 .memberName("name" + value)
