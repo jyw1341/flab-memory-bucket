@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: api
+  messages:
+    basename: messages, errors
+    encoding: utf-8
+
+cloud:
+  aws:
+    credentials:
+      profile-name: re-memory
+    region:
+      static: kr-standard
+      auto: false
+
+custom:
+  s3:
+    bucket-name: re-memory
+    end-point: https://kr.object.ncloudstorage.com
+
