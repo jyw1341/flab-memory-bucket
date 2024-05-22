@@ -4,26 +4,27 @@ import com.zephyr.api.domain.Album;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
-public class AlbumResponse {
+public class AlbumListResponse {
 
     private final Long id;
     private final String title;
     private final String description;
     private final String thumbnailUrl;
     private final LocalDateTime created;
-    private final List<AlbumMemberResponse> subscribes;
+    private final MemberResponse owner;
+    private final Long subscribeCount;
     private final Long memoryCount;
 
-    public AlbumResponse(Album album, List<AlbumMemberResponse> subscribes, Long memoryCount) {
+    public AlbumListResponse(Album album, MemberResponse memberResponse, Long subscribeCount, Long memoryCount) {
         this.id = album.getId();
         this.title = album.getTitle();
         this.description = album.getDescription();
         this.thumbnailUrl = album.getThumbnailUrl();
         this.created = album.getCreated();
-        this.subscribes = subscribes;
+        this.owner = memberResponse;
+        this.subscribeCount = subscribeCount;
         this.memoryCount = memoryCount;
     }
 }

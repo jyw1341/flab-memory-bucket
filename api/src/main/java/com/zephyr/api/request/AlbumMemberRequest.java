@@ -1,17 +1,10 @@
 package com.zephyr.api.request;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
-@Getter
-@ToString
+@Data
 public class AlbumMemberRequest {
 
-    private final String email;
+    private final Long memberId;
 
-    @Builder
-    public AlbumMemberRequest(String email) {
-        this.email = email;
-    }
 }
