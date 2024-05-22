@@ -15,6 +15,6 @@ cloud:
 
 custom:
   s3:
-    bucket-name: re-memory
+    bucket-name: re-memory-dev
     end-point: https://kr.object.ncloudstorage.com
 
