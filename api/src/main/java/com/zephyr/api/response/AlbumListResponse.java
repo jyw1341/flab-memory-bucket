@@ -14,17 +14,15 @@ public class AlbumListResponse {
     private final String thumbnailUrl;
     private final LocalDateTime created;
     private final MemberResponse owner;
-    private final Long subscribeCount;
-    private final Long memoryCount;
+    private final Integer albumMemberCount;
 
-    public AlbumListResponse(Album album, MemberResponse memberResponse, Long subscribeCount, Long memoryCount) {
+    public AlbumListResponse(Album album) {
         this.id = album.getId();
         this.title = album.getTitle();
         this.description = album.getDescription();
         this.thumbnailUrl = album.getThumbnailUrl();
         this.created = album.getCreated();
-        this.owner = memberResponse;
-        this.subscribeCount = subscribeCount;
-        this.memoryCount = memoryCount;
+        this.owner = new MemberResponse(album.getOwner());
+        this.albumMemberCount = album.getAlbumMembers().size();
     }
 }

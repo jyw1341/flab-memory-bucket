@@ -1,12 +1,12 @@
 package com.zephyr.api.controller;
 
+import com.zephyr.api.domain.Album;
 import com.zephyr.api.request.AlbumCreate;
 import com.zephyr.api.request.AlbumMemberRequest;
 import com.zephyr.api.request.AlbumUpdate;
 import com.zephyr.api.response.AlbumListResponse;
 import com.zephyr.api.response.AlbumMemberResponse;
 import com.zephyr.api.response.AlbumResponse;
-import com.zephyr.api.response.AlbumUpdateResponse;
 import com.zephyr.api.service.AlbumService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,31 +27,36 @@ public class AlbumController {
 
     @PostMapping
     public ResponseEntity<Void> create(@RequestBody AlbumCreate request) {
-        Long result = albumService.create(1L, request);
-        return ResponseEntity.created(URI.create("/albums/" + result)).build();
+        Album album = albumService.create(1L, request);
+
+        return ResponseEntity.created(URI.create("/albums/" + album.getId())).build();
     }
 
     @GetMapping("/{albumId}")
     public AlbumResponse get(@PathVariable Long albumId) {
-        return albumService.get(albumId, 1L);
+        Album album = albumService.get(albumId, 1L);
+
+        return new AlbumResponse(album);
     }
 
     @GetMapping
     public List<AlbumListResponse> getList() {
-        return albumService.getList(1L);
+        List<Album> albumsOfMember = albumService.getAlbumsOfMember(1L);
+
+        return albumsOfMember.stream().map(AlbumListResponse::new).toList();
     }
 
     @DeleteMapping("/{albumId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long albumId) {
-        Long loginId = 1L;
-        albumService.delete(albumId, loginId);
+        albumService.delete(albumId, 1L);
     }
 
     @PatchMapping("/{albumId}")
-    public AlbumUpdateResponse update(@PathVariable Long albumId, @RequestBody AlbumUpdate request) {
-        Long loginId = 1L;
-        return albumService.update(albumId, loginId, request);
+    public AlbumResponse update(@PathVariable Long albumId, @RequestBody AlbumUpdate request) {
+        Album album = albumService.update(albumId, 1L, request);
+
+        return new AlbumResponse(album);
     }
 
     @PostMapping("/{albumId}/members")
@@ -63,7 +68,8 @@ public class AlbumController {
 
     @GetMapping("/{albumId}/members")
     public List<AlbumMemberResponse> getAlbumMembers(@PathVariable Long albumId) {
-        return albumService.getAlbumMembers(albumId);
+        return albumService.getAlbumMembers(albumId, 1L).stream()
+                .map(AlbumMemberResponse::new).toList();
     }
 
     @DeleteMapping("/{albumId}/members/{memberId}")

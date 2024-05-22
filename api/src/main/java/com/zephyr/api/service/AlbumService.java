@@ -5,21 +5,24 @@ import com.zephyr.api.domain.AlbumMember;
 import com.zephyr.api.domain.Member;
 import com.zephyr.api.enums.AlbumAuthority;
 import com.zephyr.api.enums.SubscribeStatus;
+import com.zephyr.api.exception.DuplicatedException;
+import com.zephyr.api.exception.ForbiddenException;
+import com.zephyr.api.exception.NotFoundException;
 import com.zephyr.api.repository.AlbumMemberRepository;
 import com.zephyr.api.repository.AlbumRepository;
 import com.zephyr.api.repository.MemberRepository;
 import com.zephyr.api.request.AlbumCreate;
 import com.zephyr.api.request.AlbumMemberRequest;
 import com.zephyr.api.request.AlbumUpdate;
-import com.zephyr.api.response.AlbumListResponse;
-import com.zephyr.api.response.AlbumMemberResponse;
-import com.zephyr.api.response.AlbumResponse;
-import com.zephyr.api.response.AlbumUpdateResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,19 +32,17 @@ public class AlbumService {
     private final AlbumRepository albumRepository;
     private final MemberRepository memberRepository;
     private final AlbumMemberRepository albumMemberRepository;
+    private final MessageSource ms;
+    private final Environment env;
 
-    public Long create(Long userId, AlbumCreate albumCreate) {
-        Member member = memberRepository.findById(userId);
-
-        String thumbnailUrl = albumCreate.getThumbnailUrl();
-        if (albumCreate.getThumbnailUrl() == null) {
-            
-        }
+    public Album create(Long loginId, AlbumCreate albumCreate) {
+        Member member = memberRepository.findById(loginId)
+                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.member", null, Locale.KOREA)));
 
         Album album = Album.builder()
                 .title(albumCreate.getTitle())
                 .description(albumCreate.getDescription())
-                .thumbnailUrl(albumCreate.getThumbnailUrl())
+                .thumbnailUrl(getDefaultThumbnailIfEmpty(albumCreate.getThumbnailUrl()))
                 .build();
 
         AlbumMember albumMember = AlbumMember.builder()
@@ -54,68 +55,63 @@ public class AlbumService {
         albumMemberRepository.save(albumMember);
         albumRepository.save(album);
 
-        return album.getId();
+        return album;
     }
 
-    public AlbumResponse get(Long albumId, Long userId) {
-        Member member = memberRepository.findById(userId);
-
-        if (albumMemberRepository.findByAlbumIdAndMemberId(albumId, member.getId()) != null) {
-            //TODO: 권한 없음 예외 처리
-            throw new RuntimeException();
+    private String getDefaultThumbnailIfEmpty(String thumbnailUrl) {
+        if (thumbnailUrl.isEmpty()) {
+            return env.getProperty("custom.s3.end-point") + env.getProperty("custom.s3.bucket-name") + "/default-thumbnail/1.jpg";
         }
-
-        return albumRepository.findWithSubscribeAndMemory(albumId);
+        return thumbnailUrl;
     }
 
-    public List<AlbumListResponse> getList(Long memberId) {
-        return albumRepository.findAllWithSubscribeAndMemory(memberId);
+    public Album get(Long albumId, Long loginId) {
+        AlbumMember albumMember = albumMemberRepository.findByAlbumIdAndMemberId(albumId, loginId)
+                .orElseThrow(() -> new ForbiddenException(ms.getMessage("forbidden.album", null, Locale.KOREA)));
+
+        return albumMember.getAlbum();
     }
 
-    public AlbumUpdateResponse update(Long albumId, Long memberId, AlbumUpdate albumUpdate) {
-        AlbumMember albumMember = albumMemberRepository.findByAlbumIdAndMemberId(albumId, memberId);
+    public List<Album> getAlbumsOfMember(Long loginId) {
+        Member candidate = memberRepository.findById(loginId)
+                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.member", null, Locale.KOREA)));
 
-        if (albumMember == null) {
-            //TODO: AlbumNotFound 예외 처리
-            throw new RuntimeException();
-        }
+        List<AlbumMember> albumMembers = albumMemberRepository.findByMemberId(loginId);
 
-        if (!albumMember.getAuthority().equals(AlbumAuthority.ADMIN)) {
-            //TODO: 권한 없음 예외 처리
-            throw new RuntimeException();
-        }
+        return albumMembers.stream().map(AlbumMember::getAlbum).toList();
+    }
 
-        Album album = albumMember.getAlbum();
+    public Album update(Long albumId, Long loginId, AlbumUpdate albumUpdate) {
+        Album album = albumRepository.findByOwnerIdAndAlbumId(loginId, albumId)
+                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.album", null, Locale.KOREA)));
+
+        //TODO: setter를 안쓰고 엔티티를 수정 하기 위해 엔티티에 메서드를 만들었는데 괜찮을까요
         album.update(albumUpdate);
 
-        return new AlbumUpdateResponse(album);
+        return album;
     }
 
     public void delete(Long albumId, Long loginId) {
-        validateAdmin(albumId, loginId);
+        Album album = albumRepository.findByOwnerIdAndAlbumId(loginId, albumId)
+                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.album", null, Locale.KOREA)));
 
-        albumRepository.delete(albumId);
+        albumRepository.delete(album);
     }
 
-    public void createAlbumMember(Long albumId, Long ownerId, AlbumMemberRequest request) {
-        Member candidate = memberRepository.findById(request.getMemberId());
-        if (candidate == null) {
-            //TODO: 없는 멤버
-            throw new RuntimeException();
-        }
+    public void createAlbumMember(Long albumId, Long loginId, AlbumMemberRequest request) {
+        Member candidate = memberRepository.findById(request.getMemberId())
+                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.member", null, Locale.KOREA)));
 
-        Album album = albumRepository.findById(albumId);
-        if (album == null) {
-            //TODO: 존재 하지 않는 앨범
-            throw new RuntimeException();
-        }
+        Album album = albumRepository.findByOwnerIdAndAlbumId(loginId, albumId)
+                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.album", null, Locale.KOREA)));
 
-        AlbumMember albumMember = albumMemberRepository.findByAlbumIdAndMemberId(album.getId(), candidate.getId());
-        if (albumMember != null && albumMember.getStatus().equals(SubscribeStatus.APPROVED)) {
-            //TODO: 잘못된 요청. 이미 등록된 멤버
-            throw new RuntimeException();
+        Optional<AlbumMember> albumMember = albumMemberRepository.findByAlbumIdAndMemberId(album.getId(), candidate.getId());
+        if (albumMember.isPresent() && albumMember.get().getStatus().equals(SubscribeStatus.APPROVED)) {
+            throw new DuplicatedException(ms.getMessage("duplicated.albumMember.approved", null, Locale.KOREA));
         }
-        validateAdmin(album.getId(), ownerId);
+        if (albumMember.isPresent() && albumMember.get().getStatus().equals(SubscribeStatus.PENDING)) {
+            throw new DuplicatedException(ms.getMessage("duplicated.albumMember.pending", null, Locale.KOREA));
+        }
 
         albumMemberRepository.save(AlbumMember.builder()
                 .member(candidate)
@@ -125,22 +121,20 @@ public class AlbumService {
                 .build());
     }
 
-    public List<AlbumMemberResponse> getAlbumMembers(Long albumId) {
-        List<AlbumMember> albumMembers = albumMemberRepository.findByAlbumId(albumId);
-        return albumMembers.stream().map(AlbumMemberResponse::new).toList();
+    public List<AlbumMember> getAlbumMembers(Long albumId, Long loginId) {
+        memberRepository.findById(loginId)
+                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.member", null, Locale.KOREA)));
+
+        albumRepository.findById(albumId)
+                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.album", null, Locale.KOREA)));
+
+        return albumMemberRepository.findByAlbumId(albumId);
     }
 
-    public void deleteAlbumMember(Long albumId, Long memberId, Long targetId) {
-        validateAdmin(albumId, memberId);
+    public void deleteAlbumMember(Long albumId, Long loginId, Long targetId) {
+        Album album = albumRepository.findByOwnerIdAndAlbumId(loginId, albumId)
+                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.album", null, Locale.KOREA)));
 
-        albumMemberRepository.delete(albumId, targetId);
-    }
-
-    private void validateAdmin(Long albumId, Long loginId) {
-        AlbumMember albumMember = albumMemberRepository.findByAlbumIdAndMemberId(albumId, loginId);
-        if (albumMember == null || !albumMember.getAuthority().equals(AlbumAuthority.ADMIN)) {
-            //TODO: 권한 없음
-            throw new RuntimeException();
-        }
+        albumMemberRepository.delete(album.getId(), targetId);
     }
 }

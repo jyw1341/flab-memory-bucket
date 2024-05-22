@@ -4,6 +4,7 @@ import com.zephyr.api.domain.AlbumMember;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class AlbumMemberRepository {
@@ -12,8 +13,8 @@ public class AlbumMemberRepository {
 
     }
 
-    public AlbumMember findByAlbumIdAndMemberId(Long albumId, Long memberId) {
-        return null;
+    public Optional<AlbumMember> findByAlbumIdAndMemberId(Long albumId, Long memberId) {
+        return Optional.empty();
     }
 
     public List<AlbumMember> findByMemberId(Long memberId) {
