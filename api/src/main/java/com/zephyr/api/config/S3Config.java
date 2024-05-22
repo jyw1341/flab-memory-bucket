@@ -1,4 +1,4 @@
-package com.zephyr.api.s3;
+package com.zephyr.api.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
