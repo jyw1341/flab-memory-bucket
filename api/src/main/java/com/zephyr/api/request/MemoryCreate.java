@@ -1,23 +1,18 @@
 package com.zephyr.api.request;
 
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Getter
-@ToString
+@Data
 public class MemoryCreate {
 
+    private final Long albumId;
     private final String title;
     private final String description;
-    private final LocalDateTime startDate;
-    private final LocalDateTime endDate;
+    private final LocalDateTime memoryDate;
+    private final List<String> tags;
+    private final List<ContentCreate> contents;
 
-    public MemoryCreate(String title, String description, LocalDateTime startDate, LocalDateTime endDate) {
-        this.title = title;
-        this.description = description;
-        this.startDate = startDate;
-        this.endDate = endDate;
-    }
 }
