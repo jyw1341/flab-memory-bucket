@@ -15,7 +15,7 @@ public class MemoryCreate {
     public static final int MEMORY_TITLE_MAX = 30;
     public static final int MEMORY_DESCRIPTION_MAX = 100;
 
-    @NotNull
+    @NotNull(message = "{notNull.memory.albumId}")
     private final Long albumId;
 
     @NotBlank(message = "{notBlank.memory.title}")

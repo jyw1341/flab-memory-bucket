@@ -34,6 +34,34 @@ class MemoryControllerTest {
     private MessageSource messageSource;
 
     @Test
+    @DisplayName("앨범 아이디 null / 기억 생성 / 400 반환")
+    void givenNullAlbumId_whenCreateMemory_thenReturn400() {
+        List<ContentCreate> contentCreates = new ArrayList<>();
+        ContentCreate contentCreate = new ContentCreate("제목", "설명", "url", 1);
+        contentCreates.add(contentCreate);
+        MemoryCreate request = new MemoryCreate(
+                null,
+                "제목",
+                "설명",
+                LocalDateTime.now(),
+                new ArrayList<>(),
+                contentCreates
+        );
+
+        //when
+        ResponseEntity<ErrorResponse> result = restTemplate.postForEntity(
+                createUrl(port, "/memories"),
+                request,
+                ErrorResponse.class
+        );
+
+        //then
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        assertEquals(messageSource.getMessage("notNull.memory.albumId", null, Locale.KOREA),
+                result.getBody().getValidation().get("albumId"));
+    }
+
+    @Test
     @DisplayName("기억 제목이 빈 문자열 / 기억 생성 / 400 반환")
     void givenEmptyMemoryTitle_whenCreateMemory_thenReturn400() {
         List<ContentCreate> contentCreates = new ArrayList<>();
