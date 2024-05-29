@@ -57,6 +57,38 @@ class MemoryControllerTest {
     }
 
     @Test
+    @DisplayName("기억 제목이 최대값 초과 / 기억 생성 / 400 반환")
+    void givenOverMaxTitleLength_whenCreateMemory_thenReturn400() {
+        List<ContentCreate> contentCreates = new ArrayList<>();
+        ContentCreate contentCreate = new ContentCreate("제목", "설명", "url", 1);
+        contentCreates.add(contentCreate);
+        StringBuilder stringBuilder = new StringBuilder();
+        while (stringBuilder.length() <= MemoryCreate.MEMORY_TITLE_MAX) {
+            stringBuilder.append("a");
+        }
+
+        MemoryCreate request = new MemoryCreate(
+                1L,
+                stringBuilder.toString(),
+                "설명",
+                LocalDateTime.now(),
+                new ArrayList<>(),
+                contentCreates
+        );
+
+        //when
+        ResponseEntity<ErrorResponse> result = restTemplate.postForEntity(
+                createUrl(port, "/memories"),
+                request,
+                ErrorResponse.class
+        );
+
+        //then
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        assertTrue(result.getBody().getValidation().containsKey("title"));
+    }
+
+    @Test
     @DisplayName("기억 제목이 빈 문자열 / 기억 생성 / 400 반환")
     void givenEmptyMemoryTitle_whenCreateMemory_thenReturn400() {
         List<ContentCreate> contentCreates = new ArrayList<>();
