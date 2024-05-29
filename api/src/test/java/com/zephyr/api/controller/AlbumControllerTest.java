@@ -16,13 +16,12 @@ import org.springframework.http.ResponseEntity;
 
 import java.net.URI;
 
+import static com.zephyr.api.utils.HttpRequestUtils.createUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 class AlbumControllerTest {
-
-    public static final String LOCALHOST = "http://localhost:";
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -30,17 +29,13 @@ class AlbumControllerTest {
     @LocalServerPort
     private int port;
 
-    private static String createUrl(String baseUrl, int port, String path) {
-        return baseUrl + port + path;
-    }
-
     @Test
     @DisplayName("앨범 생성 / 앨범 단건 조회 / 200, 앨범 정보 반환")
     void givenValidAlbumId_whenGetAlbum_thenStatus200() throws Exception {
         //given
         AlbumCreate request = new AlbumCreate("테스트 앨범", null, null);
         ResponseEntity<AlbumResponse> responseEntity = restTemplate.postForEntity(
-                createUrl(LOCALHOST, port, "/albums"),
+                createUrl(port, "/albums"),
                 request,
                 AlbumResponse.class
         );
@@ -48,7 +43,7 @@ class AlbumControllerTest {
 
         //when
         ResponseEntity<AlbumResponse> resultEntity = restTemplate.getForEntity(
-                createUrl(LOCALHOST, port, location.getPath()),
+                createUrl(port, location.getPath()),
                 AlbumResponse.class
         );
 
@@ -66,7 +61,7 @@ class AlbumControllerTest {
 
         //when
         ResponseEntity<AlbumResponse> resultEntity = restTemplate.getForEntity(
-                createUrl(LOCALHOST, port, invalidPath),
+                createUrl(port, invalidPath),
                 AlbumResponse.class
         );
 
@@ -82,7 +77,7 @@ class AlbumControllerTest {
         for (int i = 0; i < resultSize; i++) {
             AlbumCreate request = new AlbumCreate("테스트 앨범" + i, null, null);
             restTemplate.postForEntity(
-                    createUrl(LOCALHOST, port, "/albums"),
+                    createUrl(port, "/albums"),
                     request,
                     AlbumResponse.class
             );
@@ -90,7 +85,7 @@ class AlbumControllerTest {
 
         //when
         ResponseEntity<AlbumResponse[]> resultEntity = restTemplate.getForEntity(
-                createUrl(LOCALHOST, port, "/albums"),
+                createUrl(port, "/albums"),
                 AlbumResponse[].class
         );
 
@@ -107,7 +102,7 @@ class AlbumControllerTest {
 
         //when
         ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
-                createUrl(LOCALHOST, port, "/albums"),
+                createUrl(port, "/albums"),
                 request,
                 AlbumResponse.class
         );
@@ -127,7 +122,7 @@ class AlbumControllerTest {
 
         //when
         ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
-                createUrl(LOCALHOST, port, "/albums"),
+                createUrl(port, "/albums"),
                 request,
                 AlbumResponse.class
         );
@@ -146,7 +141,7 @@ class AlbumControllerTest {
 
         //when
         ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
-                createUrl(LOCALHOST, port, "/albums"),
+                createUrl(port, "/albums"),
                 request,
                 AlbumResponse.class
         );
@@ -162,7 +157,7 @@ class AlbumControllerTest {
         AlbumCreate request = new AlbumCreate("테스트 앨범", "test title", null);
 
         ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
-                createUrl(LOCALHOST, port, "/albums"),
+                createUrl(port, "/albums"),
                 request,
                 AlbumResponse.class
         );
@@ -170,7 +165,7 @@ class AlbumControllerTest {
 
         //when
         ResponseEntity<Void> result = restTemplate.exchange(
-                createUrl(LOCALHOST, port, location.getPath()),
+                createUrl(port, location.getPath()),
                 HttpMethod.DELETE,
                 HttpEntity.EMPTY,
                 Void.class
@@ -189,7 +184,7 @@ class AlbumControllerTest {
 
         //when
         ResponseEntity<Void> result = restTemplate.exchange(
-                createUrl(LOCALHOST, port, invalidPath),
+                createUrl(port, invalidPath),
                 HttpMethod.DELETE,
                 HttpEntity.EMPTY,
                 Void.class
@@ -205,7 +200,7 @@ class AlbumControllerTest {
         //given
         AlbumCreate request = new AlbumCreate("테스트 앨범", "test title", null);
         ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
-                createUrl(LOCALHOST, port, "/albums"),
+                createUrl(port, "/albums"),
                 request,
                 AlbumResponse.class
         );
@@ -214,7 +209,7 @@ class AlbumControllerTest {
         //when
         AlbumCreate updateRequest = new AlbumCreate("테스트 앨범", "test title", null);
         ResponseEntity<AlbumResponse> result = restTemplate.exchange(
-                createUrl(LOCALHOST, port, location.getPath()),
+                createUrl(port, location.getPath()),
                 HttpMethod.PATCH,
                 new HttpEntity<>(updateRequest),
                 AlbumResponse.class
@@ -235,7 +230,7 @@ class AlbumControllerTest {
         //when
         AlbumCreate request = new AlbumCreate("테스트 앨범", "test title", null);
         ResponseEntity<AlbumResponse> result = restTemplate.exchange(
-                createUrl(LOCALHOST, port, invalidPath),
+                createUrl(port, invalidPath),
                 HttpMethod.PATCH,
                 new HttpEntity<>(request),
                 AlbumResponse.class
@@ -251,7 +246,7 @@ class AlbumControllerTest {
         //given
         AlbumCreate request = new AlbumCreate("테스트 앨범", "test title", null);
         ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
-                createUrl(LOCALHOST, port, "/albums"),
+                createUrl(port, "/albums"),
                 request,
                 AlbumResponse.class
         );
@@ -260,7 +255,7 @@ class AlbumControllerTest {
         //when
         AlbumCreate invalidUpdateRequest = new AlbumCreate(null, null, null);
         ResponseEntity<AlbumResponse> result = restTemplate.exchange(
-                createUrl(LOCALHOST, port, location.getPath()),
+                createUrl(port, location.getPath()),
                 HttpMethod.PATCH,
                 new HttpEntity<>(invalidUpdateRequest),
                 AlbumResponse.class
