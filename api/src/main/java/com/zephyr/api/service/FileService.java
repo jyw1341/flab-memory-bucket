@@ -1,9 +1,9 @@
 package com.zephyr.api.service;
 
+import com.zephyr.api.config.S3Config;
 import com.zephyr.api.request.FileCreate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -18,11 +18,11 @@ import java.time.Duration;
 public class FileService {
 
     private final S3Presigner s3Presigner;
-    private final Environment env;
+    private final S3Config s3Config;
 
     public String createPresignedUrl(Long userId, FileCreate fileCreate) {
         PutObjectRequest objectRequest = PutObjectRequest.builder()
-                .bucket(env.getProperty("custom.s3.bucket-name"))
+                .bucket(s3Config.getBucketName())
                 .key(fileCreate.createKeyName(String.valueOf(userId)))
                 .build();
 
