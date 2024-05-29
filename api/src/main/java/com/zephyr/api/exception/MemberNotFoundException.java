@@ -8,7 +8,7 @@ import java.util.Locale;
 public class MemberNotFoundException extends BaseException {
 
     public MemberNotFoundException(MessageSource messageSource) {
-        super(messageSource.getMessage("notFound.member", null, Locale.KOREA));
+        super(messageSource.getMessage("notFound", null, Locale.KOREA));
     }
 
     @Override

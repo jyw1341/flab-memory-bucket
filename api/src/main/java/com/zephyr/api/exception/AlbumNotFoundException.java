@@ -8,7 +8,7 @@ import java.util.Locale;
 public class AlbumNotFoundException extends BaseException {
 
     public AlbumNotFoundException(MessageSource messageSource) {
-        super(messageSource.getMessage("notFound.album", null, Locale.KOREA));
+        super(messageSource.getMessage("notFound", null, Locale.KOREA));
     }
 
     @Override

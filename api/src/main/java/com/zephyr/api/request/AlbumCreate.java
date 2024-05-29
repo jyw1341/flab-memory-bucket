@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class AlbumCreate {
 
-    @NotBlank(message = "notBlank.album.title")
+    @NotBlank
     @Size(max = 30)
     private final String title;
 

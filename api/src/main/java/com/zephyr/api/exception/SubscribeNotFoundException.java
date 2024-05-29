@@ -8,7 +8,7 @@ import java.util.Locale;
 public class SubscribeNotFoundException extends BaseException {
 
     public SubscribeNotFoundException(MessageSource messageSource) {
-        super(messageSource.getMessage("notFound.subscribe", null, Locale.KOREA));
+        super(messageSource.getMessage("notFound", null, Locale.KOREA));
     }
 
     @Override

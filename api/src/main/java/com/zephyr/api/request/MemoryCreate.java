@@ -15,10 +15,10 @@ public class MemoryCreate {
     public static final int MEMORY_TITLE_MAX = 30;
     public static final int MEMORY_DESCRIPTION_MAX = 100;
 
-    @NotNull(message = "{notNull.memory.albumId}")
+    @NotNull
     private final Long albumId;
 
-    @NotBlank(message = "{notBlank.memory.title}")
+    @NotBlank
     @Size(max = MEMORY_TITLE_MAX)
     private final String title;
 
