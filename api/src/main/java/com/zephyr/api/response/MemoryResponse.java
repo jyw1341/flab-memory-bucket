@@ -1,25 +1,15 @@
 package com.zephyr.api.response;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Getter
-@ToString
+@Data
 public class MemoryResponse {
 
-    private final String memoryTitle;
-    private final String memoryDescription;
-    private final LocalDateTime startDate;
-    private final LocalDateTime endDate;
+    private final String title;
+    private final String description;
+    private final LocalDateTime memoryDate;
+    
 
-    @Builder
-    public MemoryResponse(String memoryTitle, String memoryDescription, LocalDateTime startDate, LocalDateTime endDate) {
-        this.memoryTitle = memoryTitle;
-        this.memoryDescription = memoryDescription;
-        this.startDate = startDate;
-        this.endDate = endDate;
-    }
 }
