@@ -1,10 +1,10 @@
 package com.zephyr.api.service;
 
+import com.zephyr.api.config.S3Config;
 import com.zephyr.api.request.FileCreate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.net.HttpURLConnection;
@@ -24,11 +24,8 @@ class FileServiceTest {
     @Autowired
     FileService imageService;
 
-    @Value("${custom.s3.bucket-name}")
-    private String bucketName;
-
-    @Value("${custom.s3.end-point}")
-    private String endPoint;
+    @Autowired
+    S3Config s3Config;
 
     @Test
     @DisplayName("Presigned URL을 사용하여 파일을 업로드/ 업로드한 파일 조회/ 200 반환")
@@ -63,7 +60,7 @@ class FileServiceTest {
     }
 
     private HttpResponse<Void> sendHeadRequest(Long testId, FileCreate fileCreate) throws Exception {
-        String url = endPoint + "/" + bucketName + "/" + fileCreate.createKeyName(String.valueOf(testId));
+        String url = s3Config.getEndPoint() + "/" + s3Config.getBucketName() + "/" + fileCreate.createKeyName(String.valueOf(testId));
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URL(url).toURI())
