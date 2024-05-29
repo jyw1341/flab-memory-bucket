@@ -163,4 +163,53 @@ class MemoryControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
         assertTrue(result.getBody().getValidation().containsKey("memoryDate"));
     }
+
+    @Test
+    @DisplayName("컨텐츠가 빈 리스트일 때 / 기억 생성 / 400 반환")
+    void givenEmptyContents_whenCreateMemory_thenReturn400() {
+        List<ContentCreate> contentCreates = new ArrayList<>();
+        MemoryCreate request = new MemoryCreate(
+                1L,
+                "제목",
+                "설명",
+                LocalDateTime.now(),
+                new ArrayList<>(),
+                contentCreates
+        );
+
+        //when
+        ResponseEntity<ErrorResponse> result = restTemplate.postForEntity(
+                createUrl(port, "/memories"),
+                request,
+                ErrorResponse.class
+        );
+
+        //then
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        assertTrue(result.getBody().getValidation().containsKey("contents"));
+    }
+
+    @Test
+    @DisplayName("컨텐츠가 널일 때 / 기억 생성 / 400 반환")
+    void givenNullContents_whenCreateMemory_thenReturn400() {
+        MemoryCreate request = new MemoryCreate(
+                1L,
+                "제목",
+                "설명",
+                LocalDateTime.now(),
+                new ArrayList<>(),
+                null
+        );
+
+        //when
+        ResponseEntity<ErrorResponse> result = restTemplate.postForEntity(
+                createUrl(port, "/memories"),
+                request,
+                ErrorResponse.class
+        );
+
+        //then
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        assertTrue(result.getBody().getValidation().containsKey("contents"));
+    }
 }
