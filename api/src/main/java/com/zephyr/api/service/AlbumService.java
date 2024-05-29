@@ -1,27 +1,25 @@
 package com.zephyr.api.service;
 
+import com.zephyr.api.config.S3Config;
 import com.zephyr.api.domain.Album;
-import com.zephyr.api.domain.AlbumMember;
 import com.zephyr.api.domain.Member;
+import com.zephyr.api.domain.Subscribe;
 import com.zephyr.api.enums.AlbumAuthority;
 import com.zephyr.api.enums.SubscribeStatus;
-import com.zephyr.api.exception.DuplicatedException;
-import com.zephyr.api.exception.ForbiddenException;
-import com.zephyr.api.exception.NotFoundException;
-import com.zephyr.api.repository.AlbumMemberRepository;
+import com.zephyr.api.exception.*;
 import com.zephyr.api.repository.AlbumRepository;
 import com.zephyr.api.repository.MemberRepository;
+import com.zephyr.api.repository.SubscribeRepository;
 import com.zephyr.api.request.AlbumCreate;
-import com.zephyr.api.request.AlbumMemberRequest;
 import com.zephyr.api.request.AlbumUpdate;
+import com.zephyr.api.request.SubscribeRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Slf4j
@@ -31,110 +29,140 @@ public class AlbumService {
 
     private final AlbumRepository albumRepository;
     private final MemberRepository memberRepository;
-    private final AlbumMemberRepository albumMemberRepository;
-    private final MessageSource ms;
-    private final Environment env;
+    private final SubscribeRepository subscribeRepository;
+    private final MessageSource messageSource;
+    private final S3Config s3Config;
 
     public Album create(Long loginId, AlbumCreate albumCreate) {
         Member member = memberRepository.findById(loginId)
-                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.member", null, Locale.KOREA)));
+                .orElseThrow(() -> new MemberNotFoundException(messageSource));
 
         Album album = Album.builder()
                 .title(albumCreate.getTitle())
+                .owner(member)
                 .description(albumCreate.getDescription())
-                .thumbnailUrl(getDefaultThumbnailIfEmpty(albumCreate.getThumbnailUrl()))
+                .thumbnailUrl(albumCreate.getThumbnailUrl())
                 .build();
 
-        AlbumMember albumMember = AlbumMember.builder()
-                .member(member)
-                .album(album)
-                .authority(AlbumAuthority.ADMIN)
-                .status(SubscribeStatus.APPROVED)
-                .build();
-
-        albumMemberRepository.save(albumMember);
         albumRepository.save(album);
 
         return album;
     }
 
-    private String getDefaultThumbnailIfEmpty(String thumbnailUrl) {
-        if (thumbnailUrl.isEmpty()) {
-            return env.getProperty("custom.s3.end-point") + env.getProperty("custom.s3.bucket-name") + "/default-thumbnail/1.jpg";
-        }
-        return thumbnailUrl;
-    }
-
     public Album get(Long albumId, Long loginId) {
-        AlbumMember albumMember = albumMemberRepository.findByAlbumIdAndMemberId(albumId, loginId)
-                .orElseThrow(() -> new ForbiddenException(ms.getMessage("forbidden.album", null, Locale.KOREA)));
+        Album album = albumRepository.findById(albumId).orElseThrow(() -> new AlbumNotFoundException(messageSource));
+        if (!album.getOwner().getId().equals(loginId)) {
+            validSubscribe(album, loginId);
+        }
+        setDefaultThumbnailUrlIfNull(album);
 
-        return albumMember.getAlbum();
+        return album;
     }
 
-    public List<Album> getAlbumsOfMember(Long loginId) {
-        Member candidate = memberRepository.findById(loginId)
-                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.member", null, Locale.KOREA)));
+    public List<Album> getList(Long loginId) {
+        Member member = memberRepository.findById(loginId)
+                .orElseThrow(() -> new MemberNotFoundException(messageSource));
 
-        List<AlbumMember> albumMembers = albumMemberRepository.findByMemberId(loginId);
+        List<Album> result = new ArrayList<>(member.getAlbums());
+        List<Subscribe> subscribes = member.getSubscribes();
+        for (Subscribe subscribe : subscribes) {
+            Album album = subscribe.getAlbum();
+            result.add(album);
+        }
 
-        return albumMembers.stream().map(AlbumMember::getAlbum).toList();
+        result.forEach(this::setDefaultThumbnailUrlIfNull);
+
+        return result;
     }
 
     public Album update(Long albumId, Long loginId, AlbumUpdate albumUpdate) {
-        Album album = albumRepository.findByOwnerIdAndAlbumId(loginId, albumId)
-                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.album", null, Locale.KOREA)));
+        Album album = albumRepository.findById(albumId)
+                .orElseThrow(() -> new AlbumNotFoundException(messageSource));
+        validAlbumOwner(album, loginId);
 
-        //TODO: setter를 안쓰고 엔티티를 수정 하기 위해 엔티티에 메서드를 만들었는데 괜찮을까요
-        album.update(albumUpdate);
+        album.setTitle(albumUpdate.getTitle());
+        album.setDescription(albumUpdate.getDescription());
+        album.setThumbnailUrl(albumUpdate.getThumbnailUrl());
 
         return album;
     }
 
     public void delete(Long albumId, Long loginId) {
-        Album album = albumRepository.findByOwnerIdAndAlbumId(loginId, albumId)
-                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.album", null, Locale.KOREA)));
+        Album album = albumRepository.findById(albumId)
+                .orElseThrow(() -> new AlbumNotFoundException(messageSource));
+        validAlbumOwner(album, loginId);
 
         albumRepository.delete(album);
     }
 
-    public void createAlbumMember(Long albumId, Long loginId, AlbumMemberRequest request) {
+    public void createSubscribe(Long albumId, Long loginId, SubscribeRequest request) {
         Member candidate = memberRepository.findById(request.getMemberId())
-                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.member", null, Locale.KOREA)));
+                .orElseThrow(() -> new MemberNotFoundException(messageSource));
+        Album album = albumRepository.findById(albumId)
+                .orElseThrow(() -> new AlbumNotFoundException(messageSource));
+        validAlbumOwner(album, loginId);
 
-        Album album = albumRepository.findByOwnerIdAndAlbumId(loginId, albumId)
-                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.album", null, Locale.KOREA)));
-
-        Optional<AlbumMember> albumMember = albumMemberRepository.findByAlbumIdAndMemberId(album.getId(), candidate.getId());
-        if (albumMember.isPresent() && albumMember.get().getStatus().equals(SubscribeStatus.APPROVED)) {
-            throw new DuplicatedException(ms.getMessage("duplicated.albumMember.approved", null, Locale.KOREA));
+        Optional<Subscribe> subscribe = subscribeRepository.findByAlbumIdAndMemberId(album.getId(), candidate.getId());
+        if (subscribe.isPresent() && subscribe.get().getStatus().equals(SubscribeStatus.APPROVED)) {
+            throw new AlreadySubscribedException(messageSource);
         }
-        if (albumMember.isPresent() && albumMember.get().getStatus().equals(SubscribeStatus.PENDING)) {
-            throw new DuplicatedException(ms.getMessage("duplicated.albumMember.pending", null, Locale.KOREA));
+        if (subscribe.isPresent() && subscribe.get().getStatus().equals(SubscribeStatus.PENDING)) {
+            throw new InvalidSubscribeStatusException(messageSource);
         }
 
-        albumMemberRepository.save(AlbumMember.builder()
-                .member(candidate)
+        subscribeRepository.save(Subscribe.builder()
+                .subscriber(candidate)
                 .album(album)
                 .status(SubscribeStatus.PENDING)
                 .authority(AlbumAuthority.USER)
                 .build());
     }
 
-    public List<AlbumMember> getAlbumMembers(Long albumId, Long loginId) {
-        memberRepository.findById(loginId)
-                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.member", null, Locale.KOREA)));
+    public void approveSubscribe(Long albumId, Long loginId) {
+        Subscribe subscribe = subscribeRepository.findByAlbumIdAndMemberId(albumId, loginId)
+                .orElseThrow(() -> new SubscribeNotFoundException(messageSource));
+        validAlbumOwner(subscribe.getAlbum(), loginId);
+        if (!subscribe.getStatus().equals(SubscribeStatus.PENDING)) {
+            throw new InvalidSubscribeStatusException(messageSource);
+        }
 
-        albumRepository.findById(albumId)
-                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.album", null, Locale.KOREA)));
+        //TODO: setter 사용
+        subscribe.setStatus(SubscribeStatus.APPROVED);
+    }
 
-        return albumMemberRepository.findByAlbumId(albumId);
+    public List<Subscribe> getSubscribers(Long albumId, Long loginId) {
+        Album album = albumRepository.findById(albumId)
+                .orElseThrow(() -> new AlbumNotFoundException(messageSource));
+        if (!album.getOwner().getId().equals(loginId)) {
+            validSubscribe(album, loginId);
+        }
+
+        return album.getSubscribes();
     }
 
     public void deleteAlbumMember(Long albumId, Long loginId, Long targetId) {
-        Album album = albumRepository.findByOwnerIdAndAlbumId(loginId, albumId)
-                .orElseThrow(() -> new NotFoundException(ms.getMessage("notFound.album", null, Locale.KOREA)));
+        Album album = albumRepository.findById(albumId)
+                .orElseThrow(() -> new AlbumNotFoundException(messageSource));
+        validAlbumOwner(album, loginId);
 
-        albumMemberRepository.delete(album.getId(), targetId);
+        subscribeRepository.delete(album.getId(), targetId);
+    }
+
+    private void validSubscribe(Album album, Long loginId) {
+        subscribeRepository.findByAlbumIdAndMemberId(album.getId(), loginId)
+                .orElseThrow(() -> new SubscribeNotFoundException(messageSource));
+    }
+
+    private void setDefaultThumbnailUrlIfNull(Album album) {
+        if (album.getThumbnailUrl() == null || album.getThumbnailUrl().isBlank()) {
+            //TODO: setter 사용
+            album.setThumbnailUrl(s3Config.getDefaultThumbnailUrl());
+        }
+    }
+
+    private void validAlbumOwner(Album album, Long loginId) {
+        if (!album.getOwner().getId().equals(loginId)) {
+            throw new ForbiddenException(messageSource);
+        }
     }
 }
