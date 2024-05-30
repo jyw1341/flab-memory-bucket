@@ -1,21 +1,12 @@
 package com.zephyr.api.request;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
-@Getter
-@ToString
+@Data
 public class AlbumCreate {
 
-    private final String ownerId;
-    private final String albumTitle;
-    private final String albumDescription;
+    private final String title;
+    private final String description;
+    private final String thumbnailUrl;
 
-    @Builder
-    public AlbumCreate(String ownerId, String albumTitle, String albumDescription) {
-        this.ownerId = ownerId;
-        this.albumTitle = albumTitle;
-        this.albumDescription = albumDescription;
-    }
 }

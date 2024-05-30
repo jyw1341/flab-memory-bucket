@@ -1,24 +1,22 @@
 package com.zephyr.api.response;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import com.zephyr.api.domain.AlbumMember;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Getter
-@ToString
+@Data
 public class AlbumMemberResponse {
-    private final Long memberId;
-    private final String memberName;
-    private final String memberProfileImage;
-    private final LocalDateTime registerDate;
 
-    @Builder
-    public AlbumMemberResponse(Long memberId, String memberName, String memberProfileImage, LocalDateTime registerDate) {
-        this.memberId = memberId;
-        this.memberName = memberName;
-        this.memberProfileImage = memberProfileImage;
-        this.registerDate = registerDate;
+    private final Long memberId;
+    private final String name;
+    private final String profileImageUrl;
+    private final LocalDateTime subscribed;
+
+    public AlbumMemberResponse(AlbumMember subscribe) {
+        this.memberId = subscribe.getMember().getId();
+        this.name = subscribe.getMember().getName();
+        this.profileImageUrl = subscribe.getMember().getProfileImageUrl();
+        this.subscribed = subscribe.getSubscribed();
     }
 }

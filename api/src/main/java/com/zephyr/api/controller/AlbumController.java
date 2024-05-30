@@ -1,10 +1,13 @@
 package com.zephyr.api.controller;
 
+import com.zephyr.api.domain.Album;
 import com.zephyr.api.request.AlbumCreate;
 import com.zephyr.api.request.AlbumMemberRequest;
 import com.zephyr.api.request.AlbumUpdate;
+import com.zephyr.api.response.AlbumListResponse;
 import com.zephyr.api.response.AlbumMemberResponse;
 import com.zephyr.api.response.AlbumResponse;
+import com.zephyr.api.service.AlbumService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,9 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.LongStream;
 
 @RestController
 @Slf4j
@@ -22,86 +23,59 @@ import java.util.stream.LongStream;
 @RequestMapping("/albums")
 public class AlbumController {
 
+    private final AlbumService albumService;
+
+    @PostMapping
+    public ResponseEntity<Void> create(@RequestBody AlbumCreate request) {
+        Album album = albumService.create(1L, request);
+
+        return ResponseEntity.created(URI.create("/albums/" + album.getId())).build();
+    }
+
     @GetMapping("/{albumId}")
     public AlbumResponse get(@PathVariable Long albumId) {
-        AlbumResponse response = AlbumResponse.builder()
-                .albumId(albumId)
-                .albumTitle("테스트 앨범")
-                .albumDescription("hello")
-                .albumCover("url")
-                .createdAt(LocalDateTime.now())
-                .build();
+        Album album = albumService.get(albumId, 1L);
 
-        return response;
+        return new AlbumResponse(album);
     }
 
     @GetMapping
-    public List<AlbumResponse> getList() {
-        List<AlbumResponse> response = LongStream.range(1, 11).mapToObj(value -> AlbumResponse.builder()
-                .albumId(value)
-                .albumTitle("테스트 앨범" + value)
-                .albumDescription("hello" + value)
-                .albumCover("url" + value)
-                .createdAt(LocalDateTime.now())
-                .build()
-        ).toList();
+    public List<AlbumListResponse> getList() {
+        List<Album> albumsOfMember = albumService.getAlbumsOfMember(1L);
 
-        return response;
-    }
-
-    @PostMapping
-    public ResponseEntity<AlbumResponse> create(@RequestBody AlbumCreate request) {
-        AlbumResponse response = AlbumResponse.builder()
-                .albumId(1L)
-                .albumTitle(request.getAlbumTitle())
-                .albumDescription(request.getAlbumDescription())
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        return ResponseEntity.created(URI.create("/albums/1")).body(response);
+        return albumsOfMember.stream().map(AlbumListResponse::new).toList();
     }
 
     @DeleteMapping("/{albumId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long albumId) {
-
+        albumService.delete(albumId, 1L);
     }
 
     @PatchMapping("/{albumId}")
     public AlbumResponse update(@PathVariable Long albumId, @RequestBody AlbumUpdate request) {
-        AlbumResponse response = AlbumResponse.builder()
-                .albumId(albumId)
-                .albumTitle(request.getAlbumTitle())
-                .albumDescription(request.getAlbumDescription())
-                .albumCover("url")
-                .createdAt(LocalDateTime.now())
-                .build();
+        Album album = albumService.update(albumId, 1L, request);
 
-        return response;
-    }
-
-    @GetMapping("/{albumId}/members")
-    public List<AlbumMemberResponse> getMembers(@PathVariable Long albumId, @RequestBody AlbumMemberRequest request) {
-        List<AlbumMemberResponse> response = LongStream.range(1, 11).mapToObj(value -> AlbumMemberResponse.builder()
-                .memberId(value)
-                .memberName("name" + value)
-                .memberProfileImage("url" + value)
-                .registerDate(LocalDateTime.now())
-                .build()
-        ).toList();
-
-        return response;
+        return new AlbumResponse(album);
     }
 
     @PostMapping("/{albumId}/members")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void addMember(@PathVariable Long albumId) {
+    public void createAlbumMember(@PathVariable Long albumId, @RequestBody AlbumMemberRequest request) {
+        Long loginId = 1L;
+        albumService.createAlbumMember(albumId, loginId, request);
+    }
 
+    @GetMapping("/{albumId}/members")
+    public List<AlbumMemberResponse> getAlbumMembers(@PathVariable Long albumId) {
+        return albumService.getAlbumMembers(albumId, 1L).stream()
+                .map(AlbumMemberResponse::new).toList();
     }
 
     @DeleteMapping("/{albumId}/members/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteMember(@PathVariable Long albumId, @PathVariable Long memberId) {
-
+    public void deleteAlbumMember(@PathVariable Long albumId, @PathVariable Long memberId) {
+        Long loginId = 1L;
+        albumService.deleteAlbumMember(albumId, loginId, memberId);
     }
 }
