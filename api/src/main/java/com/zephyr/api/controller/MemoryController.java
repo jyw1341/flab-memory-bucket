@@ -29,14 +29,16 @@ public class MemoryController {
         return ResponseEntity.created(URI.create("/memories/" + memory.getId())).build();
     }
 
-    @GetMapping
-    public List<MemoryResponse> getMemories() {
+    @GetMapping("/{memoryId}")
+    public MemoryResponse get(@RequestParam Long albumId, @PathVariable Long memoryId) {
+        Memory memory = memoryService.get(albumId, memoryId, 1L);
 
-        return null;
+        return new MemoryResponse(memory);
     }
 
-    @GetMapping("/{memoryId}")
-    public MemoryResponse get(@PathVariable Long memoryId) {
+    @GetMapping()
+    public List<MemoryResponse> getMemories() {
+
         return null;
     }
 

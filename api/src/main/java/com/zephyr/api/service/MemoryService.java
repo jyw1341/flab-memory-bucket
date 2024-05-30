@@ -7,11 +7,9 @@ import com.zephyr.api.domain.Subscribe;
 import com.zephyr.api.enums.SubscribeStatus;
 import com.zephyr.api.exception.AlbumNotFoundException;
 import com.zephyr.api.exception.ForbiddenException;
+import com.zephyr.api.exception.MemoryNotFoundException;
 import com.zephyr.api.exception.SubscribeNotFoundException;
-import com.zephyr.api.repository.AlbumRepository;
-import com.zephyr.api.repository.ContentRepository;
-import com.zephyr.api.repository.MemoryRepository;
-import com.zephyr.api.repository.SubscribeRepository;
+import com.zephyr.api.repository.*;
 import com.zephyr.api.request.MemoryCreate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
@@ -29,6 +27,7 @@ public class MemoryService {
     private final ContentRepository contentRepository;
     private final AlbumRepository albumRepository;
     private final SubscribeRepository subscribeRepository;
+    private final CommentRepository commentRepository;
     private final MessageSource messageSource;
 
     public Memory create(MemoryCreate memoryCreate, Long loginId) {
@@ -58,6 +57,18 @@ public class MemoryService {
                 .url(request.getUrl()).build()
         ).toList();
         contentRepository.saveAll(contents);
+
+        return memory;
+    }
+
+    public Memory get(Long albumId, Long memoryId, Long loginId) {
+        Memory memory = memoryRepository.findByAlbumIdAndMemoryId(albumId, memoryId)
+                .orElseThrow(() -> new MemoryNotFoundException(messageSource));
+
+        Album album = memory.getAlbum();
+        if (!album.getOwner().getId().equals(loginId)) {
+            validSubscribe(album, loginId);
+        }
 
         return memory;
     }

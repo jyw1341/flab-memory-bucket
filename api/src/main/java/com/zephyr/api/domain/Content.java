@@ -1,7 +1,9 @@
 package com.zephyr.api.domain;
 
 import lombok.Builder;
+import lombok.Getter;
 
+@Getter
 public class Content {
 
     private final Integer index;
