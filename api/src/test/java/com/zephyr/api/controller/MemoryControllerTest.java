@@ -12,7 +12,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +38,7 @@ class MemoryControllerTest {
                 null,
                 "제목",
                 "설명",
-                LocalDateTime.now(),
+                "2024-05-30",
                 new ArrayList<>(),
                 contentCreates
         );
@@ -71,7 +70,7 @@ class MemoryControllerTest {
                 1L,
                 stringBuilder.toString(),
                 "설명",
-                LocalDateTime.now(),
+                "2024-05-30",
                 new ArrayList<>(),
                 contentCreates
         );
@@ -98,7 +97,7 @@ class MemoryControllerTest {
                 1L,
                 "",
                 "설명",
-                LocalDateTime.now(),
+                "2024-05-30",
                 new ArrayList<>(),
                 contentCreates
         );
@@ -125,7 +124,7 @@ class MemoryControllerTest {
                 1L,
                 "  ",
                 "설명",
-                LocalDateTime.now(),
+                "2024-05-30",
                 new ArrayList<>(),
                 contentCreates
         );
@@ -152,7 +151,7 @@ class MemoryControllerTest {
                 1L,
                 null,
                 "설명",
-                LocalDateTime.now(),
+                "2024-05-30",
                 new ArrayList<>(),
                 contentCreates
         );
@@ -184,7 +183,7 @@ class MemoryControllerTest {
                 1L,
                 "제목",
                 description.toString(),
-                LocalDateTime.now(),
+                "2024-05-30",
                 new ArrayList<>(),
                 contentCreates
         );
@@ -236,7 +235,7 @@ class MemoryControllerTest {
                 1L,
                 "제목",
                 "설명",
-                LocalDateTime.now(),
+                "2024-05-30",
                 new ArrayList<>(),
                 contentCreates
         );
@@ -260,7 +259,7 @@ class MemoryControllerTest {
                 1L,
                 "제목",
                 "설명",
-                LocalDateTime.now(),
+                "2024-05-30",
                 new ArrayList<>(),
                 null
         );

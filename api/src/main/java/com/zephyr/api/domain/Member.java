@@ -21,4 +21,5 @@ public class Member {
     @Builder.Default
     private List<Subscribe> subscribes = new ArrayList<>();
 
+
 }

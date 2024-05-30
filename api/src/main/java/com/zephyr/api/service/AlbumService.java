@@ -149,8 +149,12 @@ public class AlbumService {
     }
 
     private void validSubscribe(Album album, Long loginId) {
-        subscribeRepository.findByAlbumIdAndMemberId(album.getId(), loginId)
+        Subscribe subscribe = subscribeRepository.findByAlbumIdAndMemberId(album.getId(), loginId)
                 .orElseThrow(() -> new SubscribeNotFoundException(messageSource));
+
+        if (!subscribe.getStatus().equals(SubscribeStatus.APPROVED)) {
+            throw new ForbiddenException(messageSource);
+        }
     }
 
     private void setDefaultThumbnailUrlIfNull(Album album) {

@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -26,7 +25,7 @@ public class MemoryCreate {
     private final String description;
 
     @NotNull
-    private final LocalDateTime memoryDate;
+    private final String memoryDate;
 
     private final List<String> tags;
 
