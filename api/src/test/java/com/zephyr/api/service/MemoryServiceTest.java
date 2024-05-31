@@ -57,8 +57,8 @@ class MemoryServiceTest {
         contentCreates.add(new ContentCreate("메모 제목1", "메모1", "url1", 1));
         contentCreates.add(new ContentCreate("메모 제목2", "메모2", "url2", 2));
 
-        Member member = Member.builder().id(1L).build();
-        Album album = Album.builder().id(1L).owner(member).build();
+        Member member = Member.builder().build();
+        Album album = Album.builder().owner(member).build();
 
         MemoryCreate memoryCreate = new MemoryCreate(
                 album.getId(),
@@ -105,8 +105,8 @@ class MemoryServiceTest {
         contentCreates.add(new ContentCreate("메모 제목1", "메모1", "url1", 1));
         contentCreates.add(new ContentCreate("메모 제목2", "메모2", "url2", 2));
 
-        Member member = Member.builder().id(1L).build();
-        Album album = Album.builder().id(1L).owner(member).build();
+        Member member = Member.builder().build();
+        Album album = Album.builder().owner(member).build();
 
         MemoryCreate memoryCreate = new MemoryCreate(
                 album.getId(),
@@ -133,8 +133,8 @@ class MemoryServiceTest {
         contentCreates.add(new ContentCreate("메모 제목2", "메모2", "url2", 2));
 
         Long loginId = 100L;
-        Member member = Member.builder().id(1L).build();
-        Album album = Album.builder().id(1L).owner(member).build();
+        Member member = Member.builder().build();
+        Album album = Album.builder().owner(member).build();
 
         MemoryCreate memoryCreate = new MemoryCreate(
                 album.getId(),
@@ -163,8 +163,8 @@ class MemoryServiceTest {
         Long albumId = 2L;
         Long memoryId = 3L;
 
-        Member owner = Member.builder().id(ownerId).build();
-        Album album = Album.builder().id(albumId).owner(owner).build();
+        Member owner = Member.builder().build();
+        Album album = Album.builder().owner(owner).build();
         Memory memory = Memory.builder().id(memoryId).album(album).build();
 
         when(memoryRepository.findByAlbumIdAndMemoryId(albumId, memoryId))
@@ -186,8 +186,8 @@ class MemoryServiceTest {
         Long albumId = 2L;
         Long memoryId = 3L;
 
-        Member owner = Member.builder().id(ownerId).build();
-        Album album = Album.builder().id(albumId).owner(owner).build();
+        Member owner = Member.builder().build();
+        Album album = Album.builder().owner(owner).build();
         Memory memory = Memory.builder().id(memoryId).album(album).build();
         Subscribe subscribe = Subscribe.builder().status(SubscribeStatus.APPROVED).build();
 
@@ -211,8 +211,8 @@ class MemoryServiceTest {
         Long albumId = 2L;
         Long memoryId = 3L;
 
-        Member owner = Member.builder().id(ownerId).build();
-        Album album = Album.builder().id(albumId).owner(owner).build();
+        Member owner = Member.builder().build();
+        Album album = Album.builder().owner(owner).build();
         Memory memory = Memory.builder().id(memoryId).album(album).build();
 
         when(memoryRepository.findByAlbumIdAndMemoryId(albumId, memoryId))
@@ -232,8 +232,8 @@ class MemoryServiceTest {
         Long albumId = 2L;
         Long memoryId = 3L;
 
-        Member owner = Member.builder().id(ownerId).build();
-        Album album = Album.builder().id(albumId).owner(owner).build();
+        Member owner = Member.builder().build();
+        Album album = Album.builder().owner(owner).build();
         Memory memory = Memory.builder().id(memoryId).album(album).build();
         Subscribe subscribe = Subscribe.builder().status(SubscribeStatus.PENDING).build();
 

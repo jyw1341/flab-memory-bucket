@@ -11,4 +11,8 @@ public class MemberRepository {
     public Optional<Member> findById(Long id) {
         return Optional.empty();
     }
+
+    public Optional<Member> findByUsername(String username) {
+        return Optional.empty();
+    }
 }

@@ -5,9 +5,9 @@ import org.springframework.http.HttpStatus;
 
 import java.util.Locale;
 
-public class AlreadySubscribedException extends BaseException {
+public class SubscribeFailException extends BaseException {
 
-    public AlreadySubscribedException(MessageSource messageSource) {
+    public SubscribeFailException(MessageSource messageSource) {
         super(messageSource.getMessage("duplicated.albumMember.approved", null, Locale.KOREA));
     }
 

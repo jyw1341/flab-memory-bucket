@@ -33,10 +33,9 @@ public class AlbumService {
     private final MessageSource messageSource;
     private final S3Config s3Config;
 
-    public Album create(Long loginId, AlbumCreate albumCreate) {
+    public Long create(Long loginId, AlbumCreate albumCreate) {
         Member member = memberRepository.findById(loginId)
                 .orElseThrow(() -> new MemberNotFoundException(messageSource));
-
         Album album = Album.builder()
                 .title(albumCreate.getTitle())
                 .owner(member)
@@ -46,30 +45,27 @@ public class AlbumService {
 
         albumRepository.save(album);
 
-        return album;
+        return album.getId();
     }
 
     public Album get(Long albumId, Long loginId) {
         Album album = albumRepository.findById(albumId).orElseThrow(() -> new AlbumNotFoundException(messageSource));
-        if (!album.getOwner().getId().equals(loginId)) {
-            validSubscribe(album, loginId);
-        }
+
+        validReadPermission(album, loginId);
         setDefaultThumbnailUrlIfNull(album);
 
         return album;
     }
 
     public List<Album> getList(Long loginId) {
-        Member member = memberRepository.findById(loginId)
-                .orElseThrow(() -> new MemberNotFoundException(messageSource));
+        List<Album> ownAlbums = albumRepository.findByMemberId(loginId);
+        List<Album> result = new ArrayList<>(ownAlbums);
+        List<Subscribe> subscribes = subscribeRepository.findByMemberId(loginId);
 
-        List<Album> result = new ArrayList<>(member.getAlbums());
-        List<Subscribe> subscribes = member.getSubscribes();
         for (Subscribe subscribe : subscribes) {
             Album album = subscribe.getAlbum();
             result.add(album);
         }
-
         result.forEach(this::setDefaultThumbnailUrlIfNull);
 
         return result;
@@ -78,8 +74,8 @@ public class AlbumService {
     public Album update(Long albumId, Long loginId, AlbumUpdate albumUpdate) {
         Album album = albumRepository.findById(albumId)
                 .orElseThrow(() -> new AlbumNotFoundException(messageSource));
-        validAlbumOwner(album, loginId);
 
+        validWritePermission(album, loginId);
         album.setTitle(albumUpdate.getTitle());
         album.setDescription(albumUpdate.getDescription());
         album.setThumbnailUrl(albumUpdate.getThumbnailUrl());
@@ -90,26 +86,22 @@ public class AlbumService {
     public void delete(Long albumId, Long loginId) {
         Album album = albumRepository.findById(albumId)
                 .orElseThrow(() -> new AlbumNotFoundException(messageSource));
-        validAlbumOwner(album, loginId);
 
+        validWritePermission(album, loginId);
         albumRepository.delete(album);
     }
 
     public void createSubscribe(Long albumId, Long loginId, SubscribeRequest request) {
-        Member candidate = memberRepository.findById(request.getMemberId())
+        Member candidate = memberRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new MemberNotFoundException(messageSource));
         Album album = albumRepository.findById(albumId)
                 .orElseThrow(() -> new AlbumNotFoundException(messageSource));
-        validAlbumOwner(album, loginId);
 
+        validWritePermission(album, loginId);
         Optional<Subscribe> subscribe = subscribeRepository.findByAlbumIdAndMemberId(album.getId(), candidate.getId());
-        if (subscribe.isPresent() && subscribe.get().getStatus().equals(SubscribeStatus.APPROVED)) {
-            throw new AlreadySubscribedException(messageSource);
+        if (subscribe.isPresent()) {
+            throw new SubscribeFailException(messageSource);
         }
-        if (subscribe.isPresent() && subscribe.get().getStatus().equals(SubscribeStatus.PENDING)) {
-            throw new InvalidSubscribeStatusException(messageSource);
-        }
-
         subscribeRepository.save(Subscribe.builder()
                 .subscriber(candidate)
                 .album(album)
@@ -121,51 +113,53 @@ public class AlbumService {
     public void approveSubscribe(Long albumId, Long loginId) {
         Subscribe subscribe = subscribeRepository.findByAlbumIdAndMemberId(albumId, loginId)
                 .orElseThrow(() -> new SubscribeNotFoundException(messageSource));
-        validAlbumOwner(subscribe.getAlbum(), loginId);
-        if (!subscribe.getStatus().equals(SubscribeStatus.PENDING)) {
-            throw new InvalidSubscribeStatusException(messageSource);
-        }
 
-        //TODO: setter 사용
+        if (!subscribe.getStatus().equals(SubscribeStatus.PENDING)) {
+            throw new SubscribeFailException(messageSource);
+        }
         subscribe.setStatus(SubscribeStatus.APPROVED);
     }
 
     public List<Subscribe> getSubscribers(Long albumId, Long loginId) {
         Album album = albumRepository.findById(albumId)
                 .orElseThrow(() -> new AlbumNotFoundException(messageSource));
-        if (!album.getOwner().getId().equals(loginId)) {
-            validSubscribe(album, loginId);
-        }
+
+        validReadPermission(album, loginId);
 
         return album.getSubscribes();
     }
 
-    public void deleteAlbumMember(Long albumId, Long loginId, Long targetId) {
+    public void deleteSubscribe(Long albumId, Long loginId, Long targetId) {
         Album album = albumRepository.findById(albumId)
                 .orElseThrow(() -> new AlbumNotFoundException(messageSource));
-        validAlbumOwner(album, loginId);
 
+        validWritePermission(album, loginId);
         subscribeRepository.delete(album.getId(), targetId);
     }
 
-    private void validSubscribe(Album album, Long loginId) {
-        Subscribe subscribe = subscribeRepository.findByAlbumIdAndMemberId(album.getId(), loginId)
-                .orElseThrow(() -> new SubscribeNotFoundException(messageSource));
-
-        if (!subscribe.getStatus().equals(SubscribeStatus.APPROVED)) {
-            throw new ForbiddenException(messageSource);
-        }
-    }
+    //------------------------------------------------------------------------------------
 
     private void setDefaultThumbnailUrlIfNull(Album album) {
         if (album.getThumbnailUrl() == null || album.getThumbnailUrl().isBlank()) {
-            //TODO: setter 사용
             album.setThumbnailUrl(s3Config.getDefaultThumbnailUrl());
         }
     }
 
-    private void validAlbumOwner(Album album, Long loginId) {
+    private void validWritePermission(Album album, Long loginId) {
         if (!album.getOwner().getId().equals(loginId)) {
+            throw new ForbiddenException(messageSource);
+        }
+    }
+
+    private void validReadPermission(Album album, Long loginId) {
+        if (album.getOwner().getId().equals(loginId)) {
+            return;
+        }
+
+        Subscribe subscribe = subscribeRepository.findByAlbumIdAndMemberId(album.getId(), loginId)
+                .orElseThrow(() -> new SubscribeNotFoundException(messageSource));
+
+        if (!subscribe.getStatus().equals(SubscribeStatus.APPROVED)) {
             throw new ForbiddenException(messageSource);
         }
     }

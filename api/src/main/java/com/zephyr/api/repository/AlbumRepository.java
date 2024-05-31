@@ -5,13 +5,13 @@ import com.zephyr.api.response.AlbumListResponse;
 import com.zephyr.api.response.AlbumResponse;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public class AlbumRepository {
-    public Optional<Album> save(Album album) {
-        return null;
+    public void save(Album album) {
     }
 
     public void delete(Album album) {
@@ -24,6 +24,10 @@ public class AlbumRepository {
 
     public Optional<Album> findById(Long albumId) {
         return Optional.empty();
+    }
+
+    public List<Album> findByMemberId(Long memberId) {
+        return new ArrayList<>();
     }
 
     public AlbumResponse findWithSubscribeAndMemory(Long albumId) {

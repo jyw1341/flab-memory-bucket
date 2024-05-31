@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Builder
 public class Member {
 
     private Long id;
@@ -16,10 +15,25 @@ public class Member {
     private String email;
     private String profileImageUrl;
     private LocalDateTime registered;
-    @Builder.Default
-    private List<Album> albums = new ArrayList<>();
-    @Builder.Default
-    private List<Subscribe> subscribes = new ArrayList<>();
+    private final List<Subscribe> subscribes = new ArrayList<>();
 
 
+    @Builder
+    private Member(String name, String email, String profileImageUrl) {
+        this.name = name;
+        this.email = email;
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
 }
