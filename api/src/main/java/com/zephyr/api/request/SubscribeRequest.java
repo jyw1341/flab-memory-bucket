@@ -3,7 +3,7 @@ package com.zephyr.api.request;
 import lombok.Data;
 
 @Data
-public class AlbumMemberRequest {
+public class SubscribeRequest {
 
     private final Long memberId;
 

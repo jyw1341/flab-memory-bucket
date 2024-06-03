@@ -23,6 +23,6 @@ public class AlbumListResponse {
         this.thumbnailUrl = album.getThumbnailUrl();
         this.created = album.getCreated();
         this.owner = new MemberResponse(album.getOwner());
-        this.albumMemberCount = album.getAlbumMembers().size();
+        this.albumMemberCount = album.getSubscribes().size();
     }
 }

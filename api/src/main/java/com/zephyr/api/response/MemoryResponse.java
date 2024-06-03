@@ -1,25 +1,32 @@
 package com.zephyr.api.response;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import com.zephyr.api.domain.Memory;
+import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
-@Getter
-@ToString
+@Data
 public class MemoryResponse {
 
-    private final String memoryTitle;
-    private final String memoryDescription;
-    private final LocalDateTime startDate;
-    private final LocalDateTime endDate;
+    private final Long memoryId;
+    private final MemberResponse author;
+    private final String title;
+    private final String description;
+    private final String memoryDate;
+    private final List<String> tags;
+    private final List<ContentResponse> contents;
+    private final List<CommentResponse> comments;
 
-    @Builder
-    public MemoryResponse(String memoryTitle, String memoryDescription, LocalDateTime startDate, LocalDateTime endDate) {
-        this.memoryTitle = memoryTitle;
-        this.memoryDescription = memoryDescription;
-        this.startDate = startDate;
-        this.endDate = endDate;
+    public MemoryResponse(Memory memory) {
+        this.memoryId = memory.getId();
+        this.author = new MemberResponse(memory.getAuthor());
+        this.title = memory.getTitle();
+        this.description = memory.getDescription();
+        this.memoryDate = memory.getMemoryDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        this.tags = new ArrayList<>();
+        this.contents = memory.getContents().stream().map(ContentResponse::new).toList();
+        this.comments = memory.getComments().stream().map(CommentResponse::new).toList();
     }
 }

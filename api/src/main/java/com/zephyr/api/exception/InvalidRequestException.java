@@ -2,9 +2,9 @@ package com.zephyr.api.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class DuplicatedException extends BaseException {
+public class InvalidRequestException extends BaseException {
 
-    public DuplicatedException(String message) {
+    public InvalidRequestException(String message) {
         super(message);
     }
 

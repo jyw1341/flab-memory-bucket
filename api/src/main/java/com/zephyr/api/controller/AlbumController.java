@@ -2,11 +2,11 @@ package com.zephyr.api.controller;
 
 import com.zephyr.api.domain.Album;
 import com.zephyr.api.request.AlbumCreate;
-import com.zephyr.api.request.AlbumMemberRequest;
 import com.zephyr.api.request.AlbumUpdate;
+import com.zephyr.api.request.SubscribeRequest;
 import com.zephyr.api.response.AlbumListResponse;
-import com.zephyr.api.response.AlbumMemberResponse;
 import com.zephyr.api.response.AlbumResponse;
+import com.zephyr.api.response.SubscribeResponse;
 import com.zephyr.api.service.AlbumService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +41,7 @@ public class AlbumController {
 
     @GetMapping
     public List<AlbumListResponse> getList() {
-        List<Album> albumsOfMember = albumService.getAlbumsOfMember(1L);
+        List<Album> albumsOfMember = albumService.getList(1L);
 
         return albumsOfMember.stream().map(AlbumListResponse::new).toList();
     }
@@ -61,15 +61,15 @@ public class AlbumController {
 
     @PostMapping("/{albumId}/members")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void createAlbumMember(@PathVariable Long albumId, @RequestBody AlbumMemberRequest request) {
+    public void createAlbumMember(@PathVariable Long albumId, @RequestBody SubscribeRequest request) {
         Long loginId = 1L;
-        albumService.createAlbumMember(albumId, loginId, request);
+        albumService.createSubscribe(albumId, loginId, request);
     }
 
     @GetMapping("/{albumId}/members")
-    public List<AlbumMemberResponse> getAlbumMembers(@PathVariable Long albumId) {
-        return albumService.getAlbumMembers(albumId, 1L).stream()
-                .map(AlbumMemberResponse::new).toList();
+    public List<SubscribeResponse> getAlbumMembers(@PathVariable Long albumId) {
+        return albumService.getSubscribers(albumId, 1L).stream()
+                .map(SubscribeResponse::new).toList();
     }
 
     @DeleteMapping("/{albumId}/members/{memberId}")

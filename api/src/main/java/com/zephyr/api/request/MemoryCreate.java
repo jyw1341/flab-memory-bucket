@@ -1,23 +1,35 @@
 package com.zephyr.api.request;
 
-import lombok.Getter;
-import lombok.ToString;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
-@Getter
-@ToString
+@Data
 public class MemoryCreate {
 
-    private final String title;
-    private final String description;
-    private final LocalDateTime startDate;
-    private final LocalDateTime endDate;
+    public static final int MEMORY_TITLE_MAX = 30;
+    public static final int MEMORY_DESCRIPTION_MAX = 100;
 
-    public MemoryCreate(String title, String description, LocalDateTime startDate, LocalDateTime endDate) {
-        this.title = title;
-        this.description = description;
-        this.startDate = startDate;
-        this.endDate = endDate;
-    }
+    @NotNull
+    private final Long albumId;
+
+    @NotBlank
+    @Size(max = MEMORY_TITLE_MAX)
+    private final String title;
+
+    @Size(max = MEMORY_DESCRIPTION_MAX)
+    private final String description;
+
+    @NotNull
+    private final String memoryDate;
+
+    private final List<String> tags;
+
+    @NotEmpty
+    private final List<ContentCreate> contents;
+
 }

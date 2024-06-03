@@ -1,49 +1,44 @@
 package com.zephyr.api.controller;
 
+import com.zephyr.api.domain.Memory;
 import com.zephyr.api.request.MemoryCreate;
 import com.zephyr.api.request.MemoryUpdate;
 import com.zephyr.api.response.MemoryResponse;
+import com.zephyr.api.service.MemoryService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.LongStream;
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/memories")
 public class MemoryController {
 
-    @GetMapping
-    public List<MemoryResponse> getMemories(@PathVariable Long albumId) {
-        List<MemoryResponse> response = LongStream.range(1, 11).mapToObj(value -> MemoryResponse.builder()
-                .memoryTitle("title" + value)
-                .memoryDescription("description" + value)
-                .startDate(LocalDateTime.now())
-                .endDate(LocalDateTime.now())
-                .build()
-        ).toList();
-
-        return response;
-    }
+    private final MemoryService memoryService;
 
     @PostMapping
-    public ResponseEntity<MemoryResponse> createMemory(@PathVariable Long albumId, @RequestBody MemoryCreate request) {
-        MemoryResponse response = MemoryResponse.builder()
-                .memoryTitle("title")
-                .memoryDescription("description")
-                .startDate(LocalDateTime.now())
-                .endDate(LocalDateTime.now())
-                .build();
+    public ResponseEntity<Void> createMemory(@RequestBody @Valid MemoryCreate request) {
+        Memory memory = memoryService.create(request, 1L);
 
-        return ResponseEntity.created(URI.create("/memories/1")).body(response);
+        return ResponseEntity.created(URI.create("/memories/" + memory.getId())).build();
     }
 
     @GetMapping("/{memoryId}")
-    public MemoryResponse get(@PathVariable Long memoryId) {
+    public MemoryResponse get(@RequestParam Long albumId, @PathVariable Long memoryId) {
+        Memory memory = memoryService.get(albumId, memoryId, 1L);
+
+        return new MemoryResponse(memory);
+    }
+
+    @GetMapping()
+    public List<MemoryResponse> getMemories() {
+
         return null;
     }
 
