@@ -5,7 +5,6 @@ import com.zephyr.api.response.AlbumResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -20,7 +19,6 @@ import static com.zephyr.api.utils.HttpRequestUtils.createUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
 class AlbumControllerTest {
 
     @Autowired
@@ -30,73 +28,8 @@ class AlbumControllerTest {
     private int port;
 
     @Test
-    @DisplayName("앨범 생성 / 앨범 단건 조회 / 200, 앨범 정보 반환")
-    void givenValidAlbumId_whenGetAlbum_thenStatus200() throws Exception {
-        //given
-        AlbumCreate request = new AlbumCreate("테스트 앨범", null, null);
-        ResponseEntity<AlbumResponse> responseEntity = restTemplate.postForEntity(
-                createUrl(port, "/albums"),
-                request,
-                AlbumResponse.class
-        );
-        URI location = responseEntity.getHeaders().getLocation();
-
-        //when
-        ResponseEntity<AlbumResponse> resultEntity = restTemplate.getForEntity(
-                createUrl(port, location.getPath()),
-                AlbumResponse.class
-        );
-
-        //then
-        assertEquals(HttpStatus.OK, resultEntity.getStatusCode());
-        assertEquals(request.getTitle(), resultEntity.getBody().getTitle());
-        //TODO : 엔티티 개발 후 추가
-    }
-
-    @Test
-    @DisplayName("앨범 생성 x / 앨범 단건 조회 / 404 반환")
-    void givenInvalidAlbumId_whenGetAlbum_thenStatus404() throws Exception {
-        //given
-        String invalidPath = "albums/999";
-
-        //when
-        ResponseEntity<AlbumResponse> resultEntity = restTemplate.getForEntity(
-                createUrl(port, invalidPath),
-                AlbumResponse.class
-        );
-
-        //then
-        assertEquals(HttpStatus.NOT_FOUND, resultEntity.getStatusCode());
-    }
-
-    @Test
-    @DisplayName("앨범 10개 생성 / 앨범 목록 조회 / 200, 앨범 10개 반환")
-    public void givenValidRequest_whenGetList_thenStatus200AndCorrectAlbums() throws Exception {
-        //given
-        int resultSize = 10;
-        for (int i = 0; i < resultSize; i++) {
-            AlbumCreate request = new AlbumCreate("테스트 앨범" + i, null, null);
-            restTemplate.postForEntity(
-                    createUrl(port, "/albums"),
-                    request,
-                    AlbumResponse.class
-            );
-        }
-
-        //when
-        ResponseEntity<AlbumResponse[]> resultEntity = restTemplate.getForEntity(
-                createUrl(port, "/albums"),
-                AlbumResponse[].class
-        );
-
-        //then
-        assertEquals(HttpStatus.OK, resultEntity.getStatusCode());
-        assertEquals(resultSize, resultEntity.getBody().length);
-    }
-
-    @Test
     @DisplayName("모든 필드가 있는 앨범 생성 요청 / 앨범 생성 / 201, 모든 필드 정보가 있는 응답 반환")
-    void givenValidRequest_whenCreateAlbum_thenStatus201AndCorrectResponse() throws Exception {
+    void givenValidRequest_whenCreateAlbum_thenStatus201AndCorrectResponse() {
         //given
         AlbumCreate request = new AlbumCreate("테스트 앨범", "test title", null);
 
@@ -148,6 +81,71 @@ class AlbumControllerTest {
 
         //then
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("앨범 생성 / 앨범 단건 조회 / 200, 앨범 정보 반환")
+    void givenValidAlbumId_whenGetAlbum_thenStatus200() {
+        //given
+        AlbumCreate request = new AlbumCreate("테스트 앨범", null, null);
+        ResponseEntity<AlbumResponse> responseEntity = restTemplate.postForEntity(
+                createUrl(port, "/albums"),
+                request,
+                AlbumResponse.class
+        );
+        URI location = responseEntity.getHeaders().getLocation();
+
+        //when
+        ResponseEntity<AlbumResponse> resultEntity = restTemplate.getForEntity(
+                createUrl(port, location.getPath()),
+                AlbumResponse.class
+        );
+
+        //then
+        assertEquals(HttpStatus.OK, resultEntity.getStatusCode());
+        assertEquals(request.getTitle(), resultEntity.getHeaders().getLocation());
+        //TODO : 엔티티 개발 후 추가
+    }
+
+    @Test
+    @DisplayName("앨범 생성 x / 앨범 단건 조회 / 404 반환")
+    void givenInvalidAlbumId_whenGetAlbum_thenStatus404() throws Exception {
+        //given
+        String invalidPath = "albums/999";
+
+        //when
+        ResponseEntity<AlbumResponse> resultEntity = restTemplate.getForEntity(
+                createUrl(port, invalidPath),
+                AlbumResponse.class
+        );
+
+        //then
+        assertEquals(HttpStatus.NOT_FOUND, resultEntity.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("앨범 10개 생성 / 앨범 목록 조회 / 200, 앨범 10개 반환")
+    public void givenValidRequest_whenGetList_thenStatus200AndCorrectAlbums() throws Exception {
+        //given
+        int resultSize = 10;
+        for (int i = 0; i < resultSize; i++) {
+            AlbumCreate request = new AlbumCreate("테스트 앨범" + i, null, null);
+            restTemplate.postForEntity(
+                    createUrl(port, "/albums"),
+                    request,
+                    AlbumResponse.class
+            );
+        }
+
+        //when
+        ResponseEntity<AlbumResponse[]> resultEntity = restTemplate.getForEntity(
+                createUrl(port, "/albums"),
+                AlbumResponse[].class
+        );
+
+        //then
+        assertEquals(HttpStatus.OK, resultEntity.getStatusCode());
+        assertEquals(resultSize, resultEntity.getBody().length);
     }
 
     @Test
