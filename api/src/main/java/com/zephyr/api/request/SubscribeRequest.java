@@ -5,9 +5,6 @@ import lombok.Data;
 @Data
 public class SubscribeRequest {
 
-    private String username;
+    private final String username;
 
-    public SubscribeRequest(String username) {
-        this.username = username;
-    }
 }
