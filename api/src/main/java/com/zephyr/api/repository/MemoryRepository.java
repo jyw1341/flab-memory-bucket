@@ -8,8 +8,7 @@ import java.util.Optional;
 @Repository
 public class MemoryRepository {
 
-    public Memory save(Memory memory) {
-        return memory;
+    public void save(Memory memory) {
     }
 
     public Optional<Memory> findByAlbumIdAndMemoryId(Long albumId, Long memoryId) {

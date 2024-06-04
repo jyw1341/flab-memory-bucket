@@ -81,18 +81,12 @@ class MemoryServiceTest {
                 .build();
         when(albumRepository.findById(memoryCreate.getAlbumId()))
                 .thenReturn(Optional.of(album));
-        when(memoryRepository.save(any(Memory.class))).thenReturn(memory);
 
         //when
-        Memory result = memoryService.create(memoryCreate, 1L);
+        Long result = memoryService.create(memoryCreate, 1L);
 
         //then
         assertNotNull(result);
-        assertEquals(memoryCreate.getAlbumId(), result.getAlbum().getId());
-        assertEquals(memoryCreate.getTitle(), result.getTitle());
-        assertEquals(memoryCreate.getDescription(), result.getDescription());
-        assertEquals(memoryCreate.getMemoryDate(), result.getMemoryDate().format(dateFormatter));
-
         verify(memoryRepository, times(1)).save(any(Memory.class));
         verify(contentRepository, times(1)).saveAll(anyList());
     }

@@ -30,7 +30,7 @@ public class MemoryService {
     private final CommentRepository commentRepository;
     private final MessageSource messageSource;
 
-    public Memory create(MemoryCreate memoryCreate, Long loginId) {
+    public Long create(MemoryCreate memoryCreate, Long loginId) {
         Album album = albumRepository.findById(memoryCreate.getAlbumId())
                 .orElseThrow(() -> new AlbumNotFoundException(messageSource));
 
@@ -41,13 +41,14 @@ public class MemoryService {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate localDate = LocalDate.parse(memoryCreate.getMemoryDate(), dateFormatter);
 
-        Memory memory = memoryRepository.save(Memory.builder()
+        Memory memory = Memory.builder()
                 .album(album)
                 .author(album.getOwner())
                 .title(memoryCreate.getTitle())
                 .description(memoryCreate.getDescription())
                 .memoryDate(localDate.atStartOfDay())
-                .build());
+                .build();
+        memoryRepository.save(memory);
 
         List<Content> contents = memoryCreate.getContents().stream().map(request -> Content.builder()
                 .memory(memory)
@@ -58,7 +59,7 @@ public class MemoryService {
         ).toList();
         contentRepository.saveAll(contents);
 
-        return memory;
+        return memory.getId();
     }
 
     public Memory get(Long albumId, Long memoryId, Long loginId) {

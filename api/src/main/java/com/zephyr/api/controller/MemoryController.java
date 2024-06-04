@@ -24,9 +24,9 @@ public class MemoryController {
 
     @PostMapping
     public ResponseEntity<Void> createMemory(@RequestBody @Valid MemoryCreate request) {
-        Memory memory = memoryService.create(request, 1L);
+        Long result = memoryService.create(request, 1L);
 
-        return ResponseEntity.created(URI.create("/memories/" + memory.getId())).build();
+        return ResponseEntity.created(URI.create("/memories/" + result)).build();
     }
 
     @GetMapping("/{memoryId}")
