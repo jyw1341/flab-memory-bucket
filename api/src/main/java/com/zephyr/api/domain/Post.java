@@ -3,6 +3,7 @@ package com.zephyr.api.domain;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -14,12 +15,12 @@ public class Post {
     private Member author;
     private String title;
     private String description;
-    private LocalDateTime memoryDate;
+    private LocalDate memoryDate;
     private String thumbnailUrl;
     private LocalDateTime createdAt;
 
     @Builder
-    private Post(Album album, Series series, Member author, String title, String description, LocalDateTime memoryDate, String thumbnailUrl) {
+    private Post(Album album, Series series, Member author, String title, String description, LocalDate memoryDate, String thumbnailUrl) {
         this.album = album;
         this.series = series;
         this.author = author;
@@ -49,7 +50,7 @@ public class Post {
         this.description = description;
     }
 
-    public void setMemoryDate(LocalDateTime memoryDate) {
+    public void setMemoryDate(LocalDate memoryDate) {
         this.memoryDate = memoryDate;
     }
 
