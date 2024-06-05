@@ -16,18 +16,17 @@ public class Post {
     private String title;
     private String description;
     private LocalDate memoryDate;
-    private String thumbnailUrl;
+    private Memory thumbnailMemory;
     private LocalDateTime createdAt;
 
     @Builder
-    private Post(Album album, Series series, Member author, String title, String description, LocalDate memoryDate, String thumbnailUrl) {
+    private Post(Album album, Series series, Member author, String title, String description, LocalDate memoryDate) {
         this.album = album;
         this.series = series;
         this.author = author;
         this.title = title;
         this.description = description;
         this.memoryDate = memoryDate;
-        this.thumbnailUrl = thumbnailUrl;
     }
 
     public void setAlbum(Album album) {
@@ -54,7 +53,7 @@ public class Post {
         this.memoryDate = memoryDate;
     }
 
-    public void setThumbnailUrl(String thumbnailUrl) {
-        this.thumbnailUrl = thumbnailUrl;
+    public void setThumbnailMemory(Memory thumbnailMemory) {
+        this.thumbnailMemory = thumbnailMemory;
     }
 }
