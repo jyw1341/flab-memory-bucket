@@ -2,6 +2,7 @@ package com.zephyr.api.controller;
 
 import com.zephyr.api.request.PostCreate;
 import com.zephyr.api.service.PostService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<PostCreate> create(@RequestBody PostCreate postCreate) {
+    public ResponseEntity<Void> create(@RequestBody @Valid PostCreate postCreate) {
 //        Long result = postService.create(1L, postCreate);
         long result = 1L;
         return ResponseEntity.created(URI.create("/posts/" + result)).build();
