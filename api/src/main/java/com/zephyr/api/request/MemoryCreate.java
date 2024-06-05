@@ -5,8 +5,7 @@ import lombok.Data;
 @Data
 public class MemoryCreate {
 
-    private final String caption;
+    private final Integer index;
     private final String contentUrl;
-    private final String locationName;
-    private final String locationUrl;
+    private final String caption;
 }
