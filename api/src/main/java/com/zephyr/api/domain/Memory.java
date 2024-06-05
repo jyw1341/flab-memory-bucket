@@ -7,18 +7,32 @@ import lombok.Getter;
 public class Memory {
 
     private Long id;
-    private final Post post;
-    private final String caption;
-    private final String contentUrl;
-    private final String locationName;
-    private final String locationUrl;
+    private Post post;
+    private Integer index;
+    private String caption;
+    private String contentUrl;
 
     @Builder
-    private Memory(Post post, String caption, String contentUrl, String locationName, String locationUrl) {
+    private Memory(Post post, Integer index, String caption, String contentUrl) {
         this.post = post;
+        this.index = index;
         this.caption = caption;
         this.contentUrl = contentUrl;
-        this.locationName = locationName;
-        this.locationUrl = locationUrl;
+    }
+
+    public void setPost(Post post) {
+        this.post = post;
+    }
+
+    public void setIndex(Integer index) {
+        this.index = index;
+    }
+
+    public void setCaption(String caption) {
+        this.caption = caption;
+    }
+
+    public void setContentUrl(String contentUrl) {
+        this.contentUrl = contentUrl;
     }
 }
