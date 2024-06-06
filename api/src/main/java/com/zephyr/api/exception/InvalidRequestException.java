@@ -4,10 +4,8 @@ import org.springframework.http.HttpStatus;
 
 public class InvalidRequestException extends BaseException {
 
-    private static final String Message = "Invalid request";
-
     public InvalidRequestException(String fieldName, String message) {
-        super(Message);
+        super(message);
         addValidation(fieldName, message);
     }
 
