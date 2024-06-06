@@ -6,6 +6,7 @@ import com.zephyr.api.domain.Post;
 import com.zephyr.api.domain.Series;
 import com.zephyr.api.request.PostCreate;
 import com.zephyr.api.request.PostSearch;
+import com.zephyr.api.request.PostUpdate;
 import com.zephyr.api.response.PostListResponse;
 import com.zephyr.api.response.PostResponse;
 import com.zephyr.api.service.AlbumService;
@@ -60,5 +61,14 @@ public class PostController {
         }
         albumService.validReadPermission(result.get(0).getAlbum(), loginId);
         return ResponseEntity.ok().body(result.stream().map(PostListResponse::new).toList());
+    }
+
+    @PatchMapping("/{postId}")
+    public ResponseEntity<Void> update(@PathVariable Long postId, @RequestBody PostUpdate postUpdate) {
+        Long loginId = 1L;
+        Post post = postService.get(postId);
+        Series series = seriesService.get(postUpdate.getSeriesId());
+        Post result = postService.update(loginId, postId, postUpdate);
+        return null;
     }
 }

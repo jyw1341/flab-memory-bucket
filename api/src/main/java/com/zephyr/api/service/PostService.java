@@ -8,6 +8,7 @@ import com.zephyr.api.repository.PostRepository;
 import com.zephyr.api.request.MemoryCreate;
 import com.zephyr.api.request.PostCreate;
 import com.zephyr.api.request.PostSearch;
+import com.zephyr.api.request.PostUpdate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
@@ -64,6 +65,10 @@ public class PostService {
 
     public List<Post> getList(PostSearch postSearch) {
         return postRepository.getList(postSearch);
+    }
+
+    public Post update(Long loginId, Long postId, PostUpdate postUpdate) {
+        return null;
     }
 
 }
