@@ -3,6 +3,8 @@ package com.zephyr.api.domain;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 public class Memory {
 
@@ -11,6 +13,7 @@ public class Memory {
     private Integer index;
     private String caption;
     private String contentUrl;
+    private List<Comment> comments;
 
     @Builder
     private Memory(Post post, Integer index, String caption, String contentUrl) {

@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 public class Post {
@@ -18,6 +19,7 @@ public class Post {
     private LocalDate memoryDate;
     private Memory thumbnailMemory;
     private LocalDateTime createdAt;
+    private List<Memory> memories;
 
     @Builder
     private Post(Album album, Series series, Member author, String title, String description, LocalDate memoryDate) {
