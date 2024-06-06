@@ -2,6 +2,7 @@ package com.zephyr.api.service;
 
 import com.zephyr.api.domain.*;
 import com.zephyr.api.exception.InvalidRequestException;
+import com.zephyr.api.exception.PostNotFoundException;
 import com.zephyr.api.repository.MemoryRepository;
 import com.zephyr.api.repository.PostRepository;
 import com.zephyr.api.request.MemoryCreate;
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -87,5 +89,33 @@ class PostServiceTest {
         assertEquals(messageSource.getMessage("invalid_post_thumbnailIndex", null, Locale.KOREA), ErrorMessage);
         verify(postRepository, times(1)).save(any(Post.class));
         verify(memoryRepository, times(memoryCreateList.size())).save(any(Memory.class));
+    }
+
+    @Test
+    @DisplayName("포스트 조회 성공")
+    void successGetPost() {
+        //given
+        Long postId = 1L;
+        Post post = mock(Post.class);
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+
+        //when
+        Post result = postService.get(postId);
+
+        //then
+        assertNotNull(result);
+        verify(postRepository, times(1)).findById(postId);
+    }
+
+    @Test
+    @DisplayName("부적절한 포스트 아이디 / 포스트 단건 조회 / 404")
+    void givenInvalidPostId_whenGetPost_then404() {
+        //given
+        Long postId = 1L;
+        when(postRepository.findById(postId)).thenReturn(Optional.empty());
+
+        //when
+        assertThrows(PostNotFoundException.class, () -> postService.get(postId));
+        verify(postRepository, times(1)).findById(postId);
     }
 }
