@@ -5,9 +5,9 @@ import org.springframework.http.HttpStatus;
 
 import java.util.Locale;
 
-public class MemoryNotFoundException extends BaseException {
+public class SeriesNotFoundException extends BaseException {
 
-    public MemoryNotFoundException(MessageSource messageSource) {
+    public SeriesNotFoundException(MessageSource messageSource) {
         super(messageSource.getMessage("notFound", null, Locale.KOREA));
     }
 

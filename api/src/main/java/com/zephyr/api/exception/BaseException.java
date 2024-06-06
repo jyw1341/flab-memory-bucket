@@ -1,8 +1,11 @@
 package com.zephyr.api.exception;
 
+import lombok.Getter;
+
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 public abstract class BaseException extends RuntimeException {
 
     private final Map<String, String> validation = new HashMap<>();

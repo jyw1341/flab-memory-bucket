@@ -3,23 +3,36 @@ package com.zephyr.api.domain;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Getter
-@Builder
 public class Memory {
 
-    private final Album album;
-    private final Member author;
-    private final String title;
-    private final String description;
-    private final LocalDateTime memoryDate;
     private Long id;
-    private List<Content> contents;
-    private List<Comment> comments;
-    private List<Tag> tags;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    
+    private Post post;
+    private Integer index;
+    private String caption;
+    private String contentUrl;
+
+    @Builder
+    private Memory(Post post, Integer index, String caption, String contentUrl) {
+        this.post = post;
+        this.index = index;
+        this.caption = caption;
+        this.contentUrl = contentUrl;
+    }
+
+    public void setPost(Post post) {
+        this.post = post;
+    }
+
+    public void setIndex(Integer index) {
+        this.index = index;
+    }
+
+    public void setCaption(String caption) {
+        this.caption = caption;
+    }
+
+    public void setContentUrl(String contentUrl) {
+        this.contentUrl = contentUrl;
+    }
 }
