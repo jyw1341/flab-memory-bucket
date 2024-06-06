@@ -27,9 +27,9 @@ public class AlbumController {
 
     @PostMapping
     public ResponseEntity<Void> create(@RequestBody AlbumCreate request) {
-        Album album = albumService.create(1L, request);
+        Long albumId = albumService.create(1L, request);
 
-        return ResponseEntity.created(URI.create("/albums/" + album.getId())).build();
+        return ResponseEntity.created(URI.create("/albums/" + albumId)).build();
     }
 
     @GetMapping("/{albumId}")
@@ -76,6 +76,6 @@ public class AlbumController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAlbumMember(@PathVariable Long albumId, @PathVariable Long memberId) {
         Long loginId = 1L;
-        albumService.deleteAlbumMember(albumId, loginId, memberId);
+        albumService.deleteSubscribe(albumId, loginId, memberId);
     }
 }
