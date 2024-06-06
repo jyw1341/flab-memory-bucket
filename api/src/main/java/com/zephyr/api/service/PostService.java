@@ -7,11 +7,13 @@ import com.zephyr.api.repository.MemoryRepository;
 import com.zephyr.api.repository.PostRepository;
 import com.zephyr.api.request.MemoryCreate;
 import com.zephyr.api.request.PostCreate;
+import com.zephyr.api.request.PostSearch;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Locale;
 
 @Slf4j
@@ -58,6 +60,10 @@ public class PostService {
     public Post get(Long postId) {
         return postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException(messageSource));
+    }
+
+    public List<Post> getList(PostSearch postSearch) {
+        return postRepository.getList(postSearch);
     }
 
 }

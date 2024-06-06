@@ -5,6 +5,8 @@ import com.zephyr.api.domain.Member;
 import com.zephyr.api.domain.Post;
 import com.zephyr.api.domain.Series;
 import com.zephyr.api.request.PostCreate;
+import com.zephyr.api.request.PostSearch;
+import com.zephyr.api.response.PostListResponse;
 import com.zephyr.api.response.PostResponse;
 import com.zephyr.api.service.AlbumService;
 import com.zephyr.api.service.MemberService;
@@ -17,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -46,5 +49,16 @@ public class PostController {
         Post post = postService.get(postId);
         albumService.validReadPermission(post.getAlbum(), loginId);
         return new PostResponse(post);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<PostListResponse>> getList(@ModelAttribute PostSearch postSearch) {
+        Long loginId = 1L;
+        List<Post> result = postService.getList(postSearch);
+        if (result.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        albumService.validReadPermission(result.get(0).getAlbum(), loginId);
+        return ResponseEntity.ok().body(result.stream().map(PostListResponse::new).toList());
     }
 }
