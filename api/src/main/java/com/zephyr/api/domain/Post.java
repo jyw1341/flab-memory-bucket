@@ -1,61 +1,72 @@
 package com.zephyr.api.domain;
 
-import lombok.Builder;
-import lombok.Getter;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post {
 
+    @Id
+    @GeneratedValue
     private Long id;
-    private Album album;
-    private Series series;
-    private Member author;
+
+    @Setter
     private String title;
+
+    @Setter
     private String description;
+
+    @Setter
+    private String thumbnailUrl;
+
+    @Setter
     private LocalDate memoryDate;
-    private Memory thumbnailMemory;
+
+    @CreationTimestamp
     private LocalDateTime createdAt;
-    private List<Memory> memories;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ALBUM_ID")
+    private Album album;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MEMBER_ID")
+    private Member author;
+
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SERIES_ID")
+    private Series series;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<Memory> memories = new ArrayList<>();
 
     @Builder
-    private Post(Album album, Series series, Member author, String title, String description, LocalDate memoryDate) {
+    private Post(Album album, Series series, Member author, String title, String description, LocalDate memoryDate, String thumbnailUrl) {
         this.album = album;
         this.series = series;
         this.author = author;
         this.title = title;
         this.description = description;
         this.memoryDate = memoryDate;
+        this.thumbnailUrl = thumbnailUrl;
     }
 
-    public void setAlbum(Album album) {
-        this.album = album;
+    public void addMemory(Memory memory) {
+        memories.add(memory);
+        memory.setPost(this);
     }
 
-    public void setSeries(Series series) {
-        this.series = series;
-    }
-
-    public void setAuthor(Member author) {
-        this.author = author;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setMemoryDate(LocalDate memoryDate) {
-        this.memoryDate = memoryDate;
-    }
-
-    public void setThumbnailMemory(Memory thumbnailMemory) {
-        this.thumbnailMemory = thumbnailMemory;
-    }
 }

@@ -1,21 +1,23 @@
 package com.zephyr.api.service;
 
-import com.zephyr.api.domain.*;
-import com.zephyr.api.exception.InvalidRequestException;
+import com.zephyr.api.domain.Album;
+import com.zephyr.api.domain.Member;
+import com.zephyr.api.domain.Memory;
+import com.zephyr.api.domain.Post;
+import com.zephyr.api.dto.request.MemoryUpdateRequest;
+import com.zephyr.api.dto.request.PostCreateRequest;
+import com.zephyr.api.dto.request.PostSearchRequest;
+import com.zephyr.api.dto.request.PostUpdateRequest;
+import com.zephyr.api.exception.ForbiddenException;
 import com.zephyr.api.exception.PostNotFoundException;
-import com.zephyr.api.repository.MemoryRepository;
 import com.zephyr.api.repository.PostRepository;
-import com.zephyr.api.request.MemoryCreate;
-import com.zephyr.api.request.PostCreate;
-import com.zephyr.api.request.PostSearch;
-import com.zephyr.api.request.PostUpdate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Locale;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,52 +25,81 @@ import java.util.Locale;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final MemoryRepository memoryRepository;
+    private final SeriesService seriesService;
+    private final AlbumService albumService;
+    private final MemoryService memoryService;
     private final MessageSource messageSource;
 
-    public Post create(Album album, Member author, Series series, PostCreate postCreate) {
+    @Transactional
+    public Post create(Member member, PostCreateRequest dto) {
+        Album album = albumService.get(dto.getAlbumId(), member.getId());
+
         Post post = Post.builder()
                 .album(album)
-                .author(author)
-                .series(series)
-                .title(postCreate.getTitle())
-                .description(postCreate.getDescription())
-                .memoryDate(postCreate.getMemoryDate())
+                .author(member)
+                .series(seriesService.get(album, dto.getSeries()))
+                .title(dto.getTitle())
+                .description(dto.getDescription())
+                .memoryDate(dto.getMemoryDate())
+                .thumbnailUrl(dto.getThumbnailUrl())
                 .build();
-        postRepository.save(post);
 
-        for (MemoryCreate memoryCreate : postCreate.getMemoryCreates()) {
+        for (int i = 0; i < dto.getMemoryCreateRequests().size(); i++) {
             Memory memory = Memory.builder()
-                    .post(post)
-                    .index(memoryCreate.getIndex())
-                    .contentUrl(memoryCreate.getContentUrl())
-                    .caption(memoryCreate.getCaption())
+                    .index(dto.getMemoryCreateRequests().get(i).getIndex())
+                    .caption(dto.getMemoryCreateRequests().get(i).getCaption())
+                    .contentUrl(dto.getMemoryCreateRequests().get(i).getContentUrl())
                     .build();
-            memoryRepository.save(memory);
-            if (postCreate.getThumbnailIndex().equals(memory.getIndex())) {
-                post.setThumbnailMemory(memory);
-            }
+            post.addMemory(memory);
         }
 
-        if (post.getThumbnailMemory() == null) {
-            throw new InvalidRequestException("thumbnail_index",
-                    messageSource.getMessage("invalid_post_thumbnailIndex", null, Locale.KOREA));
+        postRepository.save(post);
+
+        return post;
+    }
+
+    public Post get(Member member, Long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException(messageSource));
+    }
+
+    public List<Post> getList(PostSearchRequest dto) {
+        return postRepository.findAll();
+    }
+
+    @Transactional
+    public Post update(Member member, Long postId, PostUpdateRequest dto) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException(messageSource));
+        validPostAuthor(post, member);
+
+        post.setSeries(seriesService.get(post.getAlbum(), dto.getSeries()));
+        post.setTitle(dto.getTitle());
+        post.setDescription(dto.getDescription());
+        post.setThumbnailUrl(dto.getThumbnailUrl());
+        post.setMemoryDate(dto.getMemoryDate());
+
+        for (MemoryUpdateRequest memoryUpdateRequest : dto.getMemoryUpdateRequests()) {
+            memoryService.update(memoryUpdateRequest);
         }
 
         return post;
     }
 
-    public Post get(Long postId) {
-        return postRepository.findById(postId)
+    @Transactional
+    public void delete(Member member, Long postId) {
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException(messageSource));
+        validPostAuthor(post, member);
+
+        postRepository.delete(post);
     }
 
-    public List<Post> getList(PostSearch postSearch) {
-        return postRepository.getList(postSearch);
-    }
+    public void validPostAuthor(Post post, Member member) {
+        if (post.getAuthor().equals(member)) {
+            return;
+        }
 
-    public Post update(Long loginId, Long postId, PostUpdate postUpdate) {
-        return null;
+        throw new ForbiddenException(messageSource);
     }
-
 }

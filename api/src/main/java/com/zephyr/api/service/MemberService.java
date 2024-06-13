@@ -13,9 +13,14 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final MessageSource messageSource;
+    
+    public Member get(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException(messageSource));
+    }
 
-    public Member get(Long loginId) {
-        return memberRepository.findById(loginId)
+    public Member get(String email) {
+        return memberRepository.findByEmail(email)
                 .orElseThrow(() -> new MemberNotFoundException(messageSource));
     }
 }

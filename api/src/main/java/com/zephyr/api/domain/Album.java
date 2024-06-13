@@ -1,22 +1,38 @@
 package com.zephyr.api.domain;
 
-import lombok.Builder;
-import lombok.Getter;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Album {
 
+    @Id
+    @GeneratedValue
     private Long id;
-    private String title;
+
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MEMBER_ID")
     private Member owner;
+
+    @Setter
+    @Column(nullable = false, length = 20)
+    private String title;
+
+    @Setter
+    @Column(length = 40)
     private String description;
+
+    @Setter
     private String thumbnailUrl;
-    private LocalDateTime created;
-    private LocalDateTime updated;
-    private List<Subscribe> subscribes;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
     @Builder
     private Album(String title, Member owner, String description, String thumbnailUrl) {
@@ -25,22 +41,4 @@ public class Album {
         this.description = description;
         this.thumbnailUrl = thumbnailUrl;
     }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setOwner(Member owner) {
-        this.owner = owner;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setThumbnailUrl(String thumbnailUrl) {
-        this.thumbnailUrl = thumbnailUrl;
-    }
-
-
 }

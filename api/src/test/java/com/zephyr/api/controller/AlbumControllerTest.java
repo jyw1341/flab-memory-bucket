@@ -1,7 +1,9 @@
 package com.zephyr.api.controller;
 
-import com.zephyr.api.request.AlbumCreate;
-import com.zephyr.api.response.AlbumResponse;
+import com.zephyr.api.domain.Member;
+import com.zephyr.api.dto.request.AlbumCreateRequest;
+import com.zephyr.api.dto.response.AlbumResponse;
+import com.zephyr.api.repository.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,38 +14,60 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 
+import static com.zephyr.api.constant.TestConstant.*;
 import static com.zephyr.api.utils.HttpRequestUtils.createUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Transactional
 class AlbumControllerTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
-
     @LocalServerPort
     private int port;
+    @Autowired
+    private MemberRepository memberRepository;
+
+    private void createMember() {
+        Member member = Member.builder()
+                .username(TEST_USERNAME)
+                .email(TEST_EMAIL)
+                .profileImageUrl(TEST_PROFILE_URL)
+                .build();
+        memberRepository.save(member);
+    }
 
     @Test
-    @DisplayName("모든 필드가 있는 앨범 생성 요청 / 앨범 생성 / 201, 모든 필드 정보가 있는 응답 반환")
-    void givenValidRequest_whenCreateAlbum_thenStatus201AndCorrectResponse() {
+    @DisplayName("앨범 생성 성공")
+    void successCreateAlbum() {
         //given
-        AlbumCreate request = new AlbumCreate("테스트 앨범", "test title", null);
+        createMember();
+        AlbumCreateRequest albumCreateRequest = new AlbumCreateRequest(
+                TEST_ALBUM_TITLE,
+                TEST_ALBUM_DESC,
+                TEST_ALBUM_THUMBNAIL
+        );
 
         //when
         ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
                 createUrl(port, "/albums"),
-                request,
+                albumCreateRequest,
                 AlbumResponse.class
         );
+        AlbumResponse result = response.getBody();
 
         //then
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(request.getTitle(), response.getBody().getTitle());
-        //TODO : 엔티티 개발 후 추가
+        assertNotNull(response.getHeaders().getLocation());
+        assertEquals(albumCreateRequest.getTitle(), result.getTitle());
+        assertEquals(albumCreateRequest.getDescription(), result.getDescription());
+        assertEquals(albumCreateRequest.getThumbnailUrl(), result.getThumbnailUrl());
 
     }
 
@@ -51,7 +75,7 @@ class AlbumControllerTest {
     @DisplayName("필수 필드만 있는 생성 요청 / 앨범 생성 / 201, 필수 필드만 있는 응답 반환")
     void givenValidRequest_whenCreateAlbum_thenStatus201AndOptionalFieldIsNull() throws Exception {
         //given
-        AlbumCreate request = new AlbumCreate("테스트 앨범", "test title", null);
+        AlbumCreateRequest request = new AlbumCreateRequest("테스트 앨범", "test title", null);
 
         //when
         ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
@@ -70,7 +94,7 @@ class AlbumControllerTest {
     @DisplayName("필수 필드가 없는 생성 요청 / 앨범 생성 / 400 반환")
     public void givenMissingAlbumName_whenCreateAlbum_thenBadRequest() throws Exception {
         //given
-        AlbumCreate request = new AlbumCreate("테스트 앨범", "test title", null);
+        AlbumCreateRequest request = new AlbumCreateRequest("테스트 앨범", "test title", null);
 
         //when
         ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
@@ -87,7 +111,7 @@ class AlbumControllerTest {
     @DisplayName("앨범 생성 / 앨범 단건 조회 / 200, 앨범 정보 반환")
     void givenValidAlbumId_whenGetAlbum_thenStatus200() {
         //given
-        AlbumCreate request = new AlbumCreate("테스트 앨범", null, null);
+        AlbumCreateRequest request = new AlbumCreateRequest("테스트 앨범", null, null);
         ResponseEntity<AlbumResponse> responseEntity = restTemplate.postForEntity(
                 createUrl(port, "/albums"),
                 request,
@@ -129,7 +153,7 @@ class AlbumControllerTest {
         //given
         int resultSize = 10;
         for (int i = 0; i < resultSize; i++) {
-            AlbumCreate request = new AlbumCreate("테스트 앨범" + i, null, null);
+            AlbumCreateRequest request = new AlbumCreateRequest("테스트 앨범" + i, null, null);
             restTemplate.postForEntity(
                     createUrl(port, "/albums"),
                     request,
@@ -152,7 +176,7 @@ class AlbumControllerTest {
     @DisplayName("앨범 생성 / 앨범 삭제 / 204, 생성된 앨범 삭제")
     public void givenValidAlbumId_whenDeleteAlbum_thenAlbumIsDeleted() throws Exception {
         //given
-        AlbumCreate request = new AlbumCreate("테스트 앨범", "test title", null);
+        AlbumCreateRequest request = new AlbumCreateRequest("테스트 앨범", "test title", null);
 
         ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
                 createUrl(port, "/albums"),
@@ -196,7 +220,7 @@ class AlbumControllerTest {
     @DisplayName("앨범 생성 / 생성한 앨범 수정 / 200, 변경된 앨범 정보 반환")
     public void givenValidAlbumIdAndValidRequestBody_whenUpdateAlbum_thenStatus200AndCorrectResponse() throws Exception {
         //given
-        AlbumCreate request = new AlbumCreate("테스트 앨범", "test title", null);
+        AlbumCreateRequest request = new AlbumCreateRequest("테스트 앨범", "test title", null);
         ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
                 createUrl(port, "/albums"),
                 request,
@@ -205,7 +229,7 @@ class AlbumControllerTest {
         URI location = response.getHeaders().getLocation();
 
         //when
-        AlbumCreate updateRequest = new AlbumCreate("테스트 앨범", "test title", null);
+        AlbumCreateRequest updateRequest = new AlbumCreateRequest("테스트 앨범", "test title", null);
         ResponseEntity<AlbumResponse> result = restTemplate.exchange(
                 createUrl(port, location.getPath()),
                 HttpMethod.PATCH,
@@ -226,7 +250,7 @@ class AlbumControllerTest {
         String invalidPath = "albums/999";
 
         //when
-        AlbumCreate request = new AlbumCreate("테스트 앨범", "test title", null);
+        AlbumCreateRequest request = new AlbumCreateRequest("테스트 앨범", "test title", null);
         ResponseEntity<AlbumResponse> result = restTemplate.exchange(
                 createUrl(port, invalidPath),
                 HttpMethod.PATCH,
@@ -242,7 +266,7 @@ class AlbumControllerTest {
     @DisplayName("필수 필드가 없는 수정 요청 / 앨범 수정 / 400")
     public void givenRequestBodyWithMissingData_whenUpdateAlbum_thenStatus400() throws Exception {
         //given
-        AlbumCreate request = new AlbumCreate("테스트 앨범", "test title", null);
+        AlbumCreateRequest request = new AlbumCreateRequest("테스트 앨범", "test title", null);
         ResponseEntity<AlbumResponse> response = restTemplate.postForEntity(
                 createUrl(port, "/albums"),
                 request,
@@ -251,7 +275,7 @@ class AlbumControllerTest {
         URI location = response.getHeaders().getLocation();
 
         //when
-        AlbumCreate invalidUpdateRequest = new AlbumCreate(null, null, null);
+        AlbumCreateRequest invalidUpdateRequest = new AlbumCreateRequest(null, null, null);
         ResponseEntity<AlbumResponse> result = restTemplate.exchange(
                 createUrl(port, location.getPath()),
                 HttpMethod.PATCH,

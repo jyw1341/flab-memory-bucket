@@ -1,6 +1,6 @@
 package com.zephyr.api.controller;
 
-import com.zephyr.api.response.ErrorResponse;
+import com.zephyr.api.dto.response.ErrorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;

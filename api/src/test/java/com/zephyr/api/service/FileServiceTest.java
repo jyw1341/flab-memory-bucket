@@ -1,7 +1,7 @@
 package com.zephyr.api.service;
 
 import com.zephyr.api.config.S3Config;
-import com.zephyr.api.request.FileCreate;
+import com.zephyr.api.dto.request.FileCreate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

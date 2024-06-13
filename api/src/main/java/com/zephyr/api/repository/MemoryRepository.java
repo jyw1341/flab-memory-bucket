@@ -1,12 +1,9 @@
 package com.zephyr.api.repository;
 
 import com.zephyr.api.domain.Memory;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class MemoryRepository {
-
-    public void save(Memory memory) {
-
-    }
+public interface MemoryRepository extends JpaRepository<Memory, Long> {
 }

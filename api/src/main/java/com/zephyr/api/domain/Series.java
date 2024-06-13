@@ -1,18 +1,27 @@
 package com.zephyr.api.domain;
 
-import lombok.Getter;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Getter
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Series {
 
+    @Id
+    @GeneratedValue
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ALBUM_ID")
+    private Album album;
+
+    @Setter
     private String name;
 
-    public Series(String name) {
-        this.name = name;
-    }
-
-    public void setName(String name) {
+    @Builder
+    private Series(Album album, String name) {
+        this.album = album;
         this.name = name;
     }
 }
