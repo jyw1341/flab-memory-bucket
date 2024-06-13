@@ -1,33 +1,39 @@
 package com.zephyr.api.domain;
 
+import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.util.List;
+import lombok.NoArgsConstructor;
 
 @Getter
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Memory {
 
+    @Id
+    @GeneratedValue
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "POST_ID")
     private Post post;
-    private Integer index;
+
+    private Double index;
+
     private String caption;
+
     private String contentUrl;
-    private List<Comment> comments;
 
     @Builder
-    private Memory(Post post, Integer index, String caption, String contentUrl) {
+    private Memory(Post post, Double index, String caption, String contentUrl) {
         this.post = post;
         this.index = index;
         this.caption = caption;
         this.contentUrl = contentUrl;
     }
 
-    public void setPost(Post post) {
-        this.post = post;
-    }
-
-    public void setIndex(Integer index) {
+    public void setIndex(Double index) {
         this.index = index;
     }
 
@@ -37,5 +43,9 @@ public class Memory {
 
     public void setContentUrl(String contentUrl) {
         this.contentUrl = contentUrl;
+    }
+
+    public void setPost(Post post) {
+        this.post = post;
     }
 }

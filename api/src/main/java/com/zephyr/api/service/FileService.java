@@ -1,7 +1,7 @@
 package com.zephyr.api.service;
 
 import com.zephyr.api.config.S3Config;
-import com.zephyr.api.request.FileCreate;
+import com.zephyr.api.dto.request.FileCreate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

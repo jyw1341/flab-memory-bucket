@@ -4,6 +4,22 @@ spring:
   messages:
     basename: messages, errors
     encoding: utf-8
+  datasource:
+    url: jdbc:h2:mem:test
+    driver-class-name: org.h2.Driver
+    password:
+    username: sa
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        show_sql: true
+        use_sql_comments: true
+      format_sql: true
 
 storage:
   profile-name: re-memory

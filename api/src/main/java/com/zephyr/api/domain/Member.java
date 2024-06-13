@@ -1,39 +1,39 @@
 package com.zephyr.api.domain;
 
-import lombok.Builder;
-import lombok.Getter;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
 
+    @Id
+    @GeneratedValue
     private Long id;
-    private String name;
+
+    @Setter
+    private String username;
+
+    @Setter
     private String email;
+
+    @Setter
     private String profileImageUrl;
-    private LocalDateTime registered;
-    private final List<Subscribe> subscribes = new ArrayList<>();
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
 
     @Builder
-    private Member(String name, String email, String profileImageUrl) {
-        this.name = name;
+    private Member(String username, String email, String profileImageUrl) {
+        this.username = username;
         this.email = email;
-        this.profileImageUrl = profileImageUrl;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
 }

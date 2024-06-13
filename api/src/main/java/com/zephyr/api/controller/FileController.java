@@ -1,7 +1,7 @@
 package com.zephyr.api.controller;
 
-import com.zephyr.api.request.FileCreate;
-import com.zephyr.api.response.FileResponse;
+import com.zephyr.api.dto.request.FileCreate;
+import com.zephyr.api.dto.response.FileResponse;
 import com.zephyr.api.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

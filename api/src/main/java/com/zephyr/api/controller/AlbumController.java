@@ -1,12 +1,14 @@
 package com.zephyr.api.controller;
 
 import com.zephyr.api.domain.Album;
-import com.zephyr.api.request.AlbumCreate;
-import com.zephyr.api.request.AlbumUpdate;
-import com.zephyr.api.request.SubscribeRequest;
-import com.zephyr.api.response.AlbumListResponse;
-import com.zephyr.api.response.AlbumResponse;
-import com.zephyr.api.response.SubscribeResponse;
+import com.zephyr.api.domain.AlbumMember;
+import com.zephyr.api.dto.AlbumCreateDTO;
+import com.zephyr.api.dto.AlbumUpdateDTO;
+import com.zephyr.api.dto.request.AlbumCreateRequest;
+import com.zephyr.api.dto.request.AlbumUpdateRequest;
+import com.zephyr.api.dto.response.AlbumListResponse;
+import com.zephyr.api.dto.response.AlbumMemberResponse;
+import com.zephyr.api.dto.response.AlbumResponse;
 import com.zephyr.api.service.AlbumService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
 
+import static com.zephyr.api.constant.TestConstant.TEST_EMAIL;
+
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -26,56 +30,70 @@ public class AlbumController {
     private final AlbumService albumService;
 
     @PostMapping
-    public ResponseEntity<Void> create(@RequestBody AlbumCreate request) {
-        Long albumId = albumService.create(1L, request);
+    public ResponseEntity<AlbumResponse> create(@RequestBody AlbumCreateRequest request) {
+        AlbumCreateDTO dto = new AlbumCreateDTO(
+                TEST_EMAIL,
+                request.getTitle(),
+                request.getDescription(),
+                request.getThumbnailUrl()
+        );
+        Album album = albumService.create(dto);
 
-        return ResponseEntity.created(URI.create("/albums/" + albumId)).build();
+        return ResponseEntity.created(URI.create("/albums/" + album.getId())).body(new AlbumResponse(album));
+
     }
 
     @GetMapping("/{albumId}")
     public AlbumResponse get(@PathVariable Long albumId) {
-        Album album = albumService.get(albumId, 1L);
+        Long loginId = 1L;
+        Album album = albumService.get(loginId, albumId);
 
         return new AlbumResponse(album);
     }
 
     @GetMapping
     public List<AlbumListResponse> getList() {
-        List<Album> albumsOfMember = albumService.getList(1L);
+        Long loginId = 1L;
+        List<Album> albums = albumService.getList(loginId);
 
-        return albumsOfMember.stream().map(AlbumListResponse::new).toList();
+        return albums.stream().map(AlbumListResponse::new).toList();
+    }
+
+    @PatchMapping("/{albumId}")
+    public AlbumResponse update(@PathVariable Long albumId, @RequestBody AlbumUpdateRequest request) {
+        Long loginId = 1L;
+        AlbumUpdateDTO dto = new AlbumUpdateDTO(
+                albumId,
+                loginId,
+                request.getTitle(),
+                request.getDescription(),
+                request.getThumbnailUrl()
+        );
+        Album album = albumService.update(dto);
+
+        return new AlbumResponse(album);
     }
 
     @DeleteMapping("/{albumId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long albumId) {
-        albumService.delete(albumId, 1L);
-    }
-
-    @PatchMapping("/{albumId}")
-    public AlbumResponse update(@PathVariable Long albumId, @RequestBody AlbumUpdate request) {
-        Album album = albumService.update(albumId, 1L, request);
-
-        return new AlbumResponse(album);
-    }
-
-    @PostMapping("/{albumId}/members")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void createAlbumMember(@PathVariable Long albumId, @RequestBody SubscribeRequest request) {
         Long loginId = 1L;
-        albumService.createSubscribe(albumId, loginId, request);
+        albumService.delete(albumId, loginId);
     }
 
     @GetMapping("/{albumId}/members")
-    public List<SubscribeResponse> getAlbumMembers(@PathVariable Long albumId) {
-        return albumService.getSubscribers(albumId, 1L).stream()
-                .map(SubscribeResponse::new).toList();
+    public List<AlbumMemberResponse> getAlbumMembers(@PathVariable Long albumId) {
+        Long loginId = 1L;
+        List<AlbumMember> albumMembers = albumService.getAlbumMembers(albumId, loginId);
+
+        return albumMembers.stream().map(AlbumMemberResponse::new).toList();
     }
 
     @DeleteMapping("/{albumId}/members/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteAlbumMember(@PathVariable Long albumId, @PathVariable Long memberId) {
+    public void banAlbumMember(@PathVariable Long albumId, @PathVariable Long memberId) {
         Long loginId = 1L;
-        albumService.deleteSubscribe(albumId, loginId, memberId);
+
+        albumService.banAlbumMember(albumId, loginId, memberId);
     }
 }
