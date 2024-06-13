@@ -4,8 +4,8 @@ import com.zephyr.api.config.S3Config;
 import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.AlbumMember;
 import com.zephyr.api.domain.Member;
-import com.zephyr.api.dto.AlbumCreateDTO;
 import com.zephyr.api.dto.AlbumUpdateDTO;
+import com.zephyr.api.dto.request.AlbumCreateRequest;
 import com.zephyr.api.enums.AlbumMemberRole;
 import com.zephyr.api.exception.AlbumNotFoundException;
 import com.zephyr.api.exception.ForbiddenException;
@@ -29,22 +29,21 @@ public class AlbumService {
     private final MessageSource messageSource;
     private final S3Config s3Config;
 
-    public Album create(AlbumCreateDTO dto) {
-        Member owner = memberService.get(dto.getMemberEmail());
+    public Album create(Member member, AlbumCreateRequest dto) {
         Album album = Album.builder()
-                .owner(owner)
+                .owner(member)
                 .title(dto.getTitle())
                 .description(dto.getDescription())
                 .thumbnailUrl(dto.getThumbnailUrl())
                 .build();
 
         albumRepository.save(album);
-        albumMemberService.create(album, owner, AlbumMemberRole.ADMIN);
+        albumMemberService.create(album, member, AlbumMemberRole.ADMIN);
 
         return album;
     }
 
-    public Album get(Long albumId, Long memberId) {
+    public Album get(Member member, Long albumId) {
         Album album = albumRepository.findById(albumId)
                 .orElseThrow(() -> new AlbumNotFoundException(messageSource));
         setDefaultThumbnailUrlIfNull(album);

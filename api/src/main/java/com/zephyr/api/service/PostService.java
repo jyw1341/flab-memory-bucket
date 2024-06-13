@@ -32,7 +32,7 @@ public class PostService {
 
     @Transactional
     public Post create(Member member, PostCreateRequest dto) {
-        Album album = albumService.get(dto.getAlbumId(), member.getId());
+        Album album = albumService.get(member, member.getId());
 
         Post post = Post.builder()
                 .album(album)

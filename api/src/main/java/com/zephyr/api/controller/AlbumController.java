@@ -2,7 +2,7 @@ package com.zephyr.api.controller;
 
 import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.AlbumMember;
-import com.zephyr.api.dto.AlbumCreateDTO;
+import com.zephyr.api.domain.Member;
 import com.zephyr.api.dto.AlbumUpdateDTO;
 import com.zephyr.api.dto.request.AlbumCreateRequest;
 import com.zephyr.api.dto.request.AlbumUpdateRequest;
@@ -10,6 +10,7 @@ import com.zephyr.api.dto.response.AlbumListResponse;
 import com.zephyr.api.dto.response.AlbumMemberResponse;
 import com.zephyr.api.dto.response.AlbumResponse;
 import com.zephyr.api.service.AlbumService;
+import com.zephyr.api.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -28,25 +29,20 @@ import static com.zephyr.api.constant.TestConstant.TEST_EMAIL;
 public class AlbumController {
 
     private final AlbumService albumService;
+    private final MemberService memberService;
 
     @PostMapping
     public ResponseEntity<AlbumResponse> create(@RequestBody AlbumCreateRequest request) {
-        AlbumCreateDTO dto = new AlbumCreateDTO(
-                TEST_EMAIL,
-                request.getTitle(),
-                request.getDescription(),
-                request.getThumbnailUrl()
-        );
-        Album album = albumService.create(dto);
+        Member member = memberService.get(TEST_EMAIL);
+        Album album = albumService.create(member, request);
 
         return ResponseEntity.created(URI.create("/albums/" + album.getId())).body(new AlbumResponse(album));
-
     }
 
     @GetMapping("/{albumId}")
     public AlbumResponse get(@PathVariable Long albumId) {
-        Long loginId = 1L;
-        Album album = albumService.get(loginId, albumId);
+        Member member = memberService.get(TEST_EMAIL);
+        Album album = albumService.get(member, albumId);
 
         return new AlbumResponse(album);
     }
