@@ -1,5 +1,8 @@
 package com.zephyr.api.domain;
 
+import lombok.Getter;
+
+@Getter
 public class Series {
 
     private Long id;

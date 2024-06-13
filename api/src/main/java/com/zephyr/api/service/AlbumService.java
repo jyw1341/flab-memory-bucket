@@ -151,7 +151,7 @@ public class AlbumService {
         }
     }
 
-    private void validReadPermission(Album album, Long loginId) {
+    public void validReadPermission(Album album, Long loginId) {
         if (album.getOwner().getId().equals(loginId)) {
             return;
         }
