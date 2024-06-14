@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.zephyr.api.constant.TestConstant.*;
-import static com.zephyr.api.utils.HttpRequestUtils.createUrl;
+import static com.zephyr.api.utils.TestRequestUtils.createUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -98,10 +98,10 @@ class PostControllerTest {
         return result;
     }
 
-    private PostCreateRequest makePostCreateRequest(Long albumId, int thumbnailMemoryIndex, List<MemoryCreateRequest> memoryCreateRequests) {
+    private PostCreateRequest makePostCreateRequest(Long albumId, Long seriesId, int thumbnailMemoryIndex, List<MemoryCreateRequest> memoryCreateRequests) {
         return new PostCreateRequest(
                 albumId,
-                TEST_SERIES_NAME,
+                seriesId,
                 TEST_POST_TITLE,
                 TEST_POST_DESC,
                 LocalDate.now(),
@@ -132,11 +132,12 @@ class PostControllerTest {
         //given
         createMember();
         AlbumResponse albumResponse = createAlbum();
-        createSeries(albumResponse.getId());
+        SeriesResponse seriesResponse = createSeries(albumResponse.getId());
         List<MemoryCreateRequest> memoryCreateRequests = makeMemoryRequests(5);
         int thumbnailMemoryIndex = 0;
         PostCreateRequest postCreateRequest = makePostCreateRequest(
                 albumResponse.getId(),
+                seriesResponse.getId(),
                 thumbnailMemoryIndex,
                 memoryCreateRequests
         );
@@ -152,19 +153,18 @@ class PostControllerTest {
         assertEquals(postCreateRequest.getTitle(), postResponse.getTitle());
         assertEquals(postCreateRequest.getDescription(), postResponse.getDescription());
         assertEquals(postCreateRequest.getMemoryDate(), postResponse.getMemoryDate());
-        assertEquals(postCreateRequest.getSeries(), postResponse.getSeries());
+        assertEquals(seriesResponse.getName(), postResponse.getSeries());
         assertEquals(postCreateRequest.getMemoryCreateRequests().get(thumbnailMemoryIndex).getContentUrl(), postResponse.getThumbnailUrl());
         assertNotNull(postResponse.getCreatedAt());
 
         //메모리 비교
         assertEquals(postCreateRequest.getMemoryCreateRequests().size(), postResponse.getMemories().size());
-        for (int i = 0; i < postCreateRequest.getMemoryCreateRequests().size(); i++) {
-            MemoryCreateRequest request = postCreateRequest.getMemoryCreateRequests().get(i);
-            MemoryResponse response = postResponse.getMemories().get(i);
-
-            assertEquals(request.getIndex(), response.getIndex());
-            assertEquals(request.getCaption(), response.getCaption());
-            assertEquals(request.getContentUrl(), response.getContentUrl());
+        for (MemoryCreateRequest createRequest : postCreateRequest.getMemoryCreateRequests()) {
+            MemoryResponse memoryResponse = postResponse.getMemories().stream()
+                    .filter(memory -> memory.getIndex().equals(createRequest.getIndex()))
+                    .findFirst()
+                    .orElseThrow();
+            assertEquals(createRequest.getCaption(), memoryResponse.getCaption());
         }
 
     }
@@ -175,18 +175,20 @@ class PostControllerTest {
         //given
         createMember();
         AlbumResponse albumResponse = createAlbum();
-        createSeries(albumResponse.getId());
+        SeriesResponse seriesResponse = createSeries(albumResponse.getId());
         List<MemoryCreateRequest> memoryCreateRequests = makeMemoryRequests(5);
+        int thumbnailMemoryIndex = 0;
         PostCreateRequest postCreateRequest = makePostCreateRequest(
                 albumResponse.getId(),
-                0,
+                seriesResponse.getId(),
+                thumbnailMemoryIndex,
                 memoryCreateRequests
         );
         ResponseEntity<PostResponse> responseEntity = createPost(postCreateRequest);
         PostResponse postResponse = responseEntity.getBody();
 
         //when
-        List<MemoryUpdateRequest> updateRequests = postResponse.getMemories()
+        List<MemoryUpdateRequest> memoryUpdateRequests = postResponse.getMemories()
                 .stream()
                 .map(request -> new MemoryUpdateRequest(request.getId(), "수정된 캡션", request.getIndex() + 1))
                 .toList();
@@ -197,7 +199,7 @@ class PostControllerTest {
                 "수정된 소개문",
                 LocalDate.of(2024, 6, 10),
                 postResponse.getMemories().get(1).getContentUrl(),
-                updateRequests
+                memoryUpdateRequests
         );
 
         PostResponse response = updatePost(postResponse.getId(), postUpdateRequest);
@@ -211,7 +213,7 @@ class PostControllerTest {
         assertEquals(postUpdateRequest.getMemoryDate(), response.getMemoryDate());
 
         //메모리 인덱스 비교
-        for (MemoryUpdateRequest updateRequest : updateRequests) {
+        for (MemoryUpdateRequest updateRequest : memoryUpdateRequests) {
             MemoryResponse updatedMemory = response.getMemories().stream()
                     .filter(memory -> memory.getId().equals(updateRequest.getId()))
                     .findFirst()

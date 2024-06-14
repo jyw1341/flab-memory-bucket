@@ -1,4 +1,4 @@
-package com.zephyr.api.dto.request;
+package com.zephyr.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,9 +8,11 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class PostCreateRequest {
+public class PostUpdateServiceDto {
 
-    private final Long albumId;
+    private final String memberId;
+
+    private final Long postId;
 
     private final Long seriesId;
 
@@ -22,5 +24,5 @@ public class PostCreateRequest {
 
     private final String thumbnailUrl;
 
-    private final List<MemoryCreateRequest> memoryCreateRequests;
+    private final List<MemoryUpdateServiceDto> memoryUpdateServiceDtos;
 }
