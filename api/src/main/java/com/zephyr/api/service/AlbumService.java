@@ -4,8 +4,8 @@ import com.zephyr.api.config.S3Config;
 import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.AlbumMember;
 import com.zephyr.api.domain.Member;
-import com.zephyr.api.dto.AlbumUpdateDTO;
-import com.zephyr.api.dto.request.AlbumCreateRequest;
+import com.zephyr.api.dto.*;
+import com.zephyr.api.dto.mapper.AlbumMemberCreateMapper;
 import com.zephyr.api.enums.AlbumMemberRole;
 import com.zephyr.api.exception.AlbumNotFoundException;
 import com.zephyr.api.exception.ForbiddenException;
@@ -29,7 +29,8 @@ public class AlbumService {
     private final MessageSource messageSource;
     private final S3Config s3Config;
 
-    public Album create(Member member, AlbumCreateRequest dto) {
+    public Album create(AlbumCreateServiceDto dto) {
+        Member member = memberService.get(dto.getMemberId());
         Album album = Album.builder()
                 .owner(member)
                 .title(dto.getTitle())
@@ -38,26 +39,24 @@ public class AlbumService {
                 .build();
 
         albumRepository.save(album);
-        albumMemberService.create(album, member, AlbumMemberRole.ADMIN);
-
-        return album;
-    }
-
-    public Album get(Member member, Long albumId) {
-        Album album = albumRepository.findById(albumId)
-                .orElseThrow(() -> new AlbumNotFoundException(messageSource));
-        setDefaultThumbnailUrlIfNull(album);
+        AlbumMemberCreateServiceDto serviceDto = AlbumMemberCreateMapper.INSTANCE.toAlbumMemberCreateServiceDto(album, member, AlbumMemberRole.ADMIN);
+        albumMemberService.create(serviceDto);
 
         return album;
     }
 
     public Album get(Long albumId) {
-        return albumRepository.findById(albumId)
+        Album album = albumRepository.findById(albumId)
                 .orElseThrow(() -> new AlbumNotFoundException(messageSource));
+
+        setDefaultThumbnailUrlIfNull(album);
+
+        return album;
     }
 
-    public List<Album> getList(Long memberId) {
-        List<AlbumMember> albumMembers = albumMemberService.getListByMemberId(memberId);
+    public List<Album> getList(AlbumListServiceDto dto) {
+        Member member = memberService.get(dto.getMemberId());
+        List<AlbumMember> albumMembers = albumMemberService.getListByMember(member);
         List<Album> result = new ArrayList<>();
 
         for (AlbumMember albumMember : albumMembers) {
@@ -69,11 +68,11 @@ public class AlbumService {
         return result;
     }
 
-    public Album update(AlbumUpdateDTO dto) {
+    public Album update(AlbumUpdateServiceDto dto) {
         Album album = albumRepository.findById(dto.getAlbumId())
                 .orElseThrow(() -> new AlbumNotFoundException(messageSource));
-        validAlbumOwner(album, dto.getMemberId());
 
+        validAlbumOwner(album, dto.getMemberId());
         album.setTitle(dto.getTitle());
         album.setDescription(dto.getDescription());
         album.setThumbnailUrl(dto.getThumbnailUrl());
@@ -81,36 +80,23 @@ public class AlbumService {
         return album;
     }
 
-    public void delete(Long albumId, Long memberId) {
-        Album album = albumRepository.findById(albumId)
+    public void delete(AlbumDeleteServiceDto dto) {
+        Album album = albumRepository.findById(dto.getAlbumId())
                 .orElseThrow(() -> new AlbumNotFoundException(messageSource));
 
-        validAlbumOwner(album, memberId);
+        validAlbumOwner(album, dto.getMemberId());
         albumRepository.delete(album);
-    }
-
-    public AlbumMember getAlbumMember(Long albumId, Long memberId) {
-        return albumMemberService.get(albumId, memberId);
-    }
-
-    public List<AlbumMember> getAlbumMembers(Long albumId, Long memberId) {
-        AlbumMember albumMember = albumMemberService.get(albumId, memberId);
-
-        albumMemberService.validAlbumMember(albumMember);
-
-        return albumMemberService.getListByAlbumId(albumId);
-    }
-
-    public void banAlbumMember(Long albumId, Long ownerId, Long targetId) {
-        Album album = albumRepository.findById(albumId)
-                .orElseThrow(() -> new AlbumNotFoundException(messageSource));
-
-        validAlbumOwner(album, ownerId);
-        albumMemberService.delete(albumId, targetId);
     }
 
     public void validAlbumOwner(Album album, Long memberId) {
         if (album.getOwner().getId().equals(memberId)) {
+            return;
+        }
+        throw new ForbiddenException(messageSource);
+    }
+
+    public void validAlbumOwner(Album album, String email) {
+        if (album.getOwner().getEmail().equals(email)) {
             return;
         }
         throw new ForbiddenException(messageSource);

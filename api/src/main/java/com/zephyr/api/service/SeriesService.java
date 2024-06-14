@@ -29,12 +29,12 @@ public class SeriesService {
         return series;
     }
 
-    public Series get(Album album, String seriesName) {
-        if (seriesName == null || seriesName.isBlank()) {
+    public Series get(Long seriesId) {
+        if (seriesId == null) {
             return null;
         }
 
-        return seriesRepository.findByAlbumAndName(album, seriesName)
+        return seriesRepository.findById(seriesId)
                 .orElseThrow(() -> new SeriesNotFoundException(messageSource));
     }
 }
