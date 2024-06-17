@@ -1,13 +1,7 @@
 package com.zephyr.api.service;
 
-import com.zephyr.api.domain.Album;
-import com.zephyr.api.domain.Member;
-import com.zephyr.api.domain.Memory;
-import com.zephyr.api.domain.Post;
-import com.zephyr.api.dto.request.MemoryUpdateRequest;
-import com.zephyr.api.dto.request.PostCreateRequest;
-import com.zephyr.api.dto.request.PostSearchRequest;
-import com.zephyr.api.dto.request.PostUpdateRequest;
+import com.zephyr.api.domain.*;
+import com.zephyr.api.dto.service.*;
 import com.zephyr.api.exception.ForbiddenException;
 import com.zephyr.api.exception.PostNotFoundException;
 import com.zephyr.api.repository.PostRepository;
@@ -28,16 +22,18 @@ public class PostService {
     private final SeriesService seriesService;
     private final AlbumService albumService;
     private final MemoryService memoryService;
+    private final MemberService memberService;
     private final MessageSource messageSource;
 
     @Transactional
-    public Post create(Member member, PostCreateRequest dto) {
-        Album album = albumService.get(member, member.getId());
+    public Post create(PostCreateServiceDto dto) {
+        Member member = memberService.get(dto.getMemberId());
+        Album album = albumService.get(dto.getAlbumId());
 
         Post post = Post.builder()
                 .album(album)
                 .author(member)
-                .series(seriesService.get(album, dto.getSeries()))
+                .series(seriesService.get(dto.getSeriesId()))
                 .title(dto.getTitle())
                 .description(dto.getDescription())
                 .memoryDate(dto.getMemoryDate())
@@ -58,45 +54,50 @@ public class PostService {
         return post;
     }
 
-    public Post get(Member member, Long postId) {
+    public Post get(Long postId) {
         return postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException(messageSource));
     }
 
-    public List<Post> getList(PostSearchRequest dto) {
+    public List<Post> getList(PostListServiceDto dto) {
         return postRepository.findAll();
     }
 
     @Transactional
-    public Post update(Member member, Long postId, PostUpdateRequest dto) {
-        Post post = postRepository.findById(postId)
+    public Post update(PostUpdateServiceDto dto) {
+        Member member = memberService.get(dto.getMemberId());
+        Post post = postRepository.findById(dto.getPostId())
                 .orElseThrow(() -> new PostNotFoundException(messageSource));
+        Series series = seriesService.get(dto.getSeriesId());
+
         validPostAuthor(post, member);
 
-        post.setSeries(seriesService.get(post.getAlbum(), dto.getSeries()));
+        post.setSeries(series);
         post.setTitle(dto.getTitle());
         post.setDescription(dto.getDescription());
         post.setThumbnailUrl(dto.getThumbnailUrl());
         post.setMemoryDate(dto.getMemoryDate());
 
-        for (MemoryUpdateRequest memoryUpdateRequest : dto.getMemoryUpdateRequests()) {
-            memoryService.update(memoryUpdateRequest);
+        for (MemoryUpdateServiceDto memoryUpdateServiceDto : dto.getMemoryUpdateServiceDtos()) {
+            memoryService.update(memoryUpdateServiceDto);
         }
 
         return post;
     }
 
     @Transactional
-    public void delete(Member member, Long postId) {
-        Post post = postRepository.findById(postId)
+    public void delete(PostDeleteServiceDto dto) {
+        Post post = postRepository.findById(dto.getPostId())
                 .orElseThrow(() -> new PostNotFoundException(messageSource));
+        Member member = memberService.get(dto.getMemberId());
+
         validPostAuthor(post, member);
 
         postRepository.delete(post);
     }
 
-    public void validPostAuthor(Post post, Member member) {
-        if (post.getAuthor().equals(member)) {
+    private void validPostAuthor(Post post, Member member) {
+        if (post.getAuthor().getId().equals(member.getId())) {
             return;
         }
 

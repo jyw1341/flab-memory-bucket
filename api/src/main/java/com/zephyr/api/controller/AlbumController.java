@@ -2,15 +2,15 @@ package com.zephyr.api.controller;
 
 import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.AlbumMember;
-import com.zephyr.api.domain.Member;
-import com.zephyr.api.dto.AlbumUpdateDTO;
+import com.zephyr.api.dto.mapper.*;
 import com.zephyr.api.dto.request.AlbumCreateRequest;
 import com.zephyr.api.dto.request.AlbumUpdateRequest;
 import com.zephyr.api.dto.response.AlbumListResponse;
 import com.zephyr.api.dto.response.AlbumMemberResponse;
 import com.zephyr.api.dto.response.AlbumResponse;
+import com.zephyr.api.dto.service.*;
+import com.zephyr.api.service.AlbumMemberService;
 import com.zephyr.api.service.AlbumService;
-import com.zephyr.api.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -29,43 +29,38 @@ import static com.zephyr.api.constant.TestConstant.TEST_EMAIL;
 public class AlbumController {
 
     private final AlbumService albumService;
-    private final MemberService memberService;
+    private final AlbumMemberService albumMemberService;
 
     @PostMapping
     public ResponseEntity<AlbumResponse> create(@RequestBody AlbumCreateRequest request) {
-        Member member = memberService.get(TEST_EMAIL);
-        Album album = albumService.create(member, request);
+        AlbumCreateServiceDto serviceDto = AlbumCreateMapper.INSTANCE.toAlbumCreateServiceDto(TEST_EMAIL, request);
+
+        Album album = albumService.create(serviceDto);
 
         return ResponseEntity.created(URI.create("/albums/" + album.getId())).body(new AlbumResponse(album));
     }
 
     @GetMapping("/{albumId}")
     public AlbumResponse get(@PathVariable Long albumId) {
-        Member member = memberService.get(TEST_EMAIL);
-        Album album = albumService.get(member, albumId);
+        Album album = albumService.get(albumId);
 
         return new AlbumResponse(album);
     }
 
     @GetMapping
     public List<AlbumListResponse> getList() {
-        Long loginId = 1L;
-        List<Album> albums = albumService.getList(loginId);
+        AlbumListServiceDto serviceDto = AlbumListMapper.INSTANCE.toAlbumUpdateServiceDto(TEST_EMAIL);
+
+        List<Album> albums = albumService.getList(serviceDto);
 
         return albums.stream().map(AlbumListResponse::new).toList();
     }
 
     @PatchMapping("/{albumId}")
     public AlbumResponse update(@PathVariable Long albumId, @RequestBody AlbumUpdateRequest request) {
-        Long loginId = 1L;
-        AlbumUpdateDTO dto = new AlbumUpdateDTO(
-                albumId,
-                loginId,
-                request.getTitle(),
-                request.getDescription(),
-                request.getThumbnailUrl()
-        );
-        Album album = albumService.update(dto);
+        AlbumUpdateServiceDto serviceDto = AlbumUpdateMapper.INSTANCE.toAlbumUpdateServiceDto(TEST_EMAIL, albumId, request);
+
+        Album album = albumService.update(serviceDto);
 
         return new AlbumResponse(album);
     }
@@ -73,23 +68,24 @@ public class AlbumController {
     @DeleteMapping("/{albumId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long albumId) {
-        Long loginId = 1L;
-        albumService.delete(albumId, loginId);
+        AlbumDeleteServiceDto serviceDto = AlbumDeleteMapper.INSTANCE.toAlbumDeleteServiceDto(TEST_EMAIL, albumId);
+
+        albumService.delete(serviceDto);
     }
 
     @GetMapping("/{albumId}/members")
     public List<AlbumMemberResponse> getAlbumMembers(@PathVariable Long albumId) {
-        Long loginId = 1L;
-        List<AlbumMember> albumMembers = albumService.getAlbumMembers(albumId, loginId);
+        AlbumMemberListServiceDto serviceDto = AlbumMemberListMapper.INSTANCE.toAlbumMemberListDto(TEST_EMAIL, albumId);
+        List<AlbumMember> albumMembers = albumMemberService.getListByAlbumId(serviceDto);
 
         return albumMembers.stream().map(AlbumMemberResponse::new).toList();
     }
 
     @DeleteMapping("/{albumId}/members/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void banAlbumMember(@PathVariable Long albumId, @PathVariable Long memberId) {
-        Long loginId = 1L;
+    public void deleteAlbumMember(@PathVariable Long albumId, @PathVariable("memberId") Long targetId) {
+        AlbumMemberDeleteServiceDto serviceDto = AlbumMemberDeleteMapper.INSTANCE.toAlbumMemberDeleteServiceDto(albumId, targetId);
 
-        albumService.banAlbumMember(albumId, loginId, memberId);
+        albumMemberService.delete(serviceDto);
     }
 }

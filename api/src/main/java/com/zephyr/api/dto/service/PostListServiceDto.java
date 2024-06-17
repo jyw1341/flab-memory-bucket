@@ -1,9 +1,9 @@
-package com.zephyr.api.dto.request;
+package com.zephyr.api.dto.service;
 
 import lombok.Data;
 
 @Data
-public class PostSearchRequest {
+public class PostListServiceDto {
 
     private final Long albumId;
     private final String username;
