@@ -18,6 +18,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Transactional
 class PostControllerTest {
 
     @Autowired
@@ -45,6 +47,7 @@ class PostControllerTest {
     void setUp() {
         restTemplate.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
     }
+
 
     private Member createMember() {
         Member member = Member.builder()
@@ -166,7 +169,6 @@ class PostControllerTest {
                     .orElseThrow();
             assertEquals(createRequest.getCaption(), memoryResponse.getCaption());
         }
-
     }
 
     @Test

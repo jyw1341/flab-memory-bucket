@@ -1,7 +1,7 @@
 package com.zephyr.api.service;
 
 import com.zephyr.api.domain.*;
-import com.zephyr.api.dto.*;
+import com.zephyr.api.dto.service.*;
 import com.zephyr.api.exception.ForbiddenException;
 import com.zephyr.api.exception.PostNotFoundException;
 import com.zephyr.api.repository.PostRepository;

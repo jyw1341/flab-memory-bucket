@@ -2,9 +2,9 @@ package com.zephyr.api.service;
 
 import com.zephyr.api.domain.AlbumMember;
 import com.zephyr.api.domain.Member;
-import com.zephyr.api.dto.AlbumMemberCreateServiceDto;
-import com.zephyr.api.dto.AlbumMemberDeleteServiceDto;
-import com.zephyr.api.dto.AlbumMemberListServiceDto;
+import com.zephyr.api.dto.service.AlbumMemberCreateServiceDto;
+import com.zephyr.api.dto.service.AlbumMemberDeleteServiceDto;
+import com.zephyr.api.dto.service.AlbumMemberListServiceDto;
 import com.zephyr.api.repository.AlbumMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;

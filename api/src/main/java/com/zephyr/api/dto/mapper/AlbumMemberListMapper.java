@@ -1,6 +1,6 @@
 package com.zephyr.api.dto.mapper;
 
-import com.zephyr.api.dto.AlbumMemberListServiceDto;
+import com.zephyr.api.dto.service.AlbumMemberListServiceDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

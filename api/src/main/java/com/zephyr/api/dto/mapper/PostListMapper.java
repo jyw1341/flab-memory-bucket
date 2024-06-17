@@ -1,6 +1,6 @@
 package com.zephyr.api.dto.mapper;
 
-import com.zephyr.api.dto.PostListServiceDto;
+import com.zephyr.api.dto.service.PostListServiceDto;
 import com.zephyr.api.dto.request.PostListRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

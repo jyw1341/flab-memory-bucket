@@ -1,28 +1,20 @@
-package com.zephyr.api.dto;
+package com.zephyr.api.dto.service;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.zephyr.api.dto.request.MemoryCreateRequest;
+import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Getter
-@AllArgsConstructor
-public class PostUpdateServiceDto {
+@Data
+public class PostCreateServiceDto {
 
     private final String memberId;
-
-    private final Long postId;
-
+    private final Long albumId;
     private final Long seriesId;
-
     private final String title;
-
     private final String description;
-
     private final LocalDate memoryDate;
-
     private final String thumbnailUrl;
-
-    private final List<MemoryUpdateServiceDto> memoryUpdateServiceDtos;
+    private final List<MemoryCreateRequest> memoryCreateRequests;
 }

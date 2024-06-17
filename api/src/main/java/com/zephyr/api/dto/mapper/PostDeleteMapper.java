@@ -1,6 +1,6 @@
 package com.zephyr.api.dto.mapper;
 
-import com.zephyr.api.dto.PostDeleteServiceDto;
+import com.zephyr.api.dto.service.PostDeleteServiceDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
