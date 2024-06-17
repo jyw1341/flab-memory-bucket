@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 public class PostUpdateRequest {
 
-    private final String series;
+    private final Long seriesId;
 
     private final String title;
 

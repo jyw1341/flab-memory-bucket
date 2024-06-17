@@ -14,17 +14,15 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 
 import static com.zephyr.api.constant.TestConstant.*;
-import static com.zephyr.api.utils.HttpRequestUtils.createUrl;
+import static com.zephyr.api.utils.TestRequestUtils.createUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Transactional
 class AlbumControllerTest {
 
     @Autowired

@@ -1,12 +1,11 @@
-package com.zephyr.api.dto;
+package com.zephyr.api.dto.request;
 
 import lombok.Data;
 
 @Data
-public class PostSearchDTO {
+public class PostListRequest {
 
     private final Long albumId;
-    private final Long memberId;
     private final String username;
     private final String title;
     private final String seriesName;
