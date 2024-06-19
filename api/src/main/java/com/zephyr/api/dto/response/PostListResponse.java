@@ -4,7 +4,6 @@ import com.zephyr.api.domain.Post;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 public class PostListResponse {
@@ -13,7 +12,6 @@ public class PostListResponse {
     private String title;
     private String description;
     private LocalDate memoryDate;
-    private LocalDateTime createdAt;
     private String thumbnailUrl;
     private MemberResponse author;
     private SeriesResponse series;
@@ -24,7 +22,6 @@ public class PostListResponse {
         this.title = post.getTitle();
         this.description = post.getDescription();
         this.memoryDate = post.getMemoryDate();
-        this.createdAt = post.getCreatedAt();
         this.author = new MemberResponse(post.getAuthor());
         this.series = new SeriesResponse(post.getSeries());
         this.memoryCount = post.getMemories().size();

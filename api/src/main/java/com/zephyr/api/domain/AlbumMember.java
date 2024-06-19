@@ -3,15 +3,11 @@ package com.zephyr.api.domain;
 import com.zephyr.api.enums.AlbumMemberRole;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AlbumMember {
+public class AlbumMember extends BaseTimeEntity {
 
     @Id
     @GeneratedValue
@@ -28,12 +24,6 @@ public class AlbumMember {
     @Setter
     @Enumerated(EnumType.STRING)
     private AlbumMemberRole role;
-
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
 
     @Builder
     private AlbumMember(Album album, Member member, AlbumMemberRole role) {
