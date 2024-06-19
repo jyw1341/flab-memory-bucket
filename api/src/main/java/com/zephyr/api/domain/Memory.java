@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Memory {
+public class Memory extends BaseTimeEntity {
 
     @Id
     @GeneratedValue

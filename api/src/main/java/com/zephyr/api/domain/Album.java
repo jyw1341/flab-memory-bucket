@@ -3,12 +3,10 @@ package com.zephyr.api.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Album {
+public class Album extends BaseTimeEntity {
 
     @Id
     @GeneratedValue
@@ -29,10 +27,6 @@ public class Album {
 
     @Setter
     private String thumbnailUrl;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
 
     @Builder
     private Album(String title, Member owner, String description, String thumbnailUrl) {
