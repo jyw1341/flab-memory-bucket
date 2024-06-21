@@ -27,7 +27,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.zephyr.api.constant.TestConstant.*;
+import static com.zephyr.api.utils.TestConstant.*;
 import static com.zephyr.api.utils.TestStringUtils.createUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

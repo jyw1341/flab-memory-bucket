@@ -9,5 +9,5 @@ public interface AlbumDeleteMapper {
 
     AlbumDeleteMapper INSTANCE = Mappers.getMapper(AlbumDeleteMapper.class);
 
-    AlbumDeleteServiceDto toAlbumDeleteServiceDto(String memberId, Long albumId);
+    AlbumDeleteServiceDto toAlbumDeleteServiceDto(Long memberId, Long albumId);
 }

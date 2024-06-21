@@ -7,6 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class PostDeleteServiceDto {
 
-    private final String memberId;
+    private final Long memberId;
     private final Long postId;
 }

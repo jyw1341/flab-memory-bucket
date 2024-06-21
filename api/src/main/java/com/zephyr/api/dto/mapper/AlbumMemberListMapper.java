@@ -9,5 +9,5 @@ public interface AlbumMemberListMapper {
 
     AlbumMemberListMapper INSTANCE = Mappers.getMapper(AlbumMemberListMapper.class);
 
-    AlbumMemberListServiceDto toAlbumMemberListDto(String memberId, Long albumId);
+    AlbumMemberListServiceDto toAlbumMemberListDto(Long memberId, Long albumId);
 }

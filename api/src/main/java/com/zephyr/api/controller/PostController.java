@@ -8,7 +8,6 @@ import com.zephyr.api.dto.request.PostUpdateRequest;
 import com.zephyr.api.dto.response.PostListResponse;
 import com.zephyr.api.dto.response.PostResponse;
 import com.zephyr.api.dto.service.*;
-import com.zephyr.api.service.MemberService;
 import com.zephyr.api.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
 
-import static com.zephyr.api.constant.TestConstant.TEST_EMAIL;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -27,11 +25,11 @@ import static com.zephyr.api.constant.TestConstant.TEST_EMAIL;
 public class PostController {
 
     private final PostService postService;
-    private final MemberService memberService;
 
     @PostMapping
     public ResponseEntity<PostResponse> create(@RequestBody PostCreateRequest request) {
-        PostCreateServiceDto serviceDto = PostCreateMapper.INSTANCE.toPostCreateServiceDto(TEST_EMAIL, request);
+        Long loginId = 1L;
+        PostCreateServiceDto serviceDto = PostCreateMapper.INSTANCE.toPostCreateServiceDto(loginId, request);
         Post post = postService.create(serviceDto);
 
         return ResponseEntity.created(URI.create("/posts/" + post.getId())).body(new PostResponse(post));
@@ -58,12 +56,13 @@ public class PostController {
 
     @PatchMapping("/{postId}")
     public ResponseEntity<PostResponse> update(@PathVariable Long postId, @RequestBody PostUpdateRequest request) {
+        Long loginId = 1L;
         List<MemoryUpdateServiceDto> memoryUpdateServiceDtos = request.getMemoryUpdateRequests()
                 .stream()
                 .map(MemoryUpdateMapper.INSTANCE::toMemoryUpdateServiceDto)
                 .toList();
         PostUpdateServiceDto serviceDto = PostUpdateMapper.INSTANCE.toPostUpdateServiceDto(
-                TEST_EMAIL,
+                loginId,
                 postId,
                 request,
                 memoryUpdateServiceDtos
@@ -76,7 +75,8 @@ public class PostController {
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> delete(@PathVariable Long postId) {
-        PostDeleteServiceDto serviceDto = PostDeleteMapper.INSTANCE.toPostDeleteMapper(TEST_EMAIL, postId);
+        Long loginId = 1L;
+        PostDeleteServiceDto serviceDto = PostDeleteMapper.INSTANCE.toPostDeleteMapper(loginId, postId);
         postService.delete(serviceDto);
 
         return ResponseEntity.ok().build();
