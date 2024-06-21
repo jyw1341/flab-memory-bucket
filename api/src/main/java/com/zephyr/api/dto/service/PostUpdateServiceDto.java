@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 public class PostUpdateServiceDto {
 
-    private final String memberId;
+    private final Long memberId;
 
     private final Long postId;
 

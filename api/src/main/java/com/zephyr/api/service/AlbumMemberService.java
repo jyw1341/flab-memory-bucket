@@ -29,6 +29,10 @@ public class AlbumMemberService {
         albumMemberRepository.save(albumMember);
     }
 
+    public List<AlbumMember> getList(AlbumMemberListServiceDto dto) {
+        return albumMemberRepository.findAlbumMembers(dto);
+    }
+
     public List<AlbumMember> getListByMember(Member member) {
         return albumMemberRepository.findByMember(member);
     }

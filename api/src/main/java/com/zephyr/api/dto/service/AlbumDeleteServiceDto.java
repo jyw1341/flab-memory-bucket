@@ -8,5 +8,5 @@ import lombok.Getter;
 public class AlbumDeleteServiceDto {
 
     private final Long albumId;
-    private final String memberId;
+    private final Long memberId;
 }

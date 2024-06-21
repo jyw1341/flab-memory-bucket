@@ -7,5 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class AlbumListServiceDto {
 
-    private final String memberId;
+    private final Long memberId;
+    private final Integer page;
+    private final Integer size;
 }

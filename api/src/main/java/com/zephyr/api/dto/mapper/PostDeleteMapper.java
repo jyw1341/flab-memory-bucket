@@ -9,5 +9,5 @@ public interface PostDeleteMapper {
 
     PostDeleteMapper INSTANCE = Mappers.getMapper(PostDeleteMapper.class);
 
-    PostDeleteServiceDto toPostDeleteMapper(String memberId, Long postId);
+    PostDeleteServiceDto toPostDeleteMapper(Long memberId, Long postId);
 }
