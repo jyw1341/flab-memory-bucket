@@ -39,7 +39,11 @@ public class AlbumService {
                 .build();
 
         albumRepository.save(album);
-        AlbumMemberCreateServiceDto serviceDto = AlbumMemberCreateMapper.INSTANCE.toAlbumMemberCreateServiceDto(album, member, AlbumMemberRole.ADMIN);
+        AlbumMemberCreateServiceDto serviceDto = AlbumMemberCreateMapper.INSTANCE.toAlbumMemberCreateServiceDto(
+                album,
+                member,
+                AlbumMemberRole.ADMIN
+        );
         albumMemberService.create(serviceDto);
 
         return album;
@@ -55,7 +59,12 @@ public class AlbumService {
     }
 
     public List<Album> getList(AlbumListServiceDto dto) {
-        AlbumMemberListServiceDto albumMemberListServiceDto = new AlbumMemberListServiceDto(dto.getMemberId(), null, dto.getPage(), dto.getSize());
+        AlbumMemberListServiceDto albumMemberListServiceDto = new AlbumMemberListServiceDto(
+                dto.getMemberId(),
+                null,
+                dto.getPage(),
+                dto.getSize()
+        );
         List<AlbumMember> albumMembers = albumMemberService.getList(albumMemberListServiceDto);
         List<Album> result = new ArrayList<>();
 
