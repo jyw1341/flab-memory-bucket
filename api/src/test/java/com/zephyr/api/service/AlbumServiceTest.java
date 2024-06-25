@@ -113,6 +113,12 @@ class AlbumServiceTest {
     }
 
     @Test
+    @DisplayName("앨범 목록 조회 성공")
+    public void successGetAlbumList() {
+        
+    }
+
+    @Test
     @DisplayName("앨범 수정 성공")
     public void successAlbumUpdate() {
         //given
