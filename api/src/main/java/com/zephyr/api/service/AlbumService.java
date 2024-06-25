@@ -39,7 +39,11 @@ public class AlbumService {
                 .build();
 
         albumRepository.save(album);
-        AlbumMemberCreateServiceDto serviceDto = AlbumMemberCreateMapper.INSTANCE.toAlbumMemberCreateServiceDto(album, member, AlbumMemberRole.ADMIN);
+        AlbumMemberCreateServiceDto serviceDto = AlbumMemberCreateMapper.INSTANCE.toAlbumMemberCreateServiceDto(
+                album,
+                member,
+                AlbumMemberRole.ADMIN
+        );
         albumMemberService.create(serviceDto);
 
         return album;
@@ -55,7 +59,13 @@ public class AlbumService {
     }
 
     public List<Album> getList(AlbumListServiceDto dto) {
-        AlbumMemberListServiceDto albumMemberListServiceDto = new AlbumMemberListServiceDto(dto.getMemberId(), null, dto.getPage(), dto.getSize());
+        AlbumMemberListServiceDto albumMemberListServiceDto = new AlbumMemberListServiceDto(
+                dto.getMemberId(),
+                null,
+                dto.getPage(),
+                dto.getSize()
+        );
+
         List<AlbumMember> albumMembers = albumMemberService.getList(albumMemberListServiceDto);
         List<Album> result = new ArrayList<>();
 
@@ -68,7 +78,7 @@ public class AlbumService {
         return result;
     }
 
-    public Album update(AlbumUpdateServiceDto dto) {
+    public void update(AlbumUpdateServiceDto dto) {
         Album album = albumRepository.findById(dto.getAlbumId())
                 .orElseThrow(() -> new AlbumNotFoundException(messageSource));
 
@@ -76,8 +86,6 @@ public class AlbumService {
         album.setTitle(dto.getTitle());
         album.setDescription(dto.getDescription());
         album.setThumbnailUrl(dto.getThumbnailUrl());
-
-        return album;
     }
 
     public void delete(AlbumDeleteServiceDto dto) {
@@ -88,15 +96,8 @@ public class AlbumService {
         albumRepository.delete(album);
     }
 
-    public void validAlbumOwner(Album album, Long memberId) {
+    private void validAlbumOwner(Album album, Long memberId) {
         if (album.getOwner().getId().equals(memberId)) {
-            return;
-        }
-        throw new ForbiddenException(messageSource);
-    }
-
-    public void validAlbumOwner(Album album, String email) {
-        if (album.getOwner().getEmail().equals(email)) {
             return;
         }
         throw new ForbiddenException(messageSource);

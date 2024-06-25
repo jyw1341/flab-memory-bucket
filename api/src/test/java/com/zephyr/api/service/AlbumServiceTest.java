@@ -5,7 +5,11 @@ import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.Member;
 import com.zephyr.api.dto.service.AlbumCreateServiceDto;
 import com.zephyr.api.dto.service.AlbumMemberCreateServiceDto;
+
+import com.zephyr.api.dto.service.AlbumUpdateServiceDto;
 import com.zephyr.api.exception.AlbumNotFoundException;
+import com.zephyr.api.exception.ForbiddenException;
+
 import com.zephyr.api.repository.AlbumRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,7 +61,8 @@ class AlbumServiceTest {
     }
 
     @Test
-    @DisplayName("앨범 조회 성공")
+
+    @DisplayName("앨범 단건 조회 성공")
     public void successGetAlbum() {
         //given
         Long albumId = 1L;
@@ -78,7 +83,8 @@ class AlbumServiceTest {
     }
 
     @Test
-    @DisplayName("앨범 썸네일 url이 없을 때 / 앨범 조회 / 기본 썸네일 url 반환")
+    @DisplayName("앨범 썸네일 url이 없을 때 / 앨범 단건 조회 / 기본 썸네일 url 반환")
+
     public void givenNoThumbnailUrl_whenGetAlbum_thenReturnAlbumWithDefaultThumbnail() {
         //given
         Long albumId = 1L;
@@ -104,7 +110,6 @@ class AlbumServiceTest {
     public void givenInValidAlbumId_whenFindOneAlbum_thenNotFoundAlbumException() {
         //given
         Long albumId = 2L;
-
         when(albumRepository.findById(albumId)).thenReturn(Optional.empty());
 
         //when then
@@ -113,4 +118,84 @@ class AlbumServiceTest {
         verify(albumRepository, times(1)).findById(albumId);
     }
 
+    @Test
+    @DisplayName("앨범 수정 성공")
+    public void successAlbumUpdate() {
+        //given
+        Long albumId = 1L;
+        Long loginId = 1L;
+
+        //현재 접속한 사람을 앨범 소유자와 같도록 설정
+        Member owner = mock(Member.class);
+        when(owner.getId()).thenReturn(loginId);
+        Album album = mock(Album.class);
+        when(album.getOwner()).thenReturn(owner);
+
+        when(albumRepository.findById(albumId)).thenReturn(Optional.of(album));
+        AlbumUpdateServiceDto albumUpdateServiceDto = new AlbumUpdateServiceDto(
+                albumId,
+                loginId,
+                "수정된 제목",
+                "수정된 설명",
+                "수정된 url"
+        );
+
+        //when
+        albumService.update(albumUpdateServiceDto);
+
+        //then
+        verify(album, times(1)).setTitle(albumUpdateServiceDto.getTitle());
+        verify(album, times(1)).setDescription(albumUpdateServiceDto.getDescription());
+        verify(album, times(1)).setThumbnailUrl(albumUpdateServiceDto.getThumbnailUrl());
+    }
+
+    @Test
+    @DisplayName("부적절한 앨범 아이디 / 앨범 수정 / 수정 실패")
+    public void givenInvalidAlbumId_whenAlbumUpdate_thenFail() {
+        //given
+        Long albumId = 1L;
+        Long loginId = 1L;
+
+        when(albumRepository.findById(albumId)).thenReturn(Optional.empty());
+        AlbumUpdateServiceDto albumUpdateServiceDto = new AlbumUpdateServiceDto(
+                albumId,
+                loginId,
+                "수정된 제목",
+                "수정된 설명",
+                "수정된 url"
+        );
+
+        //when
+        assertThrows(AlbumNotFoundException.class, () -> albumService.update(albumUpdateServiceDto));
+    }
+
+    @Test
+    @DisplayName("현재 사용자가 앨범 소유자가 아닐 때 / 앨범 수정 / 수정 실패")
+    public void givenNotAlbumOwner_whenAlbumUpdate_thenFail() {
+        //given
+        Long albumId = 1L;
+        Long loginId = 1L;
+        Long ownerId = 2L;
+
+        //현재 접속한 사용자와 앨범 소유자가 다르게 설정
+        Member owner = mock(Member.class);
+        when(owner.getId()).thenReturn(ownerId);
+        Album album = mock(Album.class);
+        when(album.getOwner()).thenReturn(owner);
+
+        when(albumRepository.findById(albumId)).thenReturn(Optional.of(album));
+        AlbumUpdateServiceDto albumUpdateServiceDto = new AlbumUpdateServiceDto(
+                albumId,
+                loginId,
+                "수정된 제목",
+                "수정된 설명",
+                "수정된 url"
+        );
+
+        //when then
+        assertThrows(ForbiddenException.class, () -> albumService.update(albumUpdateServiceDto));
+        verify(album, times(0)).setTitle(albumUpdateServiceDto.getTitle());
+        verify(album, times(0)).setDescription(albumUpdateServiceDto.getDescription());
+        verify(album, times(0)).setThumbnailUrl(albumUpdateServiceDto.getThumbnailUrl());
+    }
 }

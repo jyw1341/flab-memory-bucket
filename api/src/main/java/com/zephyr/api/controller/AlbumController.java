@@ -58,13 +58,14 @@ public class AlbumController {
     }
 
     @PatchMapping("/{albumId}")
-    public AlbumResponse update(@PathVariable Long albumId, @RequestBody AlbumUpdateRequest request) {
+
+    public ResponseEntity<Void> update(@PathVariable Long albumId, @RequestBody AlbumUpdateRequest request) {
         Long loginId = 1L;
         AlbumUpdateServiceDto serviceDto = AlbumUpdateMapper.INSTANCE.toAlbumUpdateServiceDto(loginId, albumId, request);
 
-        Album album = albumService.update(serviceDto);
+        albumService.update(serviceDto);
 
-        return new AlbumResponse(album);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{albumId}")
