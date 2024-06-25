@@ -65,6 +65,7 @@ public class AlbumService {
                 dto.getPage(),
                 dto.getSize()
         );
+
         List<AlbumMember> albumMembers = albumMemberService.getList(albumMemberListServiceDto);
         List<Album> result = new ArrayList<>();
 

@@ -58,6 +58,7 @@ public class AlbumController {
     }
 
     @PatchMapping("/{albumId}")
+
     public ResponseEntity<Void> update(@PathVariable Long albumId, @RequestBody AlbumUpdateRequest request) {
         Long loginId = 1L;
         AlbumUpdateServiceDto serviceDto = AlbumUpdateMapper.INSTANCE.toAlbumUpdateServiceDto(loginId, albumId, request);

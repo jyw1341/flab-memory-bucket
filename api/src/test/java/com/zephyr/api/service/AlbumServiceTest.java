@@ -5,9 +5,11 @@ import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.Member;
 import com.zephyr.api.dto.service.AlbumCreateServiceDto;
 import com.zephyr.api.dto.service.AlbumMemberCreateServiceDto;
+
 import com.zephyr.api.dto.service.AlbumUpdateServiceDto;
 import com.zephyr.api.exception.AlbumNotFoundException;
 import com.zephyr.api.exception.ForbiddenException;
+
 import com.zephyr.api.repository.AlbumRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,8 +34,10 @@ class AlbumServiceTest {
     private MemberService memberService;
     @Mock
     private AlbumMemberService albumMemberService;
+
     @Mock
     private MessageSource messageSource;
+
     @Mock
     private S3Config s3Config;
 
@@ -57,6 +61,7 @@ class AlbumServiceTest {
     }
 
     @Test
+
     @DisplayName("앨범 단건 조회 성공")
     public void successGetAlbum() {
         //given
@@ -79,6 +84,7 @@ class AlbumServiceTest {
 
     @Test
     @DisplayName("앨범 썸네일 url이 없을 때 / 앨범 단건 조회 / 기본 썸네일 url 반환")
+
     public void givenNoThumbnailUrl_whenGetAlbum_thenReturnAlbumWithDefaultThumbnail() {
         //given
         Long albumId = 1L;
@@ -192,5 +198,4 @@ class AlbumServiceTest {
         verify(album, times(0)).setDescription(albumUpdateServiceDto.getDescription());
         verify(album, times(0)).setThumbnailUrl(albumUpdateServiceDto.getThumbnailUrl());
     }
-
 }
