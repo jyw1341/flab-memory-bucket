@@ -31,7 +31,7 @@ public class S3Config {
     }
 
     @Bean
-    public S3Client s3Client() {
+    public S3Client getS3Client() {
         return S3Client.builder()
                 .credentialsProvider(DefaultCredentialsProvider.builder().profileName(profileName).build())
                 .endpointOverride(URI.create(endPoint))
@@ -40,7 +40,7 @@ public class S3Config {
     }
 
     @Bean
-    public S3Presigner presigner() {
+    public S3Presigner getPresigner() {
         return S3Presigner.builder()
                 .credentialsProvider(DefaultCredentialsProvider.builder().profileName(profileName).build())
                 .endpointOverride(URI.create(endPoint))
