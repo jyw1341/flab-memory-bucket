@@ -1,73 +1,92 @@
 package com.zephyr.api.service;
 
 import com.zephyr.api.config.S3Config;
-import com.zephyr.api.dto.request.FileCreate;
+import com.zephyr.api.dto.response.PresignedUrlCreateResponse;
+import com.zephyr.api.dto.service.PresignedUrlCreateServiceDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class FileServiceTest {
 
-    @Autowired
-    FileService imageService;
+    @Mock
+    private S3Config s3Config;
 
-    @Autowired
-    S3Config s3Config;
+    @InjectMocks
+    private FileService fileService;
 
     @Test
-    @DisplayName("Presigned URL을 사용하여 파일을 업로드/ 업로드한 파일 조회/ 200 반환")
-    public void shouldCreateAndUploadFileSuccessfully() throws Exception {
+    @DisplayName("presigned url 생성 성공")
+    public void testCreatePresignedUrl_success() throws Exception {
         //given
-        Long testId = 1L;
-        FileCreate fileCreate = new FileCreate(UUID.randomUUID().toString(), "jpg");
-        String url = imageService.createPresignedUrl(testId, fileCreate);
-        Map<String, String> metadata = new HashMap<>();
-        metadata.put("x-amz-acl", "public-read");
+        List<PresignedUrlCreateServiceDto> serviceDtos = createServiceDtos();
+        URL url = new URL("http://example.com");
+        S3Presigner s3Presigner = mock(S3Presigner.class);
+        when(s3Config.getPresigner()).thenReturn(s3Presigner);
+        when(s3Config.getBucketName()).thenReturn("bucketName");
+        PresignedPutObjectRequest presignedRequest = mock(PresignedPutObjectRequest.class);
+        when(presignedRequest.url()).thenReturn(url);
+        when(s3Presigner.presignPutObject(any(PutObjectPresignRequest.class))).thenReturn(presignedRequest);
 
-        HttpResponse<Void> uploadResponse = uploadFile(url, metadata, "sample text");
+        //when
+        List<PresignedUrlCreateResponse> responses = fileService.createPresignedUrl(serviceDtos);
 
-        // when
-        HttpResponse<Void> headResponse = sendHeadRequest(testId, fileCreate);
+        //then
+        assertEquals(serviceDtos.size(), responses.size());
+        for (PresignedUrlCreateServiceDto serviceDto : serviceDtos) {
+            PresignedUrlCreateResponse presignedUrlCreateResponse = responses.stream()
+                    .filter(response -> response.getFileIndex().equals(serviceDto.getFileIndex()))
+                    .findFirst()
+                    .orElseThrow();
+            assertNotNull(presignedUrlCreateResponse);
+            assertNotNull(presignedUrlCreateResponse.getUrl());
+        }
 
-        // then
-        assertEquals(HttpURLConnection.HTTP_OK, headResponse.statusCode());
+        verify(presignedRequest, times(serviceDtos.size())).url();
     }
 
-    private HttpResponse<Void> uploadFile(String url, Map<String, String> metadata, String content) throws Exception {
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder();
-        metadata.forEach(requestBuilder::header);
-        HttpClient httpClient = HttpClient.newHttpClient();
+    private List<PresignedUrlCreateServiceDto> createServiceDtos() {
+        List<PresignedUrlCreateServiceDto> dtos = new ArrayList<>();
 
-        HttpRequest request = requestBuilder
-                .uri(new URL(url).toURI())
-                .PUT(HttpRequest.BodyPublishers.ofString(content))
-                .build();
+        dtos.add(new PresignedUrlCreateServiceDto(1L, 0, "test1.jpg", 1024L));
+        dtos.add(new PresignedUrlCreateServiceDto(1L, 1, "test2.png", 2024L));
+        dtos.add(new PresignedUrlCreateServiceDto(1L, 2, "test3.jpeg", 2024L));
+        dtos.add(new PresignedUrlCreateServiceDto(1L, 3, "test4.mp4", 2024L));
 
-        return httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+        return dtos;
     }
 
-    private HttpResponse<Void> sendHeadRequest(Long testId, FileCreate fileCreate) throws Exception {
-        String url = s3Config.getEndPoint() + "/" + s3Config.getBucketName() + "/" + fileCreate.createKeyName(String.valueOf(testId));
+    @Test
+    @DisplayName("오브젝트 삭제 성공")
+    void successDeleteObjects() {
+        //given
+        S3Client s3Client = mock(S3Client.class);
+        when(s3Config.getS3Client()).thenReturn(s3Client);
+        when(s3Config.getBucketName()).thenReturn("bucketName");
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URL(url).toURI())
-                .method("HEAD", HttpRequest.BodyPublishers.noBody())
-                .build();
+        List<String> urls = new ArrayList<>();
+        urls.add("https://example.com/1/9b3b4472-91af-4603-94a3-515f8d45769c.jpg");
 
-        HttpClient httpClient = HttpClient.newHttpClient();
-        return httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+        //when
+        fileService.deleteObjects(urls);
+
+        //then
+//        verify(s3Client, times(urls.size())).deleteObject(any(DeleteObjectRequest.class));
     }
 }
