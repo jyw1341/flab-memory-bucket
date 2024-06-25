@@ -1,11 +1,12 @@
-package com.zephyr.api.dto;
+package com.zephyr.api.dto.service;
 
 import lombok.Data;
 
 @Data
-public class AlbumCreateServiceDto {
+public class AlbumUpdateServiceDto {
 
-    private final String memberId;
+    private final Long albumId;
+    private final Long memberId;
     private final String title;
     private final String description;
     private final String thumbnailUrl;

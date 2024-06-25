@@ -1,6 +1,7 @@
 package com.zephyr.api.dto.mapper;
 
-import com.zephyr.api.dto.AlbumListServiceDto;
+import com.zephyr.api.dto.request.AlbumListRequest;
+import com.zephyr.api.dto.service.AlbumListServiceDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -9,5 +10,5 @@ public interface AlbumListMapper {
 
     AlbumListMapper INSTANCE = Mappers.getMapper(AlbumListMapper.class);
 
-    AlbumListServiceDto toAlbumUpdateServiceDto(String memberId);
+    AlbumListServiceDto toAlbumListServiceDto(Long memberId, AlbumListRequest albumListRequest);
 }

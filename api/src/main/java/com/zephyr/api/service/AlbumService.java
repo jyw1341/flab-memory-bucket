@@ -4,8 +4,8 @@ import com.zephyr.api.config.S3Config;
 import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.AlbumMember;
 import com.zephyr.api.domain.Member;
-import com.zephyr.api.dto.*;
 import com.zephyr.api.dto.mapper.AlbumMemberCreateMapper;
+import com.zephyr.api.dto.service.*;
 import com.zephyr.api.enums.AlbumMemberRole;
 import com.zephyr.api.exception.AlbumNotFoundException;
 import com.zephyr.api.exception.ForbiddenException;
@@ -55,8 +55,8 @@ public class AlbumService {
     }
 
     public List<Album> getList(AlbumListServiceDto dto) {
-        Member member = memberService.get(dto.getMemberId());
-        List<AlbumMember> albumMembers = albumMemberService.getListByMember(member);
+        AlbumMemberListServiceDto albumMemberListServiceDto = new AlbumMemberListServiceDto(dto.getMemberId(), null, dto.getPage(), dto.getSize());
+        List<AlbumMember> albumMembers = albumMemberService.getList(albumMemberListServiceDto);
         List<Album> result = new ArrayList<>();
 
         for (AlbumMember albumMember : albumMembers) {

@@ -1,4 +1,4 @@
-package com.zephyr.api.dto;
+package com.zephyr.api.dto.service;
 
 import com.zephyr.api.dto.request.MemoryCreateRequest;
 import lombok.Data;
@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 public class PostCreateServiceDto {
 
-    private final String memberId;
+    private final Long memberId;
     private final Long albumId;
     private final Long seriesId;
     private final String title;

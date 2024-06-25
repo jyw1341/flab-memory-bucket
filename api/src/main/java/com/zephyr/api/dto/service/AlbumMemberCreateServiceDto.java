@@ -1,4 +1,4 @@
-package com.zephyr.api.dto;
+package com.zephyr.api.dto.service;
 
 import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.Member;

@@ -1,7 +1,7 @@
 package com.zephyr.api.dto.mapper;
 
-import com.zephyr.api.dto.AlbumCreateServiceDto;
 import com.zephyr.api.dto.request.AlbumCreateRequest;
+import com.zephyr.api.dto.service.AlbumCreateServiceDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -9,5 +9,5 @@ import org.mapstruct.factory.Mappers;
 public interface AlbumCreateMapper {
     AlbumCreateMapper INSTANCE = Mappers.getMapper(AlbumCreateMapper.class);
 
-    AlbumCreateServiceDto toAlbumCreateServiceDto(String memberId, AlbumCreateRequest request);
+    AlbumCreateServiceDto toAlbumCreateServiceDto(Long memberId, AlbumCreateRequest request);
 }

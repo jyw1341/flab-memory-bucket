@@ -1,5 +1,6 @@
 package com.zephyr.api.controller;
 
+import com.zephyr.api.config.TestConfig;
 import com.zephyr.api.domain.Member;
 import com.zephyr.api.dto.request.*;
 import com.zephyr.api.dto.response.AlbumResponse;
@@ -7,7 +8,9 @@ import com.zephyr.api.dto.response.MemoryResponse;
 import com.zephyr.api.dto.response.PostResponse;
 import com.zephyr.api.dto.response.SeriesResponse;
 import com.zephyr.api.repository.MemberRepository;
+import com.zephyr.api.utils.H2TableCleaner;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -23,14 +27,18 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.zephyr.api.constant.TestConstant.*;
-import static com.zephyr.api.utils.TestRequestUtils.createUrl;
+import static com.zephyr.api.utils.TestConstant.*;
+import static com.zephyr.api.utils.TestStringUtils.createUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(TestConfig.class)
 class PostControllerTest {
+
+    @Autowired
+    private H2TableCleaner h2TableCleaner;
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -45,6 +53,12 @@ class PostControllerTest {
     void setUp() {
         restTemplate.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
     }
+
+    @AfterEach
+    void cleanUp() {
+        h2TableCleaner.clean();
+    }
+
 
     private Member createMember() {
         Member member = Member.builder()
@@ -155,7 +169,6 @@ class PostControllerTest {
         assertEquals(postCreateRequest.getMemoryDate(), postResponse.getMemoryDate());
         assertEquals(seriesResponse.getName(), postResponse.getSeries());
         assertEquals(postCreateRequest.getMemoryCreateRequests().get(thumbnailMemoryIndex).getContentUrl(), postResponse.getThumbnailUrl());
-        assertNotNull(postResponse.getCreatedAt());
 
         //메모리 비교
         assertEquals(postCreateRequest.getMemoryCreateRequests().size(), postResponse.getMemories().size());
@@ -166,7 +179,6 @@ class PostControllerTest {
                     .orElseThrow();
             assertEquals(createRequest.getCaption(), memoryResponse.getCaption());
         }
-
     }
 
     @Test

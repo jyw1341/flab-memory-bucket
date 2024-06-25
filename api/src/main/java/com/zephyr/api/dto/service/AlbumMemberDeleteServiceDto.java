@@ -1,12 +1,12 @@
-package com.zephyr.api.dto;
+package com.zephyr.api.dto.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class AlbumDeleteServiceDto {
+public class AlbumMemberDeleteServiceDto {
 
     private final Long albumId;
-    private final String memberId;
+    private final Long targetId;
 }

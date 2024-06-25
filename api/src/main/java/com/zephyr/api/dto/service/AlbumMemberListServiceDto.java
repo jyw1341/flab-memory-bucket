@@ -1,4 +1,4 @@
-package com.zephyr.api.dto;
+package com.zephyr.api.dto.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,6 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class AlbumMemberListServiceDto {
 
-    private final String memberId;
+    private final Long memberId;
     private final Long albumId;
+    private final Integer page;
+    private final Integer size;
 }

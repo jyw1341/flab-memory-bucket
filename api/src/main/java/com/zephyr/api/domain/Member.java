@@ -2,18 +2,17 @@ package com.zephyr.api.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member {
+public class Member extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Setter
@@ -24,11 +23,6 @@ public class Member {
 
     @Setter
     private String profileImageUrl;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
-
 
     @Builder
     private Member(String username, String email, String profileImageUrl) {

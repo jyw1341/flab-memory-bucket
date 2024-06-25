@@ -1,4 +1,4 @@
-package com.zephyr.api.constant;
+package com.zephyr.api.utils;
 
 public class TestConstant {
     //멤버

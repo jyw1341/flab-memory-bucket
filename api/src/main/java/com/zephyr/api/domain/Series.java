@@ -6,7 +6,7 @@ import lombok.*;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Series {
+public class Series extends BaseTimeEntity {
 
     @Id
     @GeneratedValue

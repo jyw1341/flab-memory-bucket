@@ -1,4 +1,4 @@
-package com.zephyr.api.dto;
+package com.zephyr.api.dto.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 public class PostUpdateServiceDto {
 
-    private final String memberId;
+    private final Long memberId;
 
     private final Long postId;
 

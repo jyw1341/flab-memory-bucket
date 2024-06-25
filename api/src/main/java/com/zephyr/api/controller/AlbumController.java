@@ -2,13 +2,14 @@ package com.zephyr.api.controller;
 
 import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.AlbumMember;
-import com.zephyr.api.dto.*;
 import com.zephyr.api.dto.mapper.*;
 import com.zephyr.api.dto.request.AlbumCreateRequest;
+import com.zephyr.api.dto.request.AlbumListRequest;
 import com.zephyr.api.dto.request.AlbumUpdateRequest;
 import com.zephyr.api.dto.response.AlbumListResponse;
 import com.zephyr.api.dto.response.AlbumMemberResponse;
 import com.zephyr.api.dto.response.AlbumResponse;
+import com.zephyr.api.dto.service.*;
 import com.zephyr.api.service.AlbumMemberService;
 import com.zephyr.api.service.AlbumService;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
-
-import static com.zephyr.api.constant.TestConstant.TEST_EMAIL;
 
 @RestController
 @Slf4j
@@ -33,7 +32,8 @@ public class AlbumController {
 
     @PostMapping
     public ResponseEntity<AlbumResponse> create(@RequestBody AlbumCreateRequest request) {
-        AlbumCreateServiceDto serviceDto = AlbumCreateMapper.INSTANCE.toAlbumCreateServiceDto(TEST_EMAIL, request);
+        Long loginId = 1L;
+        AlbumCreateServiceDto serviceDto = AlbumCreateMapper.INSTANCE.toAlbumCreateServiceDto(loginId, request);
 
         Album album = albumService.create(serviceDto);
 
@@ -48,8 +48,9 @@ public class AlbumController {
     }
 
     @GetMapping
-    public List<AlbumListResponse> getList() {
-        AlbumListServiceDto serviceDto = AlbumListMapper.INSTANCE.toAlbumUpdateServiceDto(TEST_EMAIL);
+    public List<AlbumListResponse> getList(@ModelAttribute AlbumListRequest request) {
+        Long loginId = 1L;
+        AlbumListServiceDto serviceDto = AlbumListMapper.INSTANCE.toAlbumListServiceDto(loginId, request);
 
         List<Album> albums = albumService.getList(serviceDto);
 
@@ -58,7 +59,8 @@ public class AlbumController {
 
     @PatchMapping("/{albumId}")
     public AlbumResponse update(@PathVariable Long albumId, @RequestBody AlbumUpdateRequest request) {
-        AlbumUpdateServiceDto serviceDto = AlbumUpdateMapper.INSTANCE.toAlbumUpdateServiceDto(TEST_EMAIL, albumId, request);
+        Long loginId = 1L;
+        AlbumUpdateServiceDto serviceDto = AlbumUpdateMapper.INSTANCE.toAlbumUpdateServiceDto(loginId, albumId, request);
 
         Album album = albumService.update(serviceDto);
 
@@ -68,14 +70,16 @@ public class AlbumController {
     @DeleteMapping("/{albumId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long albumId) {
-        AlbumDeleteServiceDto serviceDto = AlbumDeleteMapper.INSTANCE.toAlbumDeleteServiceDto(TEST_EMAIL, albumId);
+        Long loginId = 1L;
+        AlbumDeleteServiceDto serviceDto = AlbumDeleteMapper.INSTANCE.toAlbumDeleteServiceDto(loginId, albumId);
 
         albumService.delete(serviceDto);
     }
 
     @GetMapping("/{albumId}/members")
     public List<AlbumMemberResponse> getAlbumMembers(@PathVariable Long albumId) {
-        AlbumMemberListServiceDto serviceDto = AlbumMemberListMapper.INSTANCE.toAlbumMemberListDto(TEST_EMAIL, albumId);
+        Long loginId = 1L;
+        AlbumMemberListServiceDto serviceDto = AlbumMemberListMapper.INSTANCE.toAlbumMemberListDto(loginId, albumId);
         List<AlbumMember> albumMembers = albumMemberService.getListByAlbumId(serviceDto);
 
         return albumMembers.stream().map(AlbumMemberResponse::new).toList();
