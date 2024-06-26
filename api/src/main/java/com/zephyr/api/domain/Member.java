@@ -22,12 +22,12 @@ public class Member extends BaseTimeEntity {
     private String email;
 
     @Setter
-    private String profileImageUrl;
+    private String profileUrl;
 
     @Builder
-    private Member(String username, String email, String profileImageUrl) {
+    private Member(String username, String email, String profileUrl) {
         this.username = username;
         this.email = email;
-        this.profileImageUrl = profileImageUrl;
+        this.profileUrl = profileUrl;
     }
 }

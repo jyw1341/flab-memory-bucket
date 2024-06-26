@@ -11,12 +11,12 @@ import lombok.ToString;
 public class MemberResponse {
 
     private final Long id;
-    private final String name;
+    private final String username;
     private final String profileImageUrl;
 
     public MemberResponse(Member member) {
         this.id = member.getId();
-        this.name = member.getUsername();
-        this.profileImageUrl = member.getProfileImageUrl();
+        this.username = member.getUsername();
+        this.profileImageUrl = member.getProfileUrl();
     }
 }
