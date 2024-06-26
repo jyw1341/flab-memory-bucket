@@ -13,6 +13,6 @@ public class AlbumMemberResponse {
     public AlbumMemberResponse(AlbumMember albumMember) {
         this.memberId = albumMember.getMember().getId();
         this.name = albumMember.getMember().getUsername();
-        this.profileImageUrl = albumMember.getMember().getProfileImageUrl();
+        this.profileImageUrl = albumMember.getMember().getProfileUrl();
     }
 }
