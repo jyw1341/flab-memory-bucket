@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -73,10 +74,12 @@ public class FileService {
         return dto.getMemberId() + "/" + uuid + extension;
     }
 
-    public void deleteObjects(List<String> urls) {
+    public List<CompletableFuture<Void>> deleteObjects(List<String> urls) {
+        List<CompletableFuture<Void>> result = new ArrayList<>();
         for (String url : urls) {
-            CompletableFuture.runAsync(() -> deleteObject(url));
+            result.add(CompletableFuture.runAsync(() -> deleteObject(url)));
         }
+        return result;
     }
 
     private void deleteObject(String urlString) {
