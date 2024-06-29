@@ -1,14 +1,16 @@
 package com.zephyr.api.service;
 
-import com.zephyr.api.config.S3Config;
+import com.zephyr.api.config.S3ConfigurationProperties;
 import com.zephyr.api.dto.response.PresignedUrlCreateResponse;
 import com.zephyr.api.dto.service.PresignedUrlCreateServiceDto;
 import com.zephyr.api.exception.PresignedUrlCreateFailException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
@@ -26,7 +28,9 @@ import java.util.concurrent.ExecutionException;
 @RequiredArgsConstructor
 public class FileService {
 
-    private final S3Config s3Config;
+    private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
+    private final S3ConfigurationProperties s3ConfigurationProperties;
 
     public List<PresignedUrlCreateResponse> createPresignedUrl(List<PresignedUrlCreateServiceDto> dtos) {
         List<CompletableFuture<PresignedUrlCreateResponse>> futures = dtos.stream()
@@ -48,14 +52,14 @@ public class FileService {
 
     private PresignedUrlCreateResponse createPresignedUrlForDto(PresignedUrlCreateServiceDto dto) {
         PutObjectRequest objectRequest = PutObjectRequest.builder()
-                .bucket(s3Config.getBucketName())
+                .bucket(s3ConfigurationProperties.getBucketName())
                 .key(createKeyName(dto))
                 .build();
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
                 .signatureDuration(Duration.ofMinutes(1))
                 .putObjectRequest(objectRequest)
                 .build();
-        PresignedPutObjectRequest presignedRequest = s3Config.getPresigner().presignPutObject(presignRequest);
+        PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
 
         return new PresignedUrlCreateResponse(dto.getFileIndex(), presignedRequest.url().toExternalForm());
     }
@@ -90,9 +94,9 @@ public class FileService {
             throw new IllegalArgumentException(e);
         }
         DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                .bucket(s3Config.getBucketName())
+                .bucket(s3ConfigurationProperties.getBucketName())
                 .key(url.getPath())
                 .build();
-        s3Config.getS3Client().deleteObject(deleteObjectRequest);
+        s3Client.deleteObject(deleteObjectRequest);
     }
 }

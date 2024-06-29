@@ -1,15 +1,13 @@
 package com.zephyr.api.service;
 
-import com.zephyr.api.config.S3Config;
+import com.zephyr.api.config.S3ConfigurationProperties;
 import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.Member;
 import com.zephyr.api.dto.service.AlbumCreateServiceDto;
 import com.zephyr.api.dto.service.AlbumMemberCreateServiceDto;
-
 import com.zephyr.api.dto.service.AlbumUpdateServiceDto;
 import com.zephyr.api.exception.AlbumNotFoundException;
 import com.zephyr.api.exception.ForbiddenException;
-
 import com.zephyr.api.repository.AlbumRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +37,7 @@ class AlbumServiceTest {
     private MessageSource messageSource;
 
     @Mock
-    private S3Config s3Config;
+    private S3ConfigurationProperties s3ConfigurationProperties;
 
     @InjectMocks
     private AlbumService albumService;
@@ -95,7 +93,7 @@ class AlbumServiceTest {
                 .build();
         Album spy = spy(album);
         when(albumRepository.findById(albumId)).thenReturn(Optional.of(spy));
-        when(s3Config.getDefaultThumbnailUrl()).thenReturn(defaultThumbnail);
+        when(albumService.getDefaultAlbumThumbnailUrl()).thenReturn(defaultThumbnail);
 
         //when
         Album result = albumService.get(albumId);
@@ -121,7 +119,7 @@ class AlbumServiceTest {
     @Test
     @DisplayName("앨범 목록 조회 성공")
     public void successGetAlbumList() {
-        
+
     }
 
     @Test

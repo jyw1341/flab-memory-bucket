@@ -1,6 +1,6 @@
 package com.zephyr.api.service;
 
-import com.zephyr.api.config.S3Config;
+import com.zephyr.api.config.S3ConfigurationProperties;
 import com.zephyr.api.dto.response.PresignedUrlCreateResponse;
 import com.zephyr.api.dto.service.PresignedUrlCreateServiceDto;
 import org.junit.jupiter.api.DisplayName;
@@ -28,7 +28,11 @@ import static org.mockito.Mockito.*;
 class FileServiceTest {
 
     @Mock
-    private S3Config s3Config;
+    private S3Client s3Client;
+    @Mock
+    private S3Presigner s3Presigner;
+    @Mock
+    private S3ConfigurationProperties s3ConfigurationProperties;
 
     @InjectMocks
     private FileService fileService;
@@ -39,9 +43,7 @@ class FileServiceTest {
         //given
         List<PresignedUrlCreateServiceDto> serviceDtos = createServiceDtos();
         URL url = new URL("http://example.com");
-        S3Presigner s3Presigner = mock(S3Presigner.class);
-        when(s3Config.getPresigner()).thenReturn(s3Presigner);
-        when(s3Config.getBucketName()).thenReturn("bucketName");
+        when(s3ConfigurationProperties.getBucketName()).thenReturn("bucketName");
         PresignedPutObjectRequest presignedRequest = mock(PresignedPutObjectRequest.class);
         when(presignedRequest.url()).thenReturn(url);
         when(s3Presigner.presignPutObject(any(PutObjectPresignRequest.class))).thenReturn(presignedRequest);
@@ -78,9 +80,7 @@ class FileServiceTest {
     @DisplayName("오브젝트 삭제 성공")
     void successDeleteObjects() {
         //given
-        S3Client s3Client = mock(S3Client.class);
-        when(s3Config.getS3Client()).thenReturn(s3Client);
-        when(s3Config.getBucketName()).thenReturn("bucketName");
+        when(s3ConfigurationProperties.getBucketName()).thenReturn("bucketName");
 
         List<String> urls = new ArrayList<>();
         urls.add("https://example.com/1/9b3b4472-91af-4603-94a3-515f8d45769c.jpg");

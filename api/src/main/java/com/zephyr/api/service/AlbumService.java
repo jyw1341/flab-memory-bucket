@@ -1,6 +1,6 @@
 package com.zephyr.api.service;
 
-import com.zephyr.api.config.S3Config;
+import com.zephyr.api.config.S3ConfigurationProperties;
 import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.AlbumMember;
 import com.zephyr.api.domain.Member;
@@ -27,7 +27,7 @@ public class AlbumService {
     private final MemberService memberService;
     private final AlbumMemberService albumMemberService;
     private final MessageSource messageSource;
-    private final S3Config s3Config;
+    private final S3ConfigurationProperties s3Properties;
 
     public Album create(AlbumCreateServiceDto dto) {
         Member member = memberService.get(dto.getMemberId());
@@ -105,7 +105,11 @@ public class AlbumService {
 
     private void setDefaultThumbnailUrlIfNull(Album album) {
         if (album.getThumbnailUrl() == null || album.getThumbnailUrl().isBlank()) {
-            album.setThumbnailUrl(s3Config.getDefaultThumbnailUrl());
+            album.setThumbnailUrl(getDefaultAlbumThumbnailUrl());
         }
+    }
+
+    public String getDefaultAlbumThumbnailUrl() {
+        return s3Properties.getEndPoint() + s3Properties.getBucketName() + s3Properties.getThumbnails().get(0);
     }
 }
