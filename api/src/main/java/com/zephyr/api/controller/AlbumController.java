@@ -2,16 +2,19 @@ package com.zephyr.api.controller;
 
 import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.AlbumMember;
+import com.zephyr.api.dto.*;
 import com.zephyr.api.dto.mapper.*;
 import com.zephyr.api.dto.request.AlbumCreateRequest;
 import com.zephyr.api.dto.request.AlbumListRequest;
 import com.zephyr.api.dto.request.AlbumUpdateRequest;
+import com.zephyr.api.dto.request.SeriesCreateRequest;
 import com.zephyr.api.dto.response.AlbumListResponse;
 import com.zephyr.api.dto.response.AlbumMemberResponse;
 import com.zephyr.api.dto.response.AlbumResponse;
-import com.zephyr.api.dto.service.*;
+import com.zephyr.api.dto.response.SeriesResponse;
 import com.zephyr.api.service.AlbumMemberService;
 import com.zephyr.api.service.AlbumService;
+import com.zephyr.api.service.SeriesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -29,6 +32,7 @@ public class AlbumController {
 
     private final AlbumService albumService;
     private final AlbumMemberService albumMemberService;
+    private final SeriesService seriesService;
 
     @PostMapping
     public ResponseEntity<AlbumResponse> create(@RequestBody AlbumCreateRequest request) {
@@ -92,5 +96,12 @@ public class AlbumController {
         AlbumMemberDeleteServiceDto serviceDto = AlbumMemberDeleteMapper.INSTANCE.toAlbumMemberDeleteServiceDto(albumId, targetId);
 
         albumMemberService.delete(serviceDto);
+    }
+
+    @PostMapping("/{albumId}/series")
+    public ResponseEntity<SeriesResponse> createSeries(
+            @PathVariable Long albumId,
+            @RequestBody SeriesCreateRequest request) {
+                return null;
     }
 }

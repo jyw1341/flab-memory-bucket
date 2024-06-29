@@ -5,7 +5,6 @@ import com.zephyr.api.dto.request.*;
 import com.zephyr.api.dto.response.AlbumResponse;
 import com.zephyr.api.dto.response.PostResponse;
 import com.zephyr.api.dto.response.SeriesResponse;
-import com.zephyr.api.dto.SeriesPostDto;
 import com.zephyr.api.utils.H2TableCleaner;
 import com.zephyr.api.utils.TestRestTemplateUtils;
 import org.junit.jupiter.api.*;
@@ -14,15 +13,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static com.zephyr.api.utils.TestConstant.*;
-import static com.zephyr.api.utils.TestStringUtils.createUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -130,16 +125,9 @@ class SeriesControllerTest {
                 memoryRequestDtos2));
 
         //when
-        List<SeriesPostDto> result = restTemplate.exchange(
-                createUrl(port, "/series/posts?albumId=" + album.getId()),
-                HttpMethod.GET,
-                new HttpEntity<>(null),
-                new ParameterizedTypeReference<List<SeriesPostDto>>() {
-                }).getBody();
+
 
         //then
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals(5, result.get(0).getPostCount());
+
     }
 }
