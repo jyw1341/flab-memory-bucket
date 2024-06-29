@@ -16,6 +16,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -73,6 +74,7 @@ public class FileService {
 
         return dto.getMemberId() + "/" + uuid + extension;
     }
+
 
     public List<CompletableFuture<Void>> deleteObjects(List<String> urls) {
         List<CompletableFuture<Void>> result = new ArrayList<>();
