@@ -2,7 +2,7 @@ package com.zephyr.api.service;
 
 import com.zephyr.api.config.S3ConfigurationProperties;
 import com.zephyr.api.dto.response.PresignedUrlCreateResponse;
-import com.zephyr.api.dto.service.PresignedUrlCreateServiceDto;
+import com.zephyr.api.dto.PresignedUrlCreateServiceDto;
 import com.zephyr.api.exception.PresignedUrlCreateFailException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

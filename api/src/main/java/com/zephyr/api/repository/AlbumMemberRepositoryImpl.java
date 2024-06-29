@@ -3,7 +3,7 @@ package com.zephyr.api.repository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zephyr.api.domain.AlbumMember;
-import com.zephyr.api.dto.service.AlbumMemberListServiceDto;
+import com.zephyr.api.dto.AlbumMemberListServiceDto;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;

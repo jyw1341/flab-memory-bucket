@@ -1,7 +1,7 @@
 package com.zephyr.api.dto.mapper;
 
 import com.zephyr.api.dto.request.AlbumUpdateRequest;
-import com.zephyr.api.dto.service.AlbumUpdateServiceDto;
+import com.zephyr.api.dto.AlbumUpdateServiceDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

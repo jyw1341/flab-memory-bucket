@@ -5,7 +5,7 @@ import com.zephyr.api.dto.request.*;
 import com.zephyr.api.dto.response.AlbumResponse;
 import com.zephyr.api.dto.response.PostResponse;
 import com.zephyr.api.dto.response.SeriesResponse;
-import com.zephyr.api.dto.service.SeriesPostDto;
+import com.zephyr.api.dto.SeriesPostDto;
 import com.zephyr.api.utils.H2TableCleaner;
 import com.zephyr.api.utils.TestRestTemplateUtils;
 import org.junit.jupiter.api.*;

@@ -3,7 +3,7 @@ package com.zephyr.api.controller;
 import com.zephyr.api.dto.mapper.PresignedUrlCreateMapper;
 import com.zephyr.api.dto.request.PresignedUrlCreateRequest;
 import com.zephyr.api.dto.response.PresignedUrlCreateResponse;
-import com.zephyr.api.dto.service.PresignedUrlCreateServiceDto;
+import com.zephyr.api.dto.PresignedUrlCreateServiceDto;
 import com.zephyr.api.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

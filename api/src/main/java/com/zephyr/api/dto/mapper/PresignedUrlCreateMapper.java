@@ -1,7 +1,7 @@
 package com.zephyr.api.dto.mapper;
 
 import com.zephyr.api.dto.request.PresignedUrlCreateRequest;
-import com.zephyr.api.dto.service.PresignedUrlCreateServiceDto;
+import com.zephyr.api.dto.PresignedUrlCreateServiceDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

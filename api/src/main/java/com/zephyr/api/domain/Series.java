@@ -2,7 +2,9 @@ package com.zephyr.api.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.cglib.core.Local;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -18,11 +20,20 @@ public class Series extends BaseTimeEntity {
     @JoinColumn(name = "ALBUM_ID")
     private Album album;
 
-    @OneToMany(mappedBy = "series")
-    private List<Post> posts;
-
     @Setter
     private String name;
+
+    @Setter
+    private Integer postCount;
+
+    @Setter
+    private LocalDate firstDate;
+
+    @Setter
+    private LocalDate lastDate;
+
+    @Setter
+    private String thumbnailUrl;
 
     @Builder
     private Series(Album album, String name) {

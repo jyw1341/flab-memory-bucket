@@ -1,4 +1,4 @@
-package com.zephyr.api.dto.service;
+package com.zephyr.api.dto;
 
 import com.zephyr.api.dto.request.MemoryCreateRequest;
 import lombok.Data;

@@ -4,7 +4,7 @@ import com.zephyr.api.domain.Member;
 import com.zephyr.api.dto.mapper.MemberCreateMapper;
 import com.zephyr.api.dto.request.MemberCreateRequest;
 import com.zephyr.api.dto.response.MemberResponse;
-import com.zephyr.api.dto.service.MemberCreateServiceDto;
+import com.zephyr.api.dto.MemberCreateServiceDto;
 import com.zephyr.api.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

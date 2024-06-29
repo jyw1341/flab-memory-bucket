@@ -3,7 +3,7 @@ package com.zephyr.api.service;
 import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.Series;
 import com.zephyr.api.dto.request.SeriesCreateRequest;
-import com.zephyr.api.dto.service.SeriesUpdateServiceDto;
+import com.zephyr.api.dto.SeriesUpdateServiceDto;
 import com.zephyr.api.exception.SeriesNotFoundException;
 import com.zephyr.api.repository.SeriesRepository;
 import lombok.RequiredArgsConstructor;

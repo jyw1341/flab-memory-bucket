@@ -1,7 +1,7 @@
 package com.zephyr.api.repository;
 
 import com.zephyr.api.domain.AlbumMember;
-import com.zephyr.api.dto.service.AlbumMemberListServiceDto;
+import com.zephyr.api.dto.AlbumMemberListServiceDto;
 
 import java.util.List;
 

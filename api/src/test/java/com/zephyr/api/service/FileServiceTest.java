@@ -2,7 +2,7 @@ package com.zephyr.api.service;
 
 import com.zephyr.api.config.S3ConfigurationProperties;
 import com.zephyr.api.dto.response.PresignedUrlCreateResponse;
-import com.zephyr.api.dto.service.PresignedUrlCreateServiceDto;
+import com.zephyr.api.dto.PresignedUrlCreateServiceDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

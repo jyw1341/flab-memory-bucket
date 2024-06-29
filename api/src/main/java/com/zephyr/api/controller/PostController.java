@@ -1,13 +1,13 @@
 package com.zephyr.api.controller;
 
 import com.zephyr.api.domain.Post;
+import com.zephyr.api.dto.*;
 import com.zephyr.api.dto.mapper.*;
 import com.zephyr.api.dto.request.PostCreateRequest;
 import com.zephyr.api.dto.request.PostListRequest;
 import com.zephyr.api.dto.request.PostUpdateRequest;
 import com.zephyr.api.dto.response.PostListResponse;
 import com.zephyr.api.dto.response.PostResponse;
-import com.zephyr.api.dto.service.*;
 import com.zephyr.api.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

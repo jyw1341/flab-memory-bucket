@@ -1,7 +1,7 @@
 package com.zephyr.api.service;
 
 import com.zephyr.api.domain.Member;
-import com.zephyr.api.dto.service.MemberCreateServiceDto;
+import com.zephyr.api.dto.MemberCreateServiceDto;
 import com.zephyr.api.repository.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
