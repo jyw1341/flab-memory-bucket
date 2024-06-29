@@ -3,6 +3,8 @@ package com.zephyr.api.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -15,6 +17,9 @@ public class Series extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ALBUM_ID")
     private Album album;
+
+    @OneToMany(mappedBy = "series")
+    private List<Post> posts;
 
     @Setter
     private String name;

@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
@@ -17,6 +18,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -82,11 +84,14 @@ class FileServiceTest {
 
         List<String> urls = new ArrayList<>();
         urls.add("https://example.com/1/9b3b4472-91af-4603-94a3-515f8d45769c.jpg");
-
+        urls.add("https://example.com/1/9b3b4472-91af-4603-94a3-515f8d45769c.jpg");
+        urls.add("https://example.com/1/9b3b4472-91af-4603-94a3-515f8d45769c.jpg");
         //when
-        fileService.deleteObjects(urls);
+        List<CompletableFuture<Void>> completableFutures = fileService.deleteObjects(urls);
+        CompletableFuture<Void> allOf = CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0]));
+        allOf.join();
 
         //then
-//        verify(s3Client, times(urls.size())).deleteObject(any(DeleteObjectRequest.class));
+        verify(s3Client, times(urls.size())).deleteObject(any(DeleteObjectRequest.class));
     }
 }

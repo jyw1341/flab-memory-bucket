@@ -21,7 +21,22 @@ public class H2TableCleaner {
     }
 
     @Transactional
-    public void clean() {
+    public void cleanAll() {
+        entityManager.flush();
+        // Disable foreign key checks
+        entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
+
+        // Truncate each table
+        for (String tableName : tableNames) {
+            entityManager.createNativeQuery("TRUNCATE TABLE " + tableName).executeUpdate();
+        }
+
+        // Enable foreign key checks
+        entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
+    }
+
+    @Transactional
+    public void clean(String... tableNames) {
         entityManager.flush();
         // Disable foreign key checks
         entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();

@@ -55,7 +55,7 @@ public class PostController {
     }
 
     @PatchMapping("/{postId}")
-    public ResponseEntity<PostResponse> update(@PathVariable Long postId, @RequestBody PostUpdateRequest request) {
+    public ResponseEntity<Void> update(@PathVariable Long postId, @RequestBody PostUpdateRequest request) {
         Long loginId = 1L;
         List<MemoryUpdateServiceDto> memoryUpdateServiceDtos = request.getMemoryUpdateRequests()
                 .stream()
@@ -67,10 +67,9 @@ public class PostController {
                 request,
                 memoryUpdateServiceDtos
         );
+        postService.update(serviceDto);
 
-        Post post = postService.update(serviceDto);
-
-        return ResponseEntity.ok(new PostResponse(post));
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{postId}")

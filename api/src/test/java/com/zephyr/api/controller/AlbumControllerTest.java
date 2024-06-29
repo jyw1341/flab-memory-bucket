@@ -32,7 +32,7 @@ class AlbumControllerTest {
         Member member = Member.builder()
                 .username(TEST_USERNAME)
                 .email(TEST_EMAIL)
-                .profileImageUrl(TEST_PROFILE_URL)
+                .profileUrl(TEST_PROFILE_URL)
                 .build();
         memberRepository.save(member);
     }

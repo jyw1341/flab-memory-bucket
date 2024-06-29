@@ -1,178 +1,95 @@
 package com.zephyr.api.controller;
 
 import com.zephyr.api.config.TestConfig;
-import com.zephyr.api.domain.Member;
 import com.zephyr.api.dto.request.*;
 import com.zephyr.api.dto.response.AlbumResponse;
 import com.zephyr.api.dto.response.MemoryResponse;
 import com.zephyr.api.dto.response.PostResponse;
 import com.zephyr.api.dto.response.SeriesResponse;
-import com.zephyr.api.repository.MemberRepository;
 import com.zephyr.api.utils.H2TableCleaner;
+import com.zephyr.api.utils.TestRestTemplateUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.zephyr.api.utils.TestConstant.*;
-import static com.zephyr.api.utils.TestStringUtils.createUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Import(TestConfig.class)
 class PostControllerTest {
 
     @Autowired
     private H2TableCleaner h2TableCleaner;
-
     @Autowired
     private TestRestTemplate restTemplate;
-
     @LocalServerPort
     private int port;
+    private TestRestTemplateUtils testRestTemplateUtils;
+    private AlbumResponse albumResponse;
+    private SeriesResponse seriesResponse;
 
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @BeforeEach
-    void setUp() {
-        restTemplate.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+    @BeforeAll
+    void setUpAll() {
+        testRestTemplateUtils = new TestRestTemplateUtils(restTemplate, port);
+        testRestTemplateUtils.requestCreateMember(new MemberCreateRequest(
+                "test@example.com",
+                "username",
+                "http://profile.url"));
+        albumResponse = testRestTemplateUtils.requestCreateAlbum(new AlbumCreateRequest(
+                TEST_ALBUM_TITLE,
+                TEST_ALBUM_DESC,
+                TEST_ALBUM_THUMBNAIL));
+        seriesResponse = testRestTemplateUtils.requestCreateSeries(new SeriesCreateRequest(
+                albumResponse.getId(),
+                TEST_SERIES_NAME));
     }
 
     @AfterEach
     void cleanUp() {
-        h2TableCleaner.clean();
-    }
-
-
-    private Member createMember() {
-        Member member = Member.builder()
-                .username(TEST_USERNAME)
-                .email(TEST_EMAIL)
-                .profileImageUrl(TEST_PROFILE_URL)
-                .build();
-        memberRepository.save(member);
-
-        return member;
-    }
-
-    private AlbumResponse createAlbum() {
-        AlbumCreateRequest albumCreateRequest = new AlbumCreateRequest(
-                TEST_ALBUM_TITLE,
-                TEST_ALBUM_DESC,
-                TEST_ALBUM_THUMBNAIL
-        );
-
-        return restTemplate.postForEntity(
-                createUrl(port, "/albums"),
-                albumCreateRequest,
-                AlbumResponse.class
-        ).getBody();
-    }
-
-    private SeriesResponse createSeries(Long albumId) {
-        SeriesCreateRequest seriesCreateRequest = new SeriesCreateRequest(
-                albumId,
-                TEST_SERIES_NAME
-        );
-
-        return restTemplate.postForEntity(
-                createUrl(port, "/series"),
-                seriesCreateRequest,
-                SeriesResponse.class
-        ).getBody();
-    }
-
-    private List<MemoryCreateRequest> makeMemoryRequests(int size) {
-        List<MemoryCreateRequest> result = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            MemoryCreateRequest request = new MemoryCreateRequest(
-                    (double) i,
-                    "Content URL " + i,
-                    "Caption " + i
-            );
-            result.add(request);
-        }
-
-        return result;
-    }
-
-    private PostCreateRequest makePostCreateRequest(Long albumId, Long seriesId, int thumbnailMemoryIndex, List<MemoryCreateRequest> memoryCreateRequests) {
-        return new PostCreateRequest(
-                albumId,
-                seriesId,
-                TEST_POST_TITLE,
-                TEST_POST_DESC,
-                LocalDate.now(),
-                memoryCreateRequests.get(thumbnailMemoryIndex).getContentUrl(),
-                memoryCreateRequests
-        );
-    }
-
-    private ResponseEntity<PostResponse> createPost(PostCreateRequest request) {
-        return restTemplate.postForEntity(
-                createUrl(port, "/posts"),
-                request,
-                PostResponse.class
-        );
-    }
-
-    private PostResponse updatePost(Long postId, PostUpdateRequest postUpdateRequest) {
-        return restTemplate.patchForObject(
-                createUrl(port, "/posts/" + postId),
-                postUpdateRequest,
-                PostResponse.class
-        );
+        h2TableCleaner.clean("post", "memory");
     }
 
     @Test
     @DisplayName("포스트 생성 요청 성공")
     public void successPostCreateRequest() {
         //given
-        createMember();
-        AlbumResponse albumResponse = createAlbum();
-        SeriesResponse seriesResponse = createSeries(albumResponse.getId());
-        List<MemoryCreateRequest> memoryCreateRequests = makeMemoryRequests(5);
-        int thumbnailMemoryIndex = 0;
-        PostCreateRequest postCreateRequest = makePostCreateRequest(
+        List<MemoryCreateRequest> memoryRequestDtos = testRestTemplateUtils.createMemoryRequestDto(10);
+        PostCreateRequest request = new PostCreateRequest(
                 albumResponse.getId(),
                 seriesResponse.getId(),
-                thumbnailMemoryIndex,
-                memoryCreateRequests
+                TEST_POST_TITLE,
+                TEST_POST_DESC,
+                LocalDate.now(),
+                memoryRequestDtos.get(0).getContentUrl(),
+                memoryRequestDtos
         );
 
         //when
-        ResponseEntity<PostResponse> responseEntity = createPost(postCreateRequest);
-        PostResponse postResponse = responseEntity.getBody();
+        PostResponse postResponse = testRestTemplateUtils.requestCreatePost(request);
 
         //then
         //포스트 내용 비교
-        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
         assertNotNull(postResponse.getId());
-        assertEquals(postCreateRequest.getTitle(), postResponse.getTitle());
-        assertEquals(postCreateRequest.getDescription(), postResponse.getDescription());
-        assertEquals(postCreateRequest.getMemoryDate(), postResponse.getMemoryDate());
-        assertEquals(seriesResponse.getName(), postResponse.getSeries());
-        assertEquals(postCreateRequest.getMemoryCreateRequests().get(thumbnailMemoryIndex).getContentUrl(), postResponse.getThumbnailUrl());
+        assertEquals(request.getTitle(), postResponse.getTitle());
+        assertEquals(request.getDescription(), postResponse.getDescription());
+        assertEquals(request.getMemoryDate(), postResponse.getMemoryDate());
+        assertEquals(request.getSeriesId(), postResponse.getSeries().getId());
+        assertEquals(request.getThumbnailUrl(), postResponse.getThumbnailUrl());
 
         //메모리 비교
-        assertEquals(postCreateRequest.getMemoryCreateRequests().size(), postResponse.getMemories().size());
-        for (MemoryCreateRequest createRequest : postCreateRequest.getMemoryCreateRequests()) {
+        assertEquals(request.getMemoryCreateRequests().size(), postResponse.getMemories().size());
+        for (MemoryCreateRequest createRequest : request.getMemoryCreateRequests()) {
             MemoryResponse memoryResponse = postResponse.getMemories().stream()
                     .filter(memory -> memory.getIndex().equals(createRequest.getIndex()))
                     .findFirst()
@@ -185,26 +102,23 @@ class PostControllerTest {
     @DisplayName("포스트 수정 요청 성공")
     void successUpdatePost() {
         //given
-        createMember();
-        AlbumResponse albumResponse = createAlbum();
-        SeriesResponse seriesResponse = createSeries(albumResponse.getId());
-        List<MemoryCreateRequest> memoryCreateRequests = makeMemoryRequests(5);
-        int thumbnailMemoryIndex = 0;
-        PostCreateRequest postCreateRequest = makePostCreateRequest(
+        List<MemoryCreateRequest> memoryRequestDtos = testRestTemplateUtils.createMemoryRequestDto(10);
+        PostCreateRequest request = new PostCreateRequest(
                 albumResponse.getId(),
                 seriesResponse.getId(),
-                thumbnailMemoryIndex,
-                memoryCreateRequests
+                TEST_POST_TITLE,
+                TEST_POST_DESC,
+                LocalDate.now(),
+                memoryRequestDtos.get(0).getContentUrl(),
+                memoryRequestDtos
         );
-        ResponseEntity<PostResponse> responseEntity = createPost(postCreateRequest);
-        PostResponse postResponse = responseEntity.getBody();
+        PostResponse postResponse = testRestTemplateUtils.requestCreatePost(request);
 
         //when
         List<MemoryUpdateRequest> memoryUpdateRequests = postResponse.getMemories()
                 .stream()
-                .map(request -> new MemoryUpdateRequest(request.getId(), "수정된 캡션", request.getIndex() + 1))
+                .map(memoryResponse -> new MemoryUpdateRequest(memoryResponse.getId(), "수정된 캡션", memoryResponse.getIndex() + 1))
                 .toList();
-
         PostUpdateRequest postUpdateRequest = new PostUpdateRequest(
                 null,
                 "수정된 제목",
@@ -213,20 +127,20 @@ class PostControllerTest {
                 postResponse.getMemories().get(1).getContentUrl(),
                 memoryUpdateRequests
         );
-
-        PostResponse response = updatePost(postResponse.getId(), postUpdateRequest);
+        testRestTemplateUtils.requestUpdatePost(postResponse.getId(), postUpdateRequest);
+        PostResponse result = testRestTemplateUtils.requestGetPost(postResponse.getId());
 
         //then
-        assertNotNull(response);
-        assertEquals(postUpdateRequest.getTitle(), response.getTitle());
-        assertEquals(postUpdateRequest.getDescription(), response.getDescription());
-        assertEquals(postUpdateRequest.getMemoryDate(), response.getMemoryDate());
-        assertEquals(postUpdateRequest.getThumbnailUrl(), response.getThumbnailUrl());
-        assertEquals(postUpdateRequest.getMemoryDate(), response.getMemoryDate());
+        assertNotNull(result);
+        assertEquals(postUpdateRequest.getTitle(), result.getTitle());
+        assertEquals(postUpdateRequest.getDescription(), result.getDescription());
+        assertEquals(postUpdateRequest.getMemoryDate(), result.getMemoryDate());
+        assertEquals(postUpdateRequest.getThumbnailUrl(), result.getThumbnailUrl());
+        assertEquals(postUpdateRequest.getMemoryDate(), result.getMemoryDate());
 
         //메모리 인덱스 비교
         for (MemoryUpdateRequest updateRequest : memoryUpdateRequests) {
-            MemoryResponse updatedMemory = response.getMemories().stream()
+            MemoryResponse updatedMemory = result.getMemories().stream()
                     .filter(memory -> memory.getId().equals(updateRequest.getId()))
                     .findFirst()
                     .orElseThrow();
