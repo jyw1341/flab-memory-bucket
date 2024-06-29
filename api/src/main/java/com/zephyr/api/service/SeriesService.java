@@ -46,10 +46,6 @@ public class SeriesService {
         return seriesRepository.findByAlbumId(albumId);
     }
 
-    public List<Series> getSeriesPostList(Long albumId) {
-        return seriesRepository.findSeriesPost(albumId);
-    }
-
     public void update(SeriesUpdateServiceDto dto) {
         Series series = seriesRepository.findById(dto.getSeriesId())
                 .orElseThrow(() -> new SeriesNotFoundException(messageSource));
