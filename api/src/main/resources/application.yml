@@ -29,5 +29,5 @@ storage:
   region: kr-standard
   bucket-name: re-memory-dev
   end-point: https://kr.object.ncloudstorage.com
-  thumbnails[0]: /thumbnails/1.jpg
+  thumbnailUrl: /thumbnails/1.jpg
 

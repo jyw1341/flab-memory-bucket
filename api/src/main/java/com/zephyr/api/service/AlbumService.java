@@ -110,6 +110,6 @@ public class AlbumService {
     }
 
     public String getDefaultAlbumThumbnailUrl() {
-        return s3Properties.getEndPoint() + s3Properties.getBucketName() + s3Properties.getThumbnails().get(0);
+        return s3Properties.getEndPoint() + s3Properties.getBucketName() + s3Properties.getThumbnailUrl();
     }
 }
