@@ -2,6 +2,7 @@ package com.zephyr.api.controller;
 
 import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.AlbumMember;
+import com.zephyr.api.domain.Series;
 import com.zephyr.api.dto.*;
 import com.zephyr.api.dto.mapper.*;
 import com.zephyr.api.dto.request.AlbumCreateRequest;
@@ -102,6 +103,11 @@ public class AlbumController {
     public ResponseEntity<SeriesResponse> createSeries(
             @PathVariable Long albumId,
             @RequestBody SeriesCreateRequest request) {
-                return null;
+        SeriesCreateServiceDto serviceDto = SeriesCreateMapper.INSTANCE.toSeriesCreateServiceDto(albumId, request);
+        Series series = seriesService.create(serviceDto);
+
+        String path = String.format("/albums/%d/series/%d", albumId, series.getId());
+
+        return ResponseEntity.created(URI.create(path)).body(new SeriesResponse(series));
     }
 }

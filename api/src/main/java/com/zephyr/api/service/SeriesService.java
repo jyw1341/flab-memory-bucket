@@ -2,6 +2,7 @@ package com.zephyr.api.service;
 
 import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.Series;
+import com.zephyr.api.dto.SeriesCreateServiceDto;
 import com.zephyr.api.dto.request.SeriesCreateRequest;
 import com.zephyr.api.dto.SeriesUpdateServiceDto;
 import com.zephyr.api.exception.SeriesNotFoundException;
@@ -20,12 +21,12 @@ public class SeriesService {
     private final AlbumService albumService;
     private final MessageSource messageSource;
 
-    public Series create(SeriesCreateRequest dto) {
+    public Series create(SeriesCreateServiceDto dto) {
         Album album = albumService.get(dto.getAlbumId());
 
         Series series = Series.builder()
                 .album(album)
-                .name(dto.getName())
+                .name(dto.getSeriesName())
                 .build();
         seriesRepository.save(series);
 
