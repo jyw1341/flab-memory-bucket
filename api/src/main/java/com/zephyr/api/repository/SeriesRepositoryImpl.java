@@ -3,7 +3,6 @@ package com.zephyr.api.repository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zephyr.api.domain.Series;
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 
@@ -14,7 +13,6 @@ import static com.zephyr.api.domain.QSeries.series;
 public class SeriesRepositoryImpl implements SeriesCustomRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
-    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public List<Series> findSeriesPost(Long albumId) {
