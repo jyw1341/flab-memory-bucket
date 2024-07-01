@@ -1,6 +1,7 @@
 package com.zephyr.api.service;
 
 import com.zephyr.api.domain.Album;
+import com.zephyr.api.domain.Post;
 import com.zephyr.api.domain.Series;
 import com.zephyr.api.dto.SeriesCreateServiceDto;
 import com.zephyr.api.repository.SeriesRepository;
@@ -11,6 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
+
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -53,6 +56,23 @@ class SeriesServiceTest {
         verify(albumService, times(1)).get(serviceDto.getAlbumId());
         verify(seriesRepository, times(1)).save(any(Series.class));
 
+    }
+
+    @Test
+    @DisplayName("")
+    void successSeriesUpdate() {
+        Post post = mock(Post.class);
+        Series series = Series.builder().name("테스트").build();
+        series.setPostCount(0);
+        series.setFirstDate(null);
+        series.setLastDate(null);
+        when(post.getSeries()).thenReturn(series);
+        when(post.getMemoryDate()).thenReturn(LocalDate.of(2024, 6, 1));
+
+        seriesService.update(post);
+
+        assertEquals(post.getMemoryDate(), series.getFirstDate());
+        assertEquals(LocalDate.of(2024, 6, 3), series.getLastDate());
     }
 
 }

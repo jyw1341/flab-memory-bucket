@@ -1,6 +1,7 @@
 package com.zephyr.api.service;
 
 import com.zephyr.api.domain.Album;
+import com.zephyr.api.domain.Post;
 import com.zephyr.api.domain.Series;
 import com.zephyr.api.dto.SeriesCreateServiceDto;
 import com.zephyr.api.dto.request.SeriesCreateRequest;
@@ -51,6 +52,18 @@ public class SeriesService {
                 .orElseThrow(() -> new SeriesNotFoundException(messageSource));
 
         series.setName(dto.getSeriesName());
+    }
+
+    public void update(Post post) {
+        Series series = post.getSeries();
+        series.setPostCount(series.getPostCount() + 1);
+        if(post.getMemoryDate().isBefore(series.getFirstDate())) {
+            series.setFirstDate(post.getMemoryDate());
+            series.setThumbnailUrl(post.getThumbnailUrl());
+        }
+        if(post.getMemoryDate().isAfter(series.getLastDate())) {
+            series.setLastDate(post.getMemoryDate());
+        }
     }
 
     public void delete(Long seriesId) {

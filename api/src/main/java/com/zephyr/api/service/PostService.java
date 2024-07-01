@@ -11,6 +11,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -27,13 +28,14 @@ public class PostService {
 
     @Transactional
     public Post create(PostCreateServiceDto dto) {
-        Member member = memberService.get(dto.getMemberId());
         Album album = albumService.get(dto.getAlbumId());
+        Member member = memberService.get(dto.getMemberId());
+        Series series = seriesService.get(dto.getSeriesId());
 
         Post post = Post.builder()
                 .album(album)
                 .author(member)
-                .series(seriesService.get(dto.getSeriesId()))
+                .series(series)
                 .title(dto.getTitle())
                 .description(dto.getDescription())
                 .memoryDate(dto.getMemoryDate())
@@ -50,6 +52,7 @@ public class PostService {
         }
 
         postRepository.save(post);
+        seriesService.update(post);
 
         return post;
     }
