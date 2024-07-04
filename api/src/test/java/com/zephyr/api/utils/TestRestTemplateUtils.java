@@ -6,6 +6,7 @@ import com.zephyr.api.dto.response.MemberResponse;
 import com.zephyr.api.dto.response.PostResponse;
 import com.zephyr.api.dto.response.SeriesResponse;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +23,11 @@ public class TestRestTemplateUtils {
         this.port = port;
     }
 
-    public MemberResponse requestCreateMember(MemberCreateRequest request) {
-        return restTemplate.postForEntity(
-                        createUrl(port, "/members"),
-                        request,
-                        MemberResponse.class)
-                .getBody();
+    public void requestCreateMember(MemberCreateRequest request) {
+        restTemplate.postForEntity(
+                createUrl(port, "/members"),
+                request,
+                MemberResponse.class);
     }
 
     public AlbumResponse requestCreateAlbum(AlbumCreateRequest request) {
@@ -40,18 +40,25 @@ public class TestRestTemplateUtils {
 
     public SeriesResponse requestCreateSeries(SeriesCreateRequest request) {
         return restTemplate.postForEntity(
-                createUrl(port, "/series"),
+                createUrl(port, "/albums/" + request.getAlbumId() + "/series"),
                 request,
                 SeriesResponse.class
         ).getBody();
     }
 
-    public PostResponse requestCreatePost(PostCreateRequest request) {
-        return restTemplate.postForEntity(
-                createUrl(port, "/posts"),
-                request,
-                PostResponse.class
+    public SeriesResponse requestGetSeries(Long seriesId) {
+        return restTemplate.getForEntity(
+                createUrl(port, "/series/" + seriesId),
+                SeriesResponse.class
         ).getBody();
+    }
+
+    public ResponseEntity<Void> requestCreatePost(Long albumId, PostCreateRequest request) {
+        return restTemplate.postForEntity(
+                createUrl(port, String.format("/albums/%d/posts", albumId)),
+                request,
+                Void.class
+        );
     }
 
     public PostResponse requestGetPost(Long postId) {
@@ -61,10 +68,25 @@ public class TestRestTemplateUtils {
         ).getBody();
     }
 
+    public PostResponse requestGetPost(String path) {
+        return restTemplate.getForEntity(
+                createUrl(port, path),
+                PostResponse.class
+        ).getBody();
+    }
+
     public void requestUpdatePost(Long postId, PostUpdateRequest postUpdateRequest) {
         restTemplate.patchForObject(
                 createUrl(port, "/posts/" + postId),
                 postUpdateRequest,
+                Void.class
+        );
+    }
+
+    public void requestUpdateMemories(Long postId, List<MemoryUpdateRequest> requests) {
+        restTemplate.patchForObject(
+                createUrl(port, "/posts/" + postId + "/memories"),
+                requests,
                 Void.class
         );
     }

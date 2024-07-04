@@ -18,9 +18,9 @@ public class AlbumMemberRepositoryImpl implements AlbumMemberCustomRepository {
     @Override
     public List<AlbumMember> findAlbumMembers(AlbumMemberListServiceDto dto) {
         return jpaQueryFactory.selectFrom(albumMember)
-                .where(albumIdEq(dto.getAlbumId()), memberIdEq(dto.getMemberId()))
+                .where(albumIdEq(dto.getAlbumId()))
                 .limit(dto.getSize())
-                .offset(0)
+                .offset(dto.getPage())
                 .fetch();
     }
 

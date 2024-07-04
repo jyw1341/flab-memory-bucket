@@ -10,5 +10,7 @@ public interface MemoryUpdateMapper {
 
     MemoryUpdateMapper INSTANCE = Mappers.getMapper(MemoryUpdateMapper.class);
 
-    MemoryUpdateServiceDto toMemoryUpdateServiceDto(MemoryUpdateRequest request);
+    MemoryUpdateServiceDto toMemoryUpdateServiceDto(
+            MemoryUpdateRequest request
+    );
 }

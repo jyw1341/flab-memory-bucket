@@ -1,11 +1,12 @@
-package com.zephyr.api.dto;
+package com.zephyr.api.dto.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-public class PostListServiceDto {
+@AllArgsConstructor
+public class PostSearchRequest {
 
-    private final Long albumId;
     private final String username;
     private final String title;
     private final String seriesName;

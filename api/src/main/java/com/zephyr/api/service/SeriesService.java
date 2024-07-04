@@ -1,18 +1,19 @@
 package com.zephyr.api.service;
 
 import com.zephyr.api.domain.Album;
-import com.zephyr.api.domain.Post;
 import com.zephyr.api.domain.Series;
+import com.zephyr.api.dto.SeriesAggregationDto;
 import com.zephyr.api.dto.SeriesCreateServiceDto;
-import com.zephyr.api.dto.request.SeriesCreateRequest;
 import com.zephyr.api.dto.SeriesUpdateServiceDto;
 import com.zephyr.api.exception.SeriesNotFoundException;
 import com.zephyr.api.repository.SeriesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +28,7 @@ public class SeriesService {
 
         Series series = Series.builder()
                 .album(album)
+                .postCount(0L)
                 .name(dto.getSeriesName())
                 .build();
         seriesRepository.save(series);
@@ -47,23 +49,34 @@ public class SeriesService {
         return seriesRepository.findByAlbumId(albumId);
     }
 
-    public void update(SeriesUpdateServiceDto dto) {
+    @Transactional
+    public void updateName(SeriesUpdateServiceDto dto) {
         Series series = seriesRepository.findById(dto.getSeriesId())
                 .orElseThrow(() -> new SeriesNotFoundException(messageSource));
 
         series.setName(dto.getSeriesName());
     }
 
-    public void update(Post post) {
-        Series series = post.getSeries();
-        series.setPostCount(series.getPostCount() + 1);
-        if(post.getMemoryDate().isBefore(series.getFirstDate())) {
-            series.setFirstDate(post.getMemoryDate());
-            series.setThumbnailUrl(post.getThumbnailUrl());
+    @Transactional
+    public void updateAggregation(Long seriesId) {
+        Series series = get(seriesId);
+        Optional<SeriesAggregationDto> optional = seriesRepository.findSeriesAggregationDto(seriesId);
+
+        if (optional.isPresent()) {
+            SeriesAggregationDto seriesAggregationDto = optional.get();
+            String thumbnail = seriesRepository.findSeriesThumbnail(seriesId).orElseThrow();
+
+            series.setPostCount(seriesAggregationDto.getPostCount());
+            series.setFirstDate(seriesAggregationDto.getFirstDate());
+            series.setLastDate(seriesAggregationDto.getLastDate());
+            series.setThumbnailUrl(thumbnail);
+            return;
         }
-        if(post.getMemoryDate().isAfter(series.getLastDate())) {
-            series.setLastDate(post.getMemoryDate());
-        }
+
+        series.setPostCount(0L);
+        series.setFirstDate(null);
+        series.setLastDate(null);
+        series.setThumbnailUrl(null);
     }
 
     public void delete(Long seriesId) {

@@ -8,6 +8,6 @@ import lombok.Getter;
 public class SeriesCreateRequest {
 
     private Long albumId;
-    private String name;
+    private String seriesName;
 
 }

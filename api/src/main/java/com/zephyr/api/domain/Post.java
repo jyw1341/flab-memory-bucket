@@ -41,7 +41,7 @@ public class Post extends BaseTimeEntity {
     @JoinColumn(name = "SERIES_ID")
     private Series series;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Memory> memories = new ArrayList<>();
 
     @Builder
@@ -60,4 +60,8 @@ public class Post extends BaseTimeEntity {
         memory.setPost(this);
     }
 
+    public void removeMemory(Memory memory) {
+        memories.remove(memory);
+        memory.setPost(null);
+    }
 }

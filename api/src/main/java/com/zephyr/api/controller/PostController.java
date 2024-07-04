@@ -3,8 +3,9 @@ package com.zephyr.api.controller;
 import com.zephyr.api.domain.Post;
 import com.zephyr.api.dto.*;
 import com.zephyr.api.dto.mapper.*;
+import com.zephyr.api.dto.request.MemoryUpdateRequest;
 import com.zephyr.api.dto.request.PostCreateRequest;
-import com.zephyr.api.dto.request.PostListRequest;
+import com.zephyr.api.dto.request.PostSearchRequest;
 import com.zephyr.api.dto.request.PostUpdateRequest;
 import com.zephyr.api.dto.response.PostListResponse;
 import com.zephyr.api.dto.response.PostResponse;
@@ -21,63 +22,68 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/posts")
 public class PostController {
 
     private final PostService postService;
 
-    @PostMapping
-    public ResponseEntity<PostResponse> create(@RequestBody PostCreateRequest request) {
+    @PostMapping("/albums/{albumId}/posts")
+    public ResponseEntity<Void> create(@PathVariable Long albumId, @RequestBody PostCreateRequest request) {
         Long loginId = 1L;
-        PostCreateServiceDto serviceDto = PostCreateMapper.INSTANCE.toPostCreateServiceDto(loginId, request);
+        List<MemoryCreateServiceDto> memoryCreateServiceDtos = request.getMemoryCreateRequests()
+                .stream()
+                .map(MemoryCreateMapper.INSTANCE::toMemoryCreateServiceDto)
+                .toList();
+        PostCreateServiceDto serviceDto = PostCreateMapper.INSTANCE.toPostCreateServiceDto(
+                loginId,
+                albumId,
+                request,
+                memoryCreateServiceDtos);
         Post post = postService.create(serviceDto);
+        String path = String.format("/posts/%d", post.getId());
 
-        return ResponseEntity.created(URI.create("/posts/" + post.getId())).body(new PostResponse(post));
+        return ResponseEntity.created(URI.create(path)).build();
     }
 
-    @GetMapping("/{postId}")
+    @GetMapping("/albums/{albumId}/posts")
+    public List<PostListResponse> getList(@PathVariable Long albumId, @ModelAttribute PostSearchRequest request) {
+        PostSearchServiceDto serviceDto = PostListMapper.INSTANCE.toPostListServiceDto(albumId, request);
+        List<Post> result = postService.getList(serviceDto);
+
+        return result.stream().map(PostListResponse::new).toList();
+    }
+
+    @GetMapping("/posts/{postId}")
     public PostResponse get(@PathVariable Long postId) {
         Post post = postService.get(postId);
 
         return new PostResponse(post);
     }
 
-    @GetMapping
-    public ResponseEntity<List<PostListResponse>> getList(@ModelAttribute PostListRequest request) {
-        PostListServiceDto serviceDto = PostListMapper.INSTANCE.toPostListServiceDto(request);
-
-        List<Post> result = postService.getList(serviceDto);
-
-        if (result.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok().body(result.stream().map(PostListResponse::new).toList());
-    }
-
-    @PatchMapping("/{postId}")
-    public ResponseEntity<Void> update(@PathVariable Long postId, @RequestBody PostUpdateRequest request) {
+    @PatchMapping("/posts/{postId}")
+    public void update(@PathVariable Long postId, @RequestBody PostUpdateRequest request) {
         Long loginId = 1L;
-        List<MemoryUpdateServiceDto> memoryUpdateServiceDtos = request.getMemoryUpdateRequests()
-                .stream()
-                .map(MemoryUpdateMapper.INSTANCE::toMemoryUpdateServiceDto)
-                .toList();
+
         PostUpdateServiceDto serviceDto = PostUpdateMapper.INSTANCE.toPostUpdateServiceDto(
                 loginId,
                 postId,
-                request,
-                memoryUpdateServiceDtos
+                request
         );
         postService.update(serviceDto);
-
-        return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{postId}")
-    public ResponseEntity<Void> delete(@PathVariable Long postId) {
+    @DeleteMapping("/posts/{postId}")
+    public void delete(@PathVariable Long postId) {
         Long loginId = 1L;
         PostDeleteServiceDto serviceDto = PostDeleteMapper.INSTANCE.toPostDeleteMapper(loginId, postId);
         postService.delete(serviceDto);
+    }
 
-        return ResponseEntity.ok().build();
+    @PatchMapping("/posts/{postId}/memories")
+    public void updateMemories(@PathVariable Long postId, @RequestBody List<MemoryUpdateRequest> requests) {
+        List<MemoryUpdateServiceDto> serviceDtos = requests.stream()
+                .map(MemoryUpdateMapper.INSTANCE::toMemoryUpdateServiceDto)
+                .toList();
+
+        postService.updateMemories(postId, serviceDtos);
     }
 }

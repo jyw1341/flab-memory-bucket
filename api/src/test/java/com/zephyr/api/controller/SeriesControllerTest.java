@@ -1,9 +1,11 @@
 package com.zephyr.api.controller;
 
 import com.zephyr.api.config.TestConfig;
-import com.zephyr.api.dto.request.*;
+import com.zephyr.api.dto.request.AlbumCreateRequest;
+import com.zephyr.api.dto.request.MemberCreateRequest;
+import com.zephyr.api.dto.request.MemoryCreateRequest;
+import com.zephyr.api.dto.request.SeriesCreateRequest;
 import com.zephyr.api.dto.response.AlbumResponse;
-import com.zephyr.api.dto.response.PostResponse;
 import com.zephyr.api.dto.response.SeriesResponse;
 import com.zephyr.api.utils.H2TableCleaner;
 import com.zephyr.api.utils.TestRestTemplateUtils;
@@ -13,13 +15,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static com.zephyr.api.utils.TestConstant.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static com.zephyr.api.utils.TestStringUtils.createUrl;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -70,64 +72,13 @@ class SeriesControllerTest {
                 album.getId(),
                 "시리즈2"));
         List<MemoryCreateRequest> memoryRequestDtos1 = restTemplateUtils.createMemoryRequestDto(1);
-        PostResponse post1 = restTemplateUtils.requestCreatePost(new PostCreateRequest(
-                album.getId(),
-                series1.getId(),
-                TEST_POST_TITLE,
-                TEST_POST_DESC,
-                LocalDate.of(2024, 6, 23),
-                "a",
-                memoryRequestDtos1));
-        List<MemoryCreateRequest> memoryRequestDtos2 = restTemplateUtils.createMemoryRequestDto(1);
-        PostResponse post2 = restTemplateUtils.requestCreatePost(new PostCreateRequest(
-                album.getId(),
-                series1.getId(),
-                TEST_POST_TITLE,
-                TEST_POST_DESC,
-                LocalDate.of(2024, 6, 2),
-                "fgh",
-                memoryRequestDtos2));
-        List<MemoryCreateRequest> memoryRequestDtos9 = restTemplateUtils.createMemoryRequestDto(1);
-        PostResponse post9 = restTemplateUtils.requestCreatePost(new PostCreateRequest(
-                album.getId(),
-                series1.getId(),
-                TEST_POST_TITLE,
-                TEST_POST_DESC,
-                LocalDate.of(2024, 6, 2),
-                "y",
-                memoryRequestDtos2));
-        List<MemoryCreateRequest> memoryRequestDtos4 = restTemplateUtils.createMemoryRequestDto(1);
-        PostResponse post4 = restTemplateUtils.requestCreatePost(new PostCreateRequest(
-                album.getId(),
-                series1.getId(),
-                TEST_POST_TITLE,
-                TEST_POST_DESC,
-                LocalDate.of(2024, 6, 4),
-                "n",
-                memoryRequestDtos2));
-        List<MemoryCreateRequest> memoryRequestDtos7 = restTemplateUtils.createMemoryRequestDto(1);
-        PostResponse post7 = restTemplateUtils.requestCreatePost(new PostCreateRequest(
-                album.getId(),
-                series1.getId(),
-                TEST_POST_TITLE,
-                TEST_POST_DESC,
-                LocalDate.of(2024, 6, 5),
-                "z",
-                memoryRequestDtos2));
-        List<MemoryCreateRequest> memoryRequestDtos3 = restTemplateUtils.createMemoryRequestDto(1);
-        PostResponse post3 = restTemplateUtils.requestCreatePost(new PostCreateRequest(
-                album.getId(),
-                series2.getId(),
-                TEST_POST_TITLE,
-                TEST_POST_DESC,
-                LocalDate.of(2024, 6, 3),
-                "c",
-                memoryRequestDtos2));
+
 
         //when
-
-
-        //then
-
+        restTemplate.exchange(
+                createUrl(port, String.format("/albums/%d/series", album.getId())),
+                HttpMethod.GET,
+                new HttpEntity<>(null),
+                Void.class);
     }
 }

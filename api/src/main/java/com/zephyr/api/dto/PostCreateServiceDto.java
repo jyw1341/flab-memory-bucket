@@ -1,6 +1,5 @@
 package com.zephyr.api.dto;
 
-import com.zephyr.api.dto.request.MemoryCreateRequest;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -16,5 +15,5 @@ public class PostCreateServiceDto {
     private final String description;
     private final LocalDate memoryDate;
     private final String thumbnailUrl;
-    private final List<MemoryCreateRequest> memoryCreateRequests;
+    private final List<MemoryCreateServiceDto> memoryCreateServiceDtos;
 }
