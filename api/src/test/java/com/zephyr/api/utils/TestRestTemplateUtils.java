@@ -45,12 +45,12 @@ public class TestRestTemplateUtils {
         ).getBody();
     }
 
-    public SeriesResponse requestCreateSeries(SeriesCreateRequest request) {
+    public ResponseEntity<Void> requestCreateSeries(SeriesCreateRequest request) {
         return restTemplate.postForEntity(
                 createUrl(port, "/albums/" + request.getAlbumId() + "/series"),
                 request,
-                SeriesResponse.class
-        ).getBody();
+                Void.class
+        );
     }
 
     public SeriesResponse requestGetSeries(Long seriesId) {
