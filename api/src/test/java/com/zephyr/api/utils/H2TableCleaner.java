@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.zephyr.api.utils.TestStringUtils.convertToUnderscore;
 
 @Slf4j
 public class H2TableCleaner {
@@ -20,23 +19,28 @@ public class H2TableCleaner {
         this.entityManager = entityManager;
     }
 
-    @Transactional
-    public void cleanAll() {
-        entityManager.flush();
-        // Disable foreign key checks
-        entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
-
-        // Truncate each table
-        for (String tableName : tableNames) {
-            entityManager.createNativeQuery("TRUNCATE TABLE " + tableName).executeUpdate();
+    public static String convertToUnderscore(String camelCase) {
+        if (camelCase == null || camelCase.isEmpty()) {
+            return camelCase;
         }
 
-        // Enable foreign key checks
-        entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
+        StringBuilder result = new StringBuilder();
+        result.append(Character.toLowerCase(camelCase.charAt(0)));
+
+        for (int i = 1; i < camelCase.length(); i++) {
+            char ch = camelCase.charAt(i);
+            if (Character.isUpperCase(ch)) {
+                result.append('_').append(Character.toLowerCase(ch));
+            } else {
+                result.append(ch);
+            }
+        }
+
+        return result.toString();
     }
 
     @Transactional
-    public void clean(String... tableNames) {
+    public void cleanTables(String... tableNames) {
         entityManager.flush();
         // Disable foreign key checks
         entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();

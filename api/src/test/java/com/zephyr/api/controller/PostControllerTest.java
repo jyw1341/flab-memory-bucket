@@ -1,5 +1,6 @@
 package com.zephyr.api.controller;
 
+import com.zephyr.api.config.TestConfig;
 import com.zephyr.api.dto.request.MemoryCreateRequest;
 import com.zephyr.api.dto.request.MemoryUpdateRequest;
 import com.zephyr.api.dto.request.PostCreateRequest;
@@ -8,13 +9,11 @@ import com.zephyr.api.dto.response.MemoryResponse;
 import com.zephyr.api.dto.response.PostResponse;
 import com.zephyr.api.utils.TestRestTemplateUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.jdbc.Sql;
 
@@ -28,19 +27,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(TestConfig.class)
 @Sql(scripts = "PostControllerTestSql.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 class PostControllerTest {
 
     @Autowired
-    private TestRestTemplate restTemplate;
-    @LocalServerPort
-    private int port;
     private TestRestTemplateUtils testRestTemplateUtils;
 
-    @BeforeEach
-    void setUp() {
-        testRestTemplateUtils = new TestRestTemplateUtils(restTemplate, port);
-    }
 
     @Test
     @DisplayName("포스트를 생성 시 포스트 정보가 저장된다")

@@ -20,7 +20,7 @@ public class PostResponse {
     private LocalDate memoryDate;
     private String thumbnailUrl;
     private MemberResponse author;
-    private SeriesNameResponse series;
+    private SeriesResponse series;
     private List<MemoryResponse> memories;
 
     public PostResponse(Post post) {
@@ -29,7 +29,7 @@ public class PostResponse {
         this.description = post.getDescription();
         this.memoryDate = post.getMemoryDate();
         this.thumbnailUrl = post.getCoverMemory().getContentUrl();
-        this.series = post.getSeries() != null ? new SeriesNameResponse(post.getSeries()) : null;
+        this.series = post.getSeries() != null ? new SeriesResponse(post.getSeries()) : null;
         this.author = new MemberResponse(post.getAuthor());
         this.memories = post.getMemories()
                 .stream()

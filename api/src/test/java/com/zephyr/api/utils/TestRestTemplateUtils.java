@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.zephyr.api.utils.TestStringUtils.createUrl;
-
 public class TestRestTemplateUtils {
 
     private final TestRestTemplate restTemplate;
@@ -25,6 +23,10 @@ public class TestRestTemplateUtils {
     public TestRestTemplateUtils(TestRestTemplate restTemplate, int port) {
         this.restTemplate = restTemplate;
         this.port = port;
+    }
+
+    public static String createUrl(int port, String path) {
+        return String.format("http://localhost:%d/%s", port, path);
     }
 
     public void requestCreateMember(MemberCreateRequest request) {
