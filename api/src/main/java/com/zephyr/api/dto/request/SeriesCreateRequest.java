@@ -1,12 +1,13 @@
 package com.zephyr.api.dto.request;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class SeriesCreateRequest {
 
     private String seriesName;
-
 }

@@ -27,7 +27,7 @@ public class TestRestTemplateUtils {
     }
 
     public static String createUrl(int port, String path) {
-        return String.format("http://localhost:%d/%s", port, path);
+        return String.format("http://localhost:%d%s", port, path);
     }
 
     public void requestCreateMember(MemberCreateRequest request) {
@@ -45,17 +45,34 @@ public class TestRestTemplateUtils {
         ).getBody();
     }
 
-    public ResponseEntity<Void> requestCreateSeries(SeriesCreateRequest request) {
+    public ResponseEntity<Void> requestCreateSeries(Long albumId, SeriesCreateRequest request) {
         return restTemplate.postForEntity(
-                createUrl(port, "/albums/" + request.getAlbumId() + "/series"),
+                createUrl(port, String.format("/albums/%d/series", albumId)),
                 request,
                 Void.class
         );
     }
 
+    public void requestCreateSeries(Long albumId, List<SeriesCreateRequest> requests) {
+        for (SeriesCreateRequest request : requests) {
+            restTemplate.postForEntity(
+                    createUrl(port, String.format("/albums/%d/series", albumId)),
+                    request,
+                    Void.class
+            );
+        }
+    }
+
     public SeriesResponse requestGetSeries(Long seriesId) {
         return restTemplate.getForEntity(
                 createUrl(port, "/series/" + seriesId),
+                SeriesResponse.class
+        ).getBody();
+    }
+
+    public SeriesResponse requestGetSeries(String path) {
+        return restTemplate.getForEntity(
+                createUrl(port, path),
                 SeriesResponse.class
         ).getBody();
     }
@@ -107,6 +124,15 @@ public class TestRestTemplateUtils {
                 requests,
                 Void.class
         );
+    }
+
+    public List<SeriesCreateRequest> makeSeriesCreateRequest(int size) {
+        List<SeriesCreateRequest> result = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            result.add(new SeriesCreateRequest("시리즈 " + i));
+        }
+
+        return result;
     }
 
     public List<MemoryCreateRequest> createMemoryRequestDto(int size) {
