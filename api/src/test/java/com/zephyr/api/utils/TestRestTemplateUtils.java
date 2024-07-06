@@ -6,6 +6,8 @@ import com.zephyr.api.dto.response.MemberResponse;
 import com.zephyr.api.dto.response.PostResponse;
 import com.zephyr.api.dto.response.SeriesResponse;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
@@ -75,10 +77,11 @@ public class TestRestTemplateUtils {
         ).getBody();
     }
 
-    public void requestUpdatePost(Long postId, PostUpdateRequest postUpdateRequest) {
-        restTemplate.patchForObject(
+    public ResponseEntity<Void> requestUpdatePost(Long postId, PostUpdateRequest postUpdateRequest) {
+        return restTemplate.exchange(
                 createUrl(port, "/posts/" + postId),
-                postUpdateRequest,
+                HttpMethod.PATCH,
+                new HttpEntity<>(postUpdateRequest),
                 Void.class
         );
     }

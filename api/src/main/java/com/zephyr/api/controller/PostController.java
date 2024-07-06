@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -82,7 +83,7 @@ public class PostController {
     public void updateMemories(@PathVariable Long postId, @RequestBody List<MemoryUpdateRequest> requests) {
         List<MemoryUpdateServiceDto> serviceDtos = requests.stream()
                 .map(MemoryUpdateMapper.INSTANCE::toMemoryUpdateServiceDto)
-                .toList();
+                .collect(Collectors.toList());
 
         postService.updateMemories(postId, serviceDtos);
     }

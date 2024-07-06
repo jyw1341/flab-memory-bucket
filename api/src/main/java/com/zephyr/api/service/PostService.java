@@ -2,7 +2,6 @@ package com.zephyr.api.service;
 
 import com.zephyr.api.domain.*;
 import com.zephyr.api.dto.*;
-import com.zephyr.api.exception.ForbiddenException;
 import com.zephyr.api.exception.PostNotFoundException;
 import com.zephyr.api.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +10,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,7 +24,6 @@ public class PostService {
     private final MemberService memberService;
     private final AlbumService albumService;
     private final SeriesService seriesService;
-    private final FileService fileService;
     private final MessageSource messageSource;
 
     @Transactional
@@ -50,7 +49,6 @@ public class PostService {
                     .build());
         }
         postRepository.save(post);
-        updateSeriesAggregation(series);
 
         return post;
     }
@@ -66,35 +64,24 @@ public class PostService {
 
     @Transactional
     public void update(PostUpdateServiceDto dto) {
-        Member member = memberService.get(dto.getMemberId());
         Post post = postRepository.findById(dto.getPostId())
                 .orElseThrow(() -> new PostNotFoundException(messageSource));
-        Series prevSeries = post.getSeries();
-        Series newSeries = seriesService.get(dto.getSeriesId());
+        Series series = seriesService.get(dto.getSeriesId());
 
-        validPostAuthor(post, member);
-        post.setSeries(newSeries);
+        post.setSeries(series);
         post.setTitle(dto.getTitle());
         post.setDescription(dto.getDescription());
-        post.setThumbnailUrl(dto.getThumbnailUrl());
         post.setMemoryDate(dto.getMemoryDate());
 
-        updateSeriesAggregation(prevSeries);
-        updateSeriesAggregation(newSeries);
+        post.getMemories().stream()
+                .filter(memory -> memory.getContentUrl().equals(dto.getThumbnailUrl()))
+                .findAny()
+                .orElseThrow(IllegalArgumentException::new);
+        post.setThumbnailUrl(dto.getThumbnailUrl());
     }
 
-    @Transactional
     public void delete(PostDeleteServiceDto dto) {
-        Post post = postRepository.findById(dto.getPostId())
-                .orElseThrow(() -> new PostNotFoundException(messageSource));
-        Member member = memberService.get(dto.getMemberId());
-        Series series = post.getSeries();
-
-        validPostAuthor(post, member);
-        List<String> urls = post.getMemories().stream().map(Memory::getContentUrl).toList();
-        postRepository.delete(post);
-        updateSeriesAggregation(series);
-        fileService.deleteObjects(urls);
+        postRepository.deleteById(dto.getPostId());
     }
 
     @Transactional
@@ -106,35 +93,30 @@ public class PostService {
                 .collect(Collectors.toMap(Memory::getId, memory -> memory));
 
         post.getMemories().clear();
+        dtos.sort(Comparator.comparing(MemoryUpdateServiceDto::getIndex));
         for (MemoryUpdateServiceDto dto : dtos) {
             if (dto.getId() == null) {
                 post.addMemory(Memory.builder()
                         .index(dto.getIndex())
                         .caption(dto.getCaption())
                         .contentUrl(dto.getContentUrl())
-                        .build());
+                        .build()
+                );
                 continue;
             }
-            Memory memory = memories.remove(dto.getId());
-            memory.setIndex(dto.getIndex());
-            memory.setCaption(dto.getCaption());
-            post.addMemory(memory);
+            Memory updatedMemory = memories.remove(dto.getId());
+            updatedMemory.setIndex(dto.getIndex());
+            updatedMemory.setCaption(dto.getCaption());
+            post.addMemory(updatedMemory);
         }
+
+        for (Memory removedMemory : memories.values()) {
+            if (post.getThumbnailUrl().equals(removedMemory.getContentUrl())) {
+                post.setThumbnailUrl(post.getMemories().get(0).getContentUrl());
+            }
+            removedMemory.setPost(null);
+        }
+
         postRepository.save(post);
-        fileService.deleteObjects(memories.values().stream().map(Memory::getContentUrl).toList());
-    }
-
-    private void validPostAuthor(Post post, Member member) {
-        if (post.getAuthor().getId().equals(member.getId())) {
-            return;
-        }
-
-        throw new ForbiddenException(messageSource);
-    }
-
-    private void updateSeriesAggregation(Series series) {
-        if (series != null) {
-            seriesService.updateAggregation(series.getId());
-        }
     }
 }

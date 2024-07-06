@@ -62,9 +62,9 @@ public class PostRepositoryImpl implements PostCustomRepository {
     public Optional<Post> findByIdFetchMemberAndSeriesAndMemories(Long postId) {
         return Optional.ofNullable(jpaQueryFactory.selectFrom(post)
                 .where(post.id.eq(postId))
-                .join(post.author, member).fetchJoin()
-                .join(post.series, series).fetchJoin()
-                .join(post.memories, memory).fetchJoin()
+                .leftJoin(post.author, member).fetchJoin()
+                .leftJoin(post.series, series).fetchJoin()
+                .leftJoin(post.memories, memory).fetchJoin()
                 .fetchOne());
     }
 }

@@ -2,6 +2,7 @@ package com.zephyr.api.controller;
 
 import com.zephyr.api.domain.Series;
 import com.zephyr.api.dto.SeriesCreateServiceDto;
+import com.zephyr.api.dto.SeriesPostDto;
 import com.zephyr.api.dto.SeriesUpdateServiceDto;
 import com.zephyr.api.dto.mapper.SeriesCreateMapper;
 import com.zephyr.api.dto.mapper.SeriesUpdateMapper;
@@ -34,10 +35,8 @@ public class SeriesController {
     }
 
     @GetMapping("/albums/{albumId}/series")
-    public List<SeriesResponse> getList(@PathVariable Long albumId) {
-        List<Series> result = seriesService.getList(albumId);
-
-        return result.stream().map(SeriesResponse::new).toList();
+    public List<SeriesPostDto> getList(@PathVariable Long albumId) {
+        return seriesService.getList(albumId);
     }
 
     @GetMapping("/series/{seriesId}")

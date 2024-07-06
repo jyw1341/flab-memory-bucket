@@ -3,8 +3,6 @@ package com.zephyr.api.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
-
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -21,22 +19,9 @@ public class Series extends BaseTimeEntity {
     @Setter
     private String name;
 
-    @Setter
-    private Long postCount;
-
-    @Setter
-    private LocalDate firstDate;
-
-    @Setter
-    private LocalDate lastDate;
-
-    @Setter
-    private String thumbnailUrl;
-
     @Builder
-    private Series(Album album, String name, Long postCount) {
+    private Series(Album album, String name) {
         this.album = album;
         this.name = name;
-        this.postCount = postCount;
     }
 }

@@ -13,7 +13,7 @@ import java.util.List;
 public class Post extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Setter
@@ -41,7 +41,7 @@ public class Post extends BaseTimeEntity {
     @JoinColumn(name = "SERIES_ID")
     private Series series;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Memory> memories = new ArrayList<>();
 
     @Builder
