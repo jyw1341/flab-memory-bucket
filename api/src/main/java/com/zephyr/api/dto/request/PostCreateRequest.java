@@ -14,6 +14,6 @@ public class PostCreateRequest {
     private final String title;
     private final String description;
     private final LocalDate memoryDate;
-    private final String thumbnailUrl;
+    private final String coverMemoryRequestId;
     private final List<MemoryCreateRequest> memoryCreateRequests;
 }

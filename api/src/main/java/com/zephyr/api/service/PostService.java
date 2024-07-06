@@ -2,6 +2,7 @@ package com.zephyr.api.service;
 
 import com.zephyr.api.domain.*;
 import com.zephyr.api.dto.*;
+import com.zephyr.api.exception.MemoryNotFoundException;
 import com.zephyr.api.exception.PostNotFoundException;
 import com.zephyr.api.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,15 +39,18 @@ public class PostService {
                 .title(dto.getTitle())
                 .description(dto.getDescription())
                 .memoryDate(dto.getMemoryDate())
-                .thumbnailUrl(dto.getThumbnailUrl())
                 .build();
 
         for (MemoryCreateServiceDto memoryCreateServiceDto : dto.getMemoryCreateServiceDtos()) {
-            post.addMemory(Memory.builder()
+            Memory memory = Memory.builder()
                     .index(memoryCreateServiceDto.getIndex())
                     .caption(memoryCreateServiceDto.getCaption())
                     .contentUrl(memoryCreateServiceDto.getContentUrl())
-                    .build());
+                    .build();
+            if (dto.getCoverMemoryRequestId().equals(memoryCreateServiceDto.getRequestId())) {
+                post.setCoverMemory(memory);
+            }
+            post.addMemory(memory);
         }
         postRepository.save(post);
 
@@ -73,11 +77,13 @@ public class PostService {
         post.setDescription(dto.getDescription());
         post.setMemoryDate(dto.getMemoryDate());
 
-        post.getMemories().stream()
-                .filter(memory -> memory.getContentUrl().equals(dto.getThumbnailUrl()))
-                .findAny()
-                .orElseThrow(IllegalArgumentException::new);
-        post.setThumbnailUrl(dto.getThumbnailUrl());
+        if (!post.getCoverMemory().getId().equals(dto.getCoverMemoryId())) {
+            Memory newCoverMemory = post.getMemories().stream()
+                    .filter(memory -> memory.getId().equals(dto.getCoverMemoryId()))
+                    .findFirst()
+                    .orElseThrow(() -> new MemoryNotFoundException(messageSource));
+            post.setCoverMemory(newCoverMemory);
+        }
     }
 
     public void delete(PostDeleteServiceDto dto) {
@@ -111,8 +117,8 @@ public class PostService {
         }
 
         for (Memory removedMemory : memories.values()) {
-            if (post.getThumbnailUrl().equals(removedMemory.getContentUrl())) {
-                post.setThumbnailUrl(post.getMemories().get(0).getContentUrl());
+            if (post.getCoverMemory().equals(removedMemory)) {
+                post.setCoverMemory(post.getMemories().get(0));
             }
             removedMemory.setPost(null);
         }

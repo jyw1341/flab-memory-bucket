@@ -23,17 +23,14 @@ public class Post extends BaseTimeEntity {
     private String description;
 
     @Setter
-    private String thumbnailUrl;
-
-    @Setter
     private LocalDate memoryDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ALBUM_ID")
+    @JoinColumn(name = "ALBUM_ID", nullable = false)
     private Album album;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "MEMBER_ID")
+    @JoinColumn(name = "MEMBER_ID", nullable = false)
     private Member author;
 
     @Setter
@@ -41,18 +38,22 @@ public class Post extends BaseTimeEntity {
     @JoinColumn(name = "SERIES_ID")
     private Series series;
 
+    @Setter
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MEMORY_ID", nullable = false)
+    private Memory coverMemory;
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Memory> memories = new ArrayList<>();
 
     @Builder
-    private Post(Album album, Series series, Member author, String title, String description, LocalDate memoryDate, String thumbnailUrl) {
+    private Post(Album album, Series series, Member author, String title, String description, LocalDate memoryDate) {
         this.album = album;
         this.series = series;
         this.author = author;
         this.title = title;
         this.description = description;
         this.memoryDate = memoryDate;
-        this.thumbnailUrl = thumbnailUrl;
     }
 
     public void addMemory(Memory memory) {

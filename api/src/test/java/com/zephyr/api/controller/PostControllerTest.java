@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.jdbc.Sql;
 
@@ -47,14 +46,14 @@ class PostControllerTest {
     @DisplayName("포스트를 생성 시 포스트 정보가 저장된다")
     public void createPost_shouldSavePostInfo() {
         //given
-        List<MemoryCreateRequest> memoryRequestDtos = testRestTemplateUtils.createMemoryRequestDto(10);
+        List<MemoryCreateRequest> memoryCreateRequests = testRestTemplateUtils.createMemoryRequestDto(5);
         PostCreateRequest request = new PostCreateRequest(
                 1L,
                 TEST_POST_TITLE,
                 TEST_POST_DESC,
-                LocalDate.of(2022, 1, 1),
-                "나다",
-                memoryRequestDtos
+                LocalDate.now(),
+                memoryCreateRequests.get(0).getRequestId(),
+                memoryCreateRequests
         );
 
         //when
@@ -66,21 +65,21 @@ class PostControllerTest {
         assertEquals(request.getDescription(), result.getDescription());
         assertEquals(request.getMemoryDate(), result.getMemoryDate());
         assertEquals(request.getSeriesId(), result.getSeries().getId());
-        assertEquals(request.getThumbnailUrl(), result.getThumbnailUrl());
+        assertEquals(request.getMemoryCreateRequests().get(0).getContentUrl(), result.getThumbnailUrl());
     }
 
     @Test
     @DisplayName("포스트를 생성하면 포스트에 속한 메모리가 저장된다")
     public void createPost_shouldSaveMemories() {
         //given
-        List<MemoryCreateRequest> memoryRequestDtos = testRestTemplateUtils.createMemoryRequestDto(10);
+        List<MemoryCreateRequest> memoryCreateRequests = testRestTemplateUtils.createMemoryRequestDto(5);
         PostCreateRequest request = new PostCreateRequest(
                 1L,
                 TEST_POST_TITLE,
                 TEST_POST_DESC,
                 LocalDate.now(),
-                memoryRequestDtos.get(0).getContentUrl(),
-                memoryRequestDtos
+                memoryCreateRequests.get(0).getRequestId(),
+                memoryCreateRequests
         );
 
         //when
@@ -88,45 +87,6 @@ class PostControllerTest {
         PostResponse result = testRestTemplateUtils.requestGetPost(response.getHeaders().getLocation().getPath());
 
         //then
-        assertEquals(request.getMemoryCreateRequests().size(), result.getMemories().size());
-        for (MemoryCreateRequest createRequest : request.getMemoryCreateRequests()) {
-            MemoryResponse memoryResponse = result.getMemories().stream()
-                    .filter(memory -> memory.getIndex().equals(createRequest.getIndex()))
-                    .findFirst()
-                    .orElseThrow();
-            assertEquals(createRequest.getCaption(), memoryResponse.getCaption());
-            assertEquals(createRequest.getIndex(), memoryResponse.getIndex());
-            assertEquals(createRequest.getContentUrl(), memoryResponse.getContentUrl());
-        }
-    }
-
-    @Test
-    @DisplayName("포스트를 생성하면 포스트, 메모리 모두 저장된다")
-    void successCreatePost() {
-        //given
-        Long albumId = 1L;
-        Long seriesId = 1L;
-        List<MemoryCreateRequest> memoryRequestDtos = testRestTemplateUtils.createMemoryRequestDto(10);
-        PostCreateRequest request = new PostCreateRequest(
-                seriesId,
-                TEST_POST_TITLE,
-                TEST_POST_DESC,
-                LocalDate.now(),
-                memoryRequestDtos.get(0).getContentUrl(),
-                memoryRequestDtos
-        );
-
-        //when
-        ResponseEntity<Void> response = testRestTemplateUtils.requestCreatePost(albumId, request);
-        PostResponse result = testRestTemplateUtils.requestGetPost(response.getHeaders().getLocation().getPath());
-
-        //then
-        assertEquals(request.getTitle(), result.getTitle());
-        assertEquals(request.getDescription(), result.getDescription());
-        assertEquals(request.getMemoryDate(), result.getMemoryDate());
-        assertEquals(request.getSeriesId(), result.getSeries().getId());
-        assertEquals(request.getThumbnailUrl(), result.getThumbnailUrl());
-
         assertEquals(request.getMemoryCreateRequests().size(), result.getMemories().size());
         for (MemoryCreateRequest createRequest : request.getMemoryCreateRequests()) {
             MemoryResponse memoryResponse = result.getMemories().stream()
@@ -151,7 +111,7 @@ class PostControllerTest {
                 TEST_POST_TITLE,
                 TEST_POST_DESC,
                 LocalDate.of(2024, 7, 1),
-                memoryRequestDtos.get(0).getContentUrl(),
+                memoryRequestDtos.get(0).getRequestId(),
                 memoryRequestDtos
         );
         String path = testRestTemplateUtils.requestCreatePost(albumId, postCreateRequest).getHeaders().getLocation().getPath();
@@ -160,10 +120,10 @@ class PostControllerTest {
         //when
         PostUpdateRequest postUpdateRequest = new PostUpdateRequest(
                 seriesOneId,
+                postResponse.getMemories().get(1).getId(),
                 "수정된 제목",
                 "수정된 소개문",
-                LocalDate.of(2024, 7, 2),
-                postResponse.getMemories().get(1).getContentUrl()
+                LocalDate.of(2024, 7, 2)
         );
         testRestTemplateUtils.requestUpdatePost(postResponse.getId(), postUpdateRequest);
         PostResponse updatedPostResult = testRestTemplateUtils.requestGetPost(postResponse.getId());
@@ -190,7 +150,7 @@ class PostControllerTest {
                 TEST_POST_TITLE,
                 TEST_POST_DESC,
                 LocalDate.of(2024, 7, 1),
-                memoryRequestDtos.get(0).getContentUrl(),
+                memoryRequestDtos.get(0).getRequestId(),
                 memoryRequestDtos
         );
         String path = testRestTemplateUtils.requestCreatePost(albumId, postCreateRequest).getHeaders().getLocation().getPath();
@@ -199,10 +159,10 @@ class PostControllerTest {
         //when
         PostUpdateRequest postUpdateRequest = new PostUpdateRequest(
                 seriesTwoId,
+                postResponse.getMemories().get(1).getId(),
                 "수정된 제목",
                 "수정된 소개문",
-                LocalDate.of(2024, 7, 2),
-                postResponse.getMemories().get(1).getContentUrl()
+                LocalDate.of(2024, 7, 2)
         );
         testRestTemplateUtils.requestUpdatePost(postResponse.getId(), postUpdateRequest);
         PostResponse updatedPostResult = testRestTemplateUtils.requestGetPost(postResponse.getId());
@@ -225,7 +185,7 @@ class PostControllerTest {
                 TEST_POST_TITLE,
                 TEST_POST_DESC,
                 LocalDate.of(2024, 7, 1),
-                memoryRequestDtos.get(0).getContentUrl(),
+                memoryRequestDtos.get(0).getRequestId(),
                 memoryRequestDtos
         );
         String path = testRestTemplateUtils.requestCreatePost(albumId, postCreateRequest).getHeaders().getLocation().getPath();
@@ -234,10 +194,10 @@ class PostControllerTest {
         //when
         PostUpdateRequest postUpdateRequest = new PostUpdateRequest(
                 null,
-                TEST_POST_TITLE,
-                TEST_POST_DESC,
-                LocalDate.of(2024, 7, 1),
-                memoryRequestDtos.get(0).getContentUrl()
+                postResponse.getMemories().get(1).getId(),
+                "수정된 제목",
+                "수정된 소개문",
+                LocalDate.of(2024, 7, 1)
         );
         testRestTemplateUtils.requestUpdatePost(postResponse.getId(), postUpdateRequest);
         PostResponse updatedPostResult = testRestTemplateUtils.requestGetPost(postResponse.getId());
@@ -260,7 +220,7 @@ class PostControllerTest {
                 TEST_POST_TITLE,
                 TEST_POST_DESC,
                 LocalDate.of(2024, 7, 1),
-                memoryRequestDtos.get(0).getContentUrl(),
+                memoryRequestDtos.get(0).getRequestId(),
                 memoryRequestDtos
         );
         String path = testRestTemplateUtils.requestCreatePost(albumId, postCreateRequest).getHeaders().getLocation().getPath();
@@ -269,10 +229,10 @@ class PostControllerTest {
         //when
         PostUpdateRequest postUpdateRequest = new PostUpdateRequest(
                 seriesOneId,
-                TEST_POST_TITLE,
-                TEST_POST_DESC,
-                LocalDate.of(2024, 7, 1),
-                memoryRequestDtos.get(0).getContentUrl()
+                postResponse.getMemories().get(1).getId(),
+                "수정된 제목",
+                "수정된 소개문",
+                LocalDate.of(2024, 7, 1)
         );
         testRestTemplateUtils.requestUpdatePost(postResponse.getId(), postUpdateRequest);
         PostResponse updatedPostResult = testRestTemplateUtils.requestGetPost(postResponse.getId());
@@ -284,8 +244,8 @@ class PostControllerTest {
     }
 
     @Test
-    @DisplayName("포스트의 썸네일을 메모리의 URL 중 하나로 수정할 수 있다")
-    void updatePostThumbnail() {
+    @DisplayName("포스트의 커버 메모리를 다른 메모리로 수정할 수 있다")
+    void updatePostCoverMemory() {
         //given
         Long albumId = 1L;
         Long seriesOneId = 1L;
@@ -295,19 +255,20 @@ class PostControllerTest {
                 TEST_POST_TITLE,
                 TEST_POST_DESC,
                 LocalDate.of(2024, 7, 1),
-                memoryRequestDtos.get(0).getContentUrl(),
+                memoryRequestDtos.get(0).getRequestId(),
                 memoryRequestDtos
         );
         String path = testRestTemplateUtils.requestCreatePost(albumId, postCreateRequest).getHeaders().getLocation().getPath();
         PostResponse postResponse = testRestTemplateUtils.requestGetPost(path);
 
         //when
+        MemoryResponse newCoverMemory = postResponse.getMemories().get(1);
         PostUpdateRequest postUpdateRequest = new PostUpdateRequest(
                 seriesOneId,
-                TEST_POST_TITLE,
-                TEST_POST_DESC,
-                LocalDate.of(2024, 7, 1),
-                memoryRequestDtos.get(1).getContentUrl()
+                newCoverMemory.getId(),
+                "수정된 제목",
+                "수정된 소개문",
+                LocalDate.of(2024, 7, 1)
         );
         testRestTemplateUtils.requestUpdatePost(postResponse.getId(), postUpdateRequest);
         PostResponse updatedPostResult = testRestTemplateUtils.requestGetPost(postResponse.getId());
@@ -315,39 +276,7 @@ class PostControllerTest {
         //then
         assertNotNull(updatedPostResult);
         assertEquals(postResponse.getId(), updatedPostResult.getId());
-        assertEquals(postUpdateRequest.getSeriesId(), updatedPostResult.getSeries().getId());
-    }
-
-    @Test
-    @DisplayName("메모리의 URL이 아닌 URL은 포스트의 썸네일로 사용할 수 없다")
-    void updatePostThumbnailWithInvalidUrl() {
-        //given
-        Long albumId = 1L;
-        Long seriesOneId = 1L;
-        List<MemoryCreateRequest> memoryRequestDtos = testRestTemplateUtils.createMemoryRequestDto(5);
-        PostCreateRequest postCreateRequest = new PostCreateRequest(
-                seriesOneId,
-                TEST_POST_TITLE,
-                TEST_POST_DESC,
-                LocalDate.of(2024, 7, 1),
-                memoryRequestDtos.get(0).getContentUrl(),
-                memoryRequestDtos
-        );
-        String path = testRestTemplateUtils.requestCreatePost(albumId, postCreateRequest).getHeaders().getLocation().getPath();
-        PostResponse postResponse = testRestTemplateUtils.requestGetPost(path);
-
-        //when
-        PostUpdateRequest postUpdateRequest = new PostUpdateRequest(
-                seriesOneId,
-                TEST_POST_TITLE,
-                TEST_POST_DESC,
-                LocalDate.of(2024, 7, 1),
-                "InvalidURL"
-        );
-        ResponseEntity<Void> response = testRestTemplateUtils.requestUpdatePost(postResponse.getId(), postUpdateRequest);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(newCoverMemory.getContentUrl(), updatedPostResult.getThumbnailUrl());
     }
 
     @Test
@@ -363,7 +292,7 @@ class PostControllerTest {
                 TEST_POST_TITLE,
                 TEST_POST_DESC,
                 LocalDate.of(2024, 7, 1),
-                memoryRequestDtos.get(0).getContentUrl(),
+                memoryRequestDtos.get(0).getRequestId(),
                 memoryRequestDtos
         );
         String path = testRestTemplateUtils.requestCreatePost(albumId, createRequest).getHeaders().getLocation().getPath();
@@ -408,7 +337,7 @@ class PostControllerTest {
                 TEST_POST_TITLE,
                 TEST_POST_DESC,
                 LocalDate.of(2024, 7, 1),
-                memoryRequestDtos.get(0).getContentUrl(),
+                memoryRequestDtos.get(0).getRequestId(),
                 memoryRequestDtos
         );
         String path = testRestTemplateUtils.requestCreatePost(albumId, createRequest).getHeaders().getLocation().getPath();
@@ -420,7 +349,7 @@ class PostControllerTest {
                         memory.getId(),
                         memory.getIndex() + 1,
                         "수정됨" + memory.getCaption(),
-                        "URL 수정"))
+                        "URL 수정 시도"))
                 .toList();
 
         testRestTemplateUtils.requestUpdateMemories(postBeforeUpdate.getId(), memoryUpdateRequests);
@@ -451,7 +380,7 @@ class PostControllerTest {
                 TEST_POST_TITLE,
                 TEST_POST_DESC,
                 LocalDate.of(2024, 7, 1),
-                memoryRequestDtos.get(0).getContentUrl(),
+                memoryRequestDtos.get(0).getRequestId(),
                 memoryRequestDtos
         );
         String path = testRestTemplateUtils.requestCreatePost(albumId, createRequest).getHeaders().getLocation().getPath();
@@ -488,7 +417,7 @@ class PostControllerTest {
                 TEST_POST_TITLE,
                 TEST_POST_DESC,
                 LocalDate.of(2024, 7, 1),
-                memoryRequestDtos.get(0).getContentUrl(),
+                memoryRequestDtos.get(0).getRequestId(),
                 memoryRequestDtos
         );
         String path = testRestTemplateUtils.requestCreatePost(albumId, createRequest).getHeaders().getLocation().getPath();
@@ -525,7 +454,7 @@ class PostControllerTest {
                 TEST_POST_TITLE,
                 TEST_POST_DESC,
                 LocalDate.of(2024, 7, 1),
-                memoryRequestDtos.get(0).getContentUrl(),
+                memoryRequestDtos.get(0).getRequestId(),
                 memoryRequestDtos
         );
         String path = testRestTemplateUtils.requestCreatePost(albumId, createRequest).getHeaders().getLocation().getPath();

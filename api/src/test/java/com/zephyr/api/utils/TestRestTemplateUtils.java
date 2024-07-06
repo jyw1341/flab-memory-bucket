@@ -5,6 +5,7 @@ import com.zephyr.api.dto.response.AlbumResponse;
 import com.zephyr.api.dto.response.MemberResponse;
 import com.zephyr.api.dto.response.PostResponse;
 import com.zephyr.api.dto.response.SeriesResponse;
+import com.zephyr.api.enums.ContentType;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.zephyr.api.utils.TestStringUtils.createUrl;
 
@@ -98,6 +100,8 @@ public class TestRestTemplateUtils {
         List<MemoryCreateRequest> result = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             MemoryCreateRequest request = new MemoryCreateRequest(
+                    UUID.randomUUID().toString(),
+                    ContentType.IMAGE,
                     (double) i,
                     "Content URL " + i,
                     "Caption " + i

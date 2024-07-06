@@ -28,7 +28,7 @@ public class PostResponse {
         this.title = post.getTitle();
         this.description = post.getDescription();
         this.memoryDate = post.getMemoryDate();
-        this.thumbnailUrl = post.getThumbnailUrl();
+        this.thumbnailUrl = post.getCoverMemory().getContentUrl();
         this.series = post.getSeries() != null ? new SeriesNameResponse(post.getSeries()) : null;
         this.author = new MemberResponse(post.getAuthor());
         this.memories = post.getMemories()
