@@ -7,7 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class SeriesCreateRequest {
 
-    private Long albumId;
     private String seriesName;
 
 }
