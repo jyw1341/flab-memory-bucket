@@ -43,7 +43,11 @@ public class SeriesService {
                 .orElseThrow(() -> new SeriesNotFoundException(messageSource));
     }
 
-    public List<SeriesPostDto> getList(Long albumId) {
+    public List<Series> getList(Long albumId) {
+        return seriesRepository.findByAlbumId(albumId);
+    }
+
+    public List<SeriesPostDto> getSeriesPostList(Long albumId) {
         return seriesRepository.findSeriesAggregationDto(albumId);
     }
 

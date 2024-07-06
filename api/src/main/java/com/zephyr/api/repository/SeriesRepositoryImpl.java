@@ -22,8 +22,9 @@ public class SeriesRepositoryImpl implements SeriesCustomRepository {
                 "       COUNT(P.ID) AS POST_COUNT, " +
                 "       MIN(P.MEMORY_DATE) AS FIRST_MEMORY_DATE, " +
                 "       MAX(P.MEMORY_DATE) AS LAST_MEMORY_DATE, " +
-                "       (SELECT P2.THUMBNAIL_URL " +
+                "       (SELECT M.CONTENT_URL " +
                 "        FROM POST P2 " +
+                "        JOIN MEMORY M ON P2.MEMORY_ID = M.ID " +
                 "        WHERE P2.SERIES_ID = S.ID " +
                 "        ORDER BY P2.MEMORY_DATE ASC, P2.CREATED_DATE ASC " +
                 "        FETCH FIRST 1 ROW ONLY) AS THUMBNAIL_URL " +

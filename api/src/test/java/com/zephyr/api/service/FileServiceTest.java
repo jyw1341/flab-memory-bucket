@@ -1,8 +1,8 @@
 package com.zephyr.api.service;
 
 import com.zephyr.api.config.S3ConfigurationProperties;
-import com.zephyr.api.dto.response.PresignedUrlCreateResponse;
 import com.zephyr.api.dto.PresignedUrlCreateServiceDto;
+import com.zephyr.api.dto.response.PresignedUrlCreateResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -87,7 +87,7 @@ class FileServiceTest {
         urls.add("https://example.com/1/9b3b4472-91af-4603-94a3-515f8d45769c.jpg");
         urls.add("https://example.com/1/9b3b4472-91af-4603-94a3-515f8d45769c.jpg");
         //when
-        List<CompletableFuture<Void>> completableFutures = fileService.deleteObjects(urls);
+        List<CompletableFuture<Void>> completableFutures = fileService.deleteObject(urls);
         CompletableFuture<Void> allOf = CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0]));
         allOf.join();
 

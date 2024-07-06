@@ -43,6 +43,7 @@ public class PostService {
 
         for (MemoryCreateServiceDto memoryCreateServiceDto : dto.getMemoryCreateServiceDtos()) {
             Memory memory = Memory.builder()
+                    .contentType(memoryCreateServiceDto.getContentType())
                     .index(memoryCreateServiceDto.getIndex())
                     .caption(memoryCreateServiceDto.getCaption())
                     .contentUrl(memoryCreateServiceDto.getContentUrl())

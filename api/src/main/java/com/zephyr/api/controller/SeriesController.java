@@ -35,8 +35,13 @@ public class SeriesController {
     }
 
     @GetMapping("/albums/{albumId}/series")
-    public List<SeriesPostDto> getList(@PathVariable Long albumId) {
-        return seriesService.getList(albumId);
+    public List<SeriesResponse> getList(@PathVariable Long albumId) {
+        return seriesService.getList(albumId).stream().map(SeriesResponse::new).toList();
+    }
+
+    @GetMapping("/albums/{albumId}/series-aggregations")
+    public List<SeriesPostDto> getDtoList(@PathVariable Long albumId) {
+        return null;
     }
 
     @GetMapping("/series/{seriesId}")

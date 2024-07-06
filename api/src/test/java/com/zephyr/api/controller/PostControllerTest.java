@@ -34,7 +34,6 @@ class PostControllerTest {
     @Autowired
     private TestRestTemplateUtils testRestTemplateUtils;
 
-
     @Test
     @DisplayName("포스트를 생성 시 포스트 정보가 저장된다")
     public void createPost_shouldSavePostInfo() {

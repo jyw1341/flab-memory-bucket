@@ -34,7 +34,7 @@ public class FileService {
 
     public List<PresignedUrlCreateResponse> createPresignedUrl(List<PresignedUrlCreateServiceDto> dtos) {
         List<CompletableFuture<PresignedUrlCreateResponse>> futures = dtos.stream()
-                .map(dto -> CompletableFuture.supplyAsync(() -> createPresignedUrlForDto(dto)))
+                .map(dto -> CompletableFuture.supplyAsync(() -> createPresignedUrl(dto)))
                 .toList();
 
         CompletableFuture<List<PresignedUrlCreateResponse>> result = CompletableFuture
@@ -50,7 +50,7 @@ public class FileService {
         }
     }
 
-    private PresignedUrlCreateResponse createPresignedUrlForDto(PresignedUrlCreateServiceDto dto) {
+    public PresignedUrlCreateResponse createPresignedUrl(PresignedUrlCreateServiceDto dto) {
         PutObjectRequest objectRequest = PutObjectRequest.builder()
                 .bucket(s3ConfigurationProperties.getBucketName())
                 .key(createKeyName(dto))
@@ -78,7 +78,7 @@ public class FileService {
         return dto.getMemberId() + "/" + uuid + extension;
     }
 
-    public List<CompletableFuture<Void>> deleteObjects(List<String> urls) {
+    public List<CompletableFuture<Void>> deleteObject(List<String> urls) {
         List<CompletableFuture<Void>> result = new ArrayList<>();
         for (String url : urls) {
             result.add(CompletableFuture.runAsync(() -> deleteObject(url)));

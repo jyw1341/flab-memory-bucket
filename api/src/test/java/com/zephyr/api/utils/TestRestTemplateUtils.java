@@ -7,6 +7,7 @@ import com.zephyr.api.dto.response.PostResponse;
 import com.zephyr.api.dto.response.SeriesResponse;
 import com.zephyr.api.enums.ContentType;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -56,6 +57,16 @@ public class TestRestTemplateUtils {
         return restTemplate.getForEntity(
                 createUrl(port, "/series/" + seriesId),
                 SeriesResponse.class
+        ).getBody();
+    }
+
+    public List<SeriesResponse> requestGetSeriesList(Long albumId) {
+        return restTemplate.exchange(
+                createUrl(port, String.format("/albums/%d/series", albumId)),
+                HttpMethod.GET,
+                new HttpEntity<>(null),
+                new ParameterizedTypeReference<List<SeriesResponse>>() {
+                }
         ).getBody();
     }
 
