@@ -110,16 +110,15 @@ public class TestRestTemplateUtils {
     }
 
     public ResponseEntity<Void> requestUpdatePost(Long postId, PostUpdateRequest postUpdateRequest) {
-        return restTemplate.exchange(
+        return restTemplate.postForEntity(
                 createUrl(port, "/posts/" + postId),
-                HttpMethod.PATCH,
                 new HttpEntity<>(postUpdateRequest),
                 Void.class
         );
     }
 
     public void requestUpdateMemories(Long postId, List<MemoryUpdateRequest> requests) {
-        restTemplate.patchForObject(
+        restTemplate.postForEntity(
                 createUrl(port, "/posts/" + postId + "/memories"),
                 requests,
                 Void.class

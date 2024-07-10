@@ -59,8 +59,8 @@ public class PostController {
 
         return new PostResponse(post);
     }
-
-    @PatchMapping("/posts/{postId}")
+ 
+    @PostMapping("/posts/{postId}")
     public void update(@PathVariable Long postId, @RequestBody PostUpdateRequest request) {
         Long loginId = 1L;
 
@@ -79,7 +79,7 @@ public class PostController {
         postService.delete(serviceDto);
     }
 
-    @PatchMapping("/posts/{postId}/memories")
+    @PostMapping("/posts/{postId}/memories")
     public void updateMemories(@PathVariable Long postId, @RequestBody List<MemoryUpdateRequest> requests) {
         List<MemoryUpdateServiceDto> serviceDtos = requests.stream()
                 .map(MemoryUpdateMapper.INSTANCE::toMemoryUpdateServiceDto)
