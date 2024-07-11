@@ -1,6 +1,6 @@
 package com.zephyr.api.dto.mapper;
 
-import com.zephyr.api.dto.service.AlbumDeleteServiceDto;
+import com.zephyr.api.dto.AlbumDeleteServiceDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

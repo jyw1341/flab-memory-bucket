@@ -1,26 +1,25 @@
 package com.zephyr.api.dto.response;
 
 import com.zephyr.api.domain.Memory;
+import com.zephyr.api.enums.ContentType;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
-@Getter
+@Data
 @AllArgsConstructor
-@ToString
 public class MemoryResponse {
 
     private Long id;
+    private ContentType contentType;
     private String contentUrl;
     private String caption;
     private Double index;
-//    private Integer commentCount;
 
     public MemoryResponse(Memory memory) {
         this.id = memory.getId();
+        this.contentType = memory.getContentType();
         this.contentUrl = memory.getContentUrl();
         this.caption = memory.getCaption();
         this.index = memory.getIndex();
-//        this.commentCount = memory.getComments().size();
     }
 }

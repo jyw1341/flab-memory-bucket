@@ -1,8 +1,8 @@
 package com.zephyr.api.service;
 
 import com.zephyr.api.domain.Member;
-import com.zephyr.api.dto.service.MemberCreateServiceDto;
-import com.zephyr.api.dto.service.MemberUpdateServiceDto;
+import com.zephyr.api.dto.MemberCreateServiceDto;
+import com.zephyr.api.dto.MemberUpdateServiceDto;
 import com.zephyr.api.exception.MemberNotFoundException;
 import com.zephyr.api.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;

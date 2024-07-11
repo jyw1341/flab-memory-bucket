@@ -1,4 +1,4 @@
-package com.zephyr.api.dto.service;
+package com.zephyr.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,5 +8,6 @@ import lombok.Data;
 public class SeriesUpdateServiceDto {
     private final Long memberId;
     private final Long seriesId;
+    private final Long albumId;
     private final String seriesName;
 }

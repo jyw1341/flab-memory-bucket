@@ -1,11 +1,11 @@
 package com.zephyr.api.repository;
 
-import com.zephyr.api.domain.Series;
+import com.zephyr.api.dto.SeriesAggregationDto;
 
 import java.util.List;
 
 public interface SeriesCustomRepository {
 
-    List<Series> findSeriesPost(Long albumId);
+    List<SeriesAggregationDto> findSeriesAggregationDto(Long albumId);
 
 }

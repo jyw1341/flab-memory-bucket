@@ -1,8 +1,8 @@
 package com.zephyr.api.service;
 
 import com.zephyr.api.config.S3ConfigurationProperties;
+import com.zephyr.api.dto.PresignedUrlCreateServiceDto;
 import com.zephyr.api.dto.response.PresignedUrlCreateResponse;
-import com.zephyr.api.dto.service.PresignedUrlCreateServiceDto;
 import com.zephyr.api.exception.PresignedUrlCreateFailException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
-
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -35,7 +34,7 @@ public class FileService {
 
     public List<PresignedUrlCreateResponse> createPresignedUrl(List<PresignedUrlCreateServiceDto> dtos) {
         List<CompletableFuture<PresignedUrlCreateResponse>> futures = dtos.stream()
-                .map(dto -> CompletableFuture.supplyAsync(() -> createPresignedUrlForDto(dto)))
+                .map(dto -> CompletableFuture.supplyAsync(() -> createPresignedUrl(dto)))
                 .toList();
 
         CompletableFuture<List<PresignedUrlCreateResponse>> result = CompletableFuture
@@ -51,7 +50,7 @@ public class FileService {
         }
     }
 
-    private PresignedUrlCreateResponse createPresignedUrlForDto(PresignedUrlCreateServiceDto dto) {
+    public PresignedUrlCreateResponse createPresignedUrl(PresignedUrlCreateServiceDto dto) {
         PutObjectRequest objectRequest = PutObjectRequest.builder()
                 .bucket(s3ConfigurationProperties.getBucketName())
                 .key(createKeyName(dto))
@@ -79,7 +78,7 @@ public class FileService {
         return dto.getMemberId() + "/" + uuid + extension;
     }
 
-    public List<CompletableFuture<Void>> deleteObjects(List<String> urls) {
+    public List<CompletableFuture<Void>> deleteObject(List<String> urls) {
         List<CompletableFuture<Void>> result = new ArrayList<>();
         for (String url : urls) {
             result.add(CompletableFuture.runAsync(() -> deleteObject(url)));
@@ -87,7 +86,7 @@ public class FileService {
         return result;
     }
 
-    private void deleteObject(String urlString) {
+    public void deleteObject(String urlString) {
         URL url = null;
         try {
             url = new URL(urlString);

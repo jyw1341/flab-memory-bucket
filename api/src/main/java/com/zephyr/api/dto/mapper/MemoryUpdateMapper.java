@@ -1,6 +1,6 @@
 package com.zephyr.api.dto.mapper;
 
-import com.zephyr.api.dto.service.MemoryUpdateServiceDto;
+import com.zephyr.api.dto.MemoryUpdateServiceDto;
 import com.zephyr.api.dto.request.MemoryUpdateRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
@@ -10,5 +10,7 @@ public interface MemoryUpdateMapper {
 
     MemoryUpdateMapper INSTANCE = Mappers.getMapper(MemoryUpdateMapper.class);
 
-    MemoryUpdateServiceDto toMemoryUpdateServiceDto(MemoryUpdateRequest request);
+    MemoryUpdateServiceDto toMemoryUpdateServiceDto(
+            MemoryUpdateRequest request
+    );
 }

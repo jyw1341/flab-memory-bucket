@@ -1,16 +1,17 @@
 package com.zephyr.api.utils;
 
 import com.zephyr.api.dto.request.*;
-import com.zephyr.api.dto.response.AlbumResponse;
-import com.zephyr.api.dto.response.MemberResponse;
-import com.zephyr.api.dto.response.PostResponse;
-import com.zephyr.api.dto.response.SeriesResponse;
+import com.zephyr.api.dto.response.*;
+import com.zephyr.api.enums.ContentType;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.zephyr.api.utils.TestStringUtils.createUrl;
+import java.util.UUID;
 
 public class TestRestTemplateUtils {
 
@@ -22,12 +23,23 @@ public class TestRestTemplateUtils {
         this.port = port;
     }
 
-    public MemberResponse requestCreateMember(MemberCreateRequest request) {
-        return restTemplate.postForEntity(
-                        createUrl(port, "/members"),
-                        request,
-                        MemberResponse.class)
-                .getBody();
+    public static String createUrl(int port, String path) {
+        return String.format("http://localhost:%d%s", port, path);
+    }
+
+    public static String createUrl(int port, String path, String params) {
+        if (params == null) {
+            params = "";
+        }
+        String format = String.format("http://localhost:%d%s%s", port, path, params);
+        return format;
+    }
+
+    public void requestCreateMember(MemberCreateRequest request) {
+        restTemplate.postForEntity(
+                createUrl(port, "/members"),
+                request,
+                MemberResponse.class);
     }
 
     public AlbumResponse requestCreateAlbum(AlbumCreateRequest request) {
@@ -38,20 +50,54 @@ public class TestRestTemplateUtils {
         ).getBody();
     }
 
-    public SeriesResponse requestCreateSeries(SeriesCreateRequest request) {
+    public ResponseEntity<Void> requestCreateSeries(Long albumId, SeriesCreateRequest request) {
         return restTemplate.postForEntity(
-                createUrl(port, "/series"),
+                createUrl(port, String.format("/albums/%d/series", albumId)),
                 request,
+                Void.class
+        );
+    }
+
+    public void requestCreateSeries(Long albumId, List<SeriesCreateRequest> requests) {
+        for (SeriesCreateRequest request : requests) {
+            restTemplate.postForEntity(
+                    createUrl(port, String.format("/albums/%d/series", albumId)),
+                    request,
+                    Void.class
+            );
+        }
+    }
+
+    public SeriesResponse requestGetSeries(Long seriesId) {
+        return restTemplate.getForEntity(
+                createUrl(port, "/series/" + seriesId),
                 SeriesResponse.class
         ).getBody();
     }
 
-    public PostResponse requestCreatePost(PostCreateRequest request) {
-        return restTemplate.postForEntity(
-                createUrl(port, "/posts"),
-                request,
-                PostResponse.class
+    public SeriesResponse requestGetSeries(String path) {
+        return restTemplate.getForEntity(
+                createUrl(port, path),
+                SeriesResponse.class
         ).getBody();
+    }
+
+    public List<SeriesResponse> requestGetSeriesList(Long albumId) {
+        return restTemplate.exchange(
+                createUrl(port, String.format("/albums/%d/series", albumId)),
+                HttpMethod.GET,
+                new HttpEntity<>(null),
+                new ParameterizedTypeReference<List<SeriesResponse>>() {
+                }
+        ).getBody();
+    }
+
+    public ResponseEntity<Void> requestCreatePost(Long albumId, PostCreateRequest request) {
+        return restTemplate.postForEntity(
+                createUrl(port, String.format("/albums/%d/posts", albumId)),
+                request,
+                Void.class
+        );
     }
 
     public PostResponse requestGetPost(Long postId) {
@@ -61,18 +107,54 @@ public class TestRestTemplateUtils {
         ).getBody();
     }
 
-    public void requestUpdatePost(Long postId, PostUpdateRequest postUpdateRequest) {
-        restTemplate.patchForObject(
+    public PostResponse requestGetPost(String path) {
+        return restTemplate.getForEntity(
+                createUrl(port, path),
+                PostResponse.class
+        ).getBody();
+    }
+
+    public PostSearchResponse requestGetPostList(Long albumId, String params) {
+        return restTemplate.exchange(
+                createUrl(port, String.format("/albums/%d/posts", albumId), params),
+                HttpMethod.GET,
+                new HttpEntity<>(null),
+                new ParameterizedTypeReference<PostSearchResponse>() {
+                }
+        ).getBody();
+    }
+
+    public ResponseEntity<Void> requestUpdatePost(Long postId, PostUpdateRequest postUpdateRequest) {
+        return restTemplate.postForEntity(
                 createUrl(port, "/posts/" + postId),
-                postUpdateRequest,
+                new HttpEntity<>(postUpdateRequest),
                 Void.class
         );
+    }
+
+    public void requestUpdateMemories(Long postId, List<MemoryUpdateRequest> requests) {
+        restTemplate.postForEntity(
+                createUrl(port, "/posts/" + postId + "/memories"),
+                requests,
+                Void.class
+        );
+    }
+
+    public List<SeriesCreateRequest> makeSeriesCreateRequest(int size) {
+        List<SeriesCreateRequest> result = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            result.add(new SeriesCreateRequest("시리즈 " + i));
+        }
+
+        return result;
     }
 
     public List<MemoryCreateRequest> createMemoryRequestDto(int size) {
         List<MemoryCreateRequest> result = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             MemoryCreateRequest request = new MemoryCreateRequest(
+                    UUID.randomUUID().toString(),
+                    ContentType.IMAGE,
                     (double) i,
                     "Content URL " + i,
                     "Caption " + i

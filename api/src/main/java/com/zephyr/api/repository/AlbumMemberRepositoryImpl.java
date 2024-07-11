@@ -3,7 +3,7 @@ package com.zephyr.api.repository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zephyr.api.domain.AlbumMember;
-import com.zephyr.api.dto.service.AlbumMemberListServiceDto;
+import com.zephyr.api.dto.AlbumMemberListServiceDto;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -18,9 +18,9 @@ public class AlbumMemberRepositoryImpl implements AlbumMemberCustomRepository {
     @Override
     public List<AlbumMember> findAlbumMembers(AlbumMemberListServiceDto dto) {
         return jpaQueryFactory.selectFrom(albumMember)
-                .where(albumIdEq(dto.getAlbumId()), memberIdEq(dto.getMemberId()))
+                .where(albumIdEq(dto.getAlbumId()))
                 .limit(dto.getSize())
-                .offset(0)
+                .offset(dto.getPage())
                 .fetch();
     }
 

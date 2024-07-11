@@ -1,7 +1,7 @@
 package com.zephyr.api.dto.mapper;
 
 import com.zephyr.api.dto.request.MemberCreateRequest;
-import com.zephyr.api.dto.service.MemberCreateServiceDto;
+import com.zephyr.api.dto.MemberCreateServiceDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

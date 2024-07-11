@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 
 @Getter
@@ -27,9 +28,13 @@ public class PostResponse {
         this.title = post.getTitle();
         this.description = post.getDescription();
         this.memoryDate = post.getMemoryDate();
-        this.thumbnailUrl = post.getThumbnailUrl();
+        this.thumbnailUrl = post.getCoverMemory().getContentUrl();
         this.series = post.getSeries() != null ? new SeriesResponse(post.getSeries()) : null;
         this.author = new MemberResponse(post.getAuthor());
-        this.memories = post.getMemories().stream().map(MemoryResponse::new).toList();
+        this.memories = post.getMemories()
+                .stream()
+                .map(MemoryResponse::new)
+                .sorted(Comparator.comparing(MemoryResponse::getIndex))
+                .toList();
     }
 }

@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static com.zephyr.api.utils.TestConstant.*;
-import static com.zephyr.api.utils.TestStringUtils.createUrl;
+import static com.zephyr.api.utils.TestRestTemplateUtils.createUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 

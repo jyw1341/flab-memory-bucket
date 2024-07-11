@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.zephyr.api.utils.TestStringUtils.createUrl;
+import static com.zephyr.api.utils.TestRestTemplateUtils.createUrl;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

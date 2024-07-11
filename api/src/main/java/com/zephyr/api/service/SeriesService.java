@@ -2,13 +2,15 @@ package com.zephyr.api.service;
 
 import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.Series;
-import com.zephyr.api.dto.request.SeriesCreateRequest;
-import com.zephyr.api.dto.service.SeriesUpdateServiceDto;
+import com.zephyr.api.dto.SeriesAggregationDto;
+import com.zephyr.api.dto.SeriesCreateServiceDto;
+import com.zephyr.api.dto.SeriesUpdateServiceDto;
 import com.zephyr.api.exception.SeriesNotFoundException;
 import com.zephyr.api.repository.SeriesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,12 +22,12 @@ public class SeriesService {
     private final AlbumService albumService;
     private final MessageSource messageSource;
 
-    public Series create(SeriesCreateRequest dto) {
+    public Series create(SeriesCreateServiceDto dto) {
         Album album = albumService.get(dto.getAlbumId());
 
         Series series = Series.builder()
                 .album(album)
-                .name(dto.getName())
+                .name(dto.getSeriesName())
                 .build();
         seriesRepository.save(series);
 
@@ -45,11 +47,12 @@ public class SeriesService {
         return seriesRepository.findByAlbumId(albumId);
     }
 
-    public List<Series> getSeriesPostList(Long albumId) {
-        return seriesRepository.findSeriesPost(albumId);
+    public List<SeriesAggregationDto> getSeriesAggregations(Long albumId) {
+        return seriesRepository.findSeriesAggregationDto(albumId);
     }
 
-    public void update(SeriesUpdateServiceDto dto) {
+    @Transactional
+    public void updateName(SeriesUpdateServiceDto dto) {
         Series series = seriesRepository.findById(dto.getSeriesId())
                 .orElseThrow(() -> new SeriesNotFoundException(messageSource));
 
