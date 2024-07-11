@@ -2,8 +2,8 @@ package com.zephyr.api.service;
 
 import com.zephyr.api.domain.Album;
 import com.zephyr.api.domain.Series;
+import com.zephyr.api.dto.SeriesAggregationDto;
 import com.zephyr.api.dto.SeriesCreateServiceDto;
-import com.zephyr.api.dto.SeriesPostDto;
 import com.zephyr.api.dto.SeriesUpdateServiceDto;
 import com.zephyr.api.exception.SeriesNotFoundException;
 import com.zephyr.api.repository.SeriesRepository;
@@ -47,7 +47,7 @@ public class SeriesService {
         return seriesRepository.findByAlbumId(albumId);
     }
 
-    public List<SeriesPostDto> getSeriesPostList(Long albumId) {
+    public List<SeriesAggregationDto> getSeriesAggregations(Long albumId) {
         return seriesRepository.findSeriesAggregationDto(albumId);
     }
 

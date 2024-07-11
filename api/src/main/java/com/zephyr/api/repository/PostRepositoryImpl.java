@@ -1,10 +1,17 @@
 package com.zephyr.api.repository;
 
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zephyr.api.domain.Post;
 import com.zephyr.api.dto.PostSearchServiceDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,13 +27,33 @@ public class PostRepositoryImpl implements PostCustomRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<Post> search(PostSearchServiceDto dto) {
-        return jpaQueryFactory.selectFrom(post)
-                .where(albumIdEq(dto.getAlbumId()), usernameContains(dto.getUsername()), titleContains(dto.getTitle()))
-                .limit(dto.getSize())
-                .offset((long) (dto.getPage() - 1) * dto.getSize())
-                .orderBy(post.id.desc())
-                .fetch();
+    public Page<Post> search(PostSearchServiceDto dto) {
+        JPAQuery<Post> query = jpaQueryFactory.selectFrom(post)
+                .where(albumIdEq(dto.getAlbumId()),
+                        authorContains(dto.getAuthor()),
+                        titleContains(dto.getTitle()),
+                        seriesEq(dto.getSeriesId()))
+                .leftJoin(post.author, member).fetchJoin()
+                .leftJoin(post.series, series).fetchJoin()
+                .leftJoin(post.coverMemory, memory).fetchJoin()
+                .limit(dto.getPageable().getPageSize())
+                .offset(dto.getPageable().getOffset());
+
+        for (Sort.Order o : dto.getPageable().getSortOr(Sort.by("createdDate").descending())) {
+            PathBuilder<? extends Post> pathBuilder = new PathBuilder<Post>(post.getType(), post.getMetadata());
+            query.orderBy(new OrderSpecifier(o.isAscending() ? Order.ASC : Order.DESC, pathBuilder.get(o.getProperty())));
+        }
+
+        List<Post> content = query.fetch();
+
+        JPAQuery<Long> countQuery = jpaQueryFactory.select(post.id.count())
+                .from(post)
+                .where(albumIdEq(dto.getAlbumId()),
+                        authorContains(dto.getAuthor()),
+                        titleContains(dto.getTitle()),
+                        seriesEq(dto.getSeriesId()));
+
+        return PageableExecutionUtils.getPage(content, dto.getPageable(), () -> Optional.ofNullable(countQuery.fetchOne()).orElse(0L));
     }
 
     private BooleanExpression albumIdEq(Long albumId) {
@@ -36,7 +63,7 @@ public class PostRepositoryImpl implements PostCustomRepository {
         return post.album.id.eq(albumId);
     }
 
-    private BooleanExpression usernameContains(String username) {
+    private BooleanExpression authorContains(String username) {
         if (username == null) {
             return null;
         }
@@ -48,6 +75,13 @@ public class PostRepositoryImpl implements PostCustomRepository {
             return null;
         }
         return post.title.contains(title);
+    }
+
+    private BooleanExpression seriesEq(Long seriesId) {
+        if (seriesId == null) {
+            return null;
+        }
+        return post.series.id.eq(seriesId);
     }
 
     @Override

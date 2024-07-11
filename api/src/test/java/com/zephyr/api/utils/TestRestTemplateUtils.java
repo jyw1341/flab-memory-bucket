@@ -1,10 +1,7 @@
 package com.zephyr.api.utils;
 
 import com.zephyr.api.dto.request.*;
-import com.zephyr.api.dto.response.AlbumResponse;
-import com.zephyr.api.dto.response.MemberResponse;
-import com.zephyr.api.dto.response.PostResponse;
-import com.zephyr.api.dto.response.SeriesResponse;
+import com.zephyr.api.dto.response.*;
 import com.zephyr.api.enums.ContentType;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
@@ -28,6 +25,14 @@ public class TestRestTemplateUtils {
 
     public static String createUrl(int port, String path) {
         return String.format("http://localhost:%d%s", port, path);
+    }
+
+    public static String createUrl(int port, String path, String params) {
+        if (params == null) {
+            params = "";
+        }
+        String format = String.format("http://localhost:%d%s%s", port, path, params);
+        return format;
     }
 
     public void requestCreateMember(MemberCreateRequest request) {
@@ -106,6 +111,16 @@ public class TestRestTemplateUtils {
         return restTemplate.getForEntity(
                 createUrl(port, path),
                 PostResponse.class
+        ).getBody();
+    }
+
+    public PostSearchResponse requestGetPostList(Long albumId, String params) {
+        return restTemplate.exchange(
+                createUrl(port, String.format("/albums/%d/posts", albumId), params),
+                HttpMethod.GET,
+                new HttpEntity<>(null),
+                new ParameterizedTypeReference<PostSearchResponse>() {
+                }
         ).getBody();
     }
 

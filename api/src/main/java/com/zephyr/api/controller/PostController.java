@@ -7,11 +7,13 @@ import com.zephyr.api.dto.request.MemoryUpdateRequest;
 import com.zephyr.api.dto.request.PostCreateRequest;
 import com.zephyr.api.dto.request.PostSearchRequest;
 import com.zephyr.api.dto.request.PostUpdateRequest;
-import com.zephyr.api.dto.response.PostListResponse;
 import com.zephyr.api.dto.response.PostResponse;
+import com.zephyr.api.dto.response.PostSearchResponse;
 import com.zephyr.api.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,12 +48,13 @@ public class PostController {
     }
 
     @GetMapping("/albums/{albumId}/posts")
-    public List<PostListResponse> getList(@PathVariable Long albumId, @ModelAttribute PostSearchRequest request) {
-        PostSearchServiceDto serviceDto = PostListMapper.INSTANCE.toPostListServiceDto(albumId, request);
-        List<Post> result = postService.getList(serviceDto);
+    public PostSearchResponse getList(@PathVariable Long albumId, PostSearchRequest request, Pageable pageable) {
+        PostSearchServiceDto serviceDto = PostListMapper.INSTANCE.toPostListServiceDto(albumId, pageable, request);
+        Page<Post> result = postService.getList(serviceDto);
 
-        return result.stream().map(PostListResponse::new).toList();
+        return new PostSearchResponse(result);
     }
+
 
     @GetMapping("/posts/{postId}")
     public PostResponse get(@PathVariable Long postId) {
@@ -59,7 +62,7 @@ public class PostController {
 
         return new PostResponse(post);
     }
- 
+
     @PostMapping("/posts/{postId}")
     public void update(@PathVariable Long postId, @RequestBody PostUpdateRequest request) {
         Long loginId = 1L;

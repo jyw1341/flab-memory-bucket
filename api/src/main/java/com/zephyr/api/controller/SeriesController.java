@@ -1,8 +1,8 @@
 package com.zephyr.api.controller;
 
 import com.zephyr.api.domain.Series;
+import com.zephyr.api.dto.SeriesAggregationDto;
 import com.zephyr.api.dto.SeriesCreateServiceDto;
-import com.zephyr.api.dto.SeriesPostDto;
 import com.zephyr.api.dto.SeriesUpdateServiceDto;
 import com.zephyr.api.dto.mapper.SeriesCreateMapper;
 import com.zephyr.api.dto.mapper.SeriesUpdateMapper;
@@ -40,8 +40,8 @@ public class SeriesController {
     }
 
     @GetMapping("/albums/{albumId}/series-aggregations")
-    public List<SeriesPostDto> getDtoList(@PathVariable Long albumId) {
-        return null;
+    public List<SeriesAggregationDto> getDtoList(@PathVariable Long albumId) {
+        return seriesService.getSeriesAggregations(albumId);
     }
 
     @GetMapping("/series/{seriesId}")

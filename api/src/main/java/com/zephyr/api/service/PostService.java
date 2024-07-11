@@ -8,6 +8,7 @@ import com.zephyr.api.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,7 +64,7 @@ public class PostService {
                 .orElseThrow(() -> new PostNotFoundException(messageSource));
     }
 
-    public List<Post> getList(PostSearchServiceDto dto) {
+    public Page<Post> getList(PostSearchServiceDto dto) {
         return postRepository.search(dto);
     }
 

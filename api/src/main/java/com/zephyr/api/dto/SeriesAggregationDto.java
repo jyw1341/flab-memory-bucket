@@ -1,16 +1,19 @@
 package com.zephyr.api.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class SeriesAggregationDto {
 
-    private final Long seriesId;
-    private final Long postCount;
-    private final LocalDate firstDate;
-    private final LocalDate lastDate;
+    private Long id;
+    private String name;
+    private LocalDate firstMemoryDate;
+    private LocalDate lastMemoryDate;
+    private String thumbnailUrl;
 }

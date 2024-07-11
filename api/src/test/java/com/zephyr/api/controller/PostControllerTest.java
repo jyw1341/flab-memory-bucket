@@ -1,14 +1,18 @@
 package com.zephyr.api.controller;
 
 import com.zephyr.api.config.TestConfig;
+import com.zephyr.api.dto.PostListDto;
 import com.zephyr.api.dto.request.MemoryCreateRequest;
 import com.zephyr.api.dto.request.MemoryUpdateRequest;
 import com.zephyr.api.dto.request.PostCreateRequest;
 import com.zephyr.api.dto.request.PostUpdateRequest;
 import com.zephyr.api.dto.response.MemoryResponse;
 import com.zephyr.api.dto.response.PostResponse;
+import com.zephyr.api.dto.response.PostSearchResponse;
+import com.zephyr.api.utils.H2TableCleaner;
 import com.zephyr.api.utils.TestRestTemplateUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +38,14 @@ class PostControllerTest {
 
     @Autowired
     private TestRestTemplateUtils testRestTemplateUtils;
+
+    @Autowired
+    private H2TableCleaner tableCleaner;
+
+    @AfterEach
+    void cleanUp() {
+        tableCleaner.cleanTables("post", "memory");
+    }
 
     @Test
     @DisplayName("포스트를 생성 시 포스트 정보가 저장된다")
@@ -434,7 +447,7 @@ class PostControllerTest {
     }
 
     @Test
-    @DisplayName("포스트의 썸네일로 사용되는 메모리를 지우면 첫번째 순서의 메모리의 URL이 포스트의 썸네일로 지정된다")
+    @DisplayName("커버 메모리 삭제 / 포스트 메모리 수정 / 첫번째 순서의 메모리의 URL이 포스트의 썸네일로 지정된다")
     void whenAddMemories_thenSuccess() {
         //given
         Long albumId = 1L;
@@ -468,5 +481,178 @@ class PostControllerTest {
         assertEquals(second.getIndex(), updatedPost.getMemories().get(1).getIndex());
         assertEquals(second.getCaption(), updatedPost.getMemories().get(1).getCaption());
         assertEquals(second.getContentUrl(), updatedPost.getMemories().get(1).getContentUrl());
+    }
+
+    @Test
+    @DisplayName("쿼리 파라미터 없음 / 포스트 목록 조회 / 가장 최근에 생성한 포스트 20개 반환")
+    void successGetPostList() {
+        //given
+        Long albumId = 1L;
+        Long seriesOneId = 1L;
+        int postSize = 40;
+        int defaultSize = 20;
+        List<PostCreateRequest> postCreateRequests = new ArrayList<>();
+        for (int i = 0; i < postSize; i++) {
+            List<MemoryCreateRequest> memoryRequestDtos = testRestTemplateUtils.createMemoryRequestDto(1);
+            PostCreateRequest createRequest = new PostCreateRequest(
+                    seriesOneId,
+                    String.format("포스트 %d", i),
+                    String.format("포스트 소개문 %d", i),
+                    LocalDate.of(2024, 7, 1).plusDays(i),
+                    memoryRequestDtos.get(0).getRequestId(),
+                    memoryRequestDtos
+            );
+            testRestTemplateUtils.requestCreatePost(albumId, createRequest);
+            postCreateRequests.add(createRequest);
+        }
+
+        //when
+        PostSearchResponse result = testRestTemplateUtils.requestGetPostList(albumId, null);
+
+        assertNotNull(result);
+        assertEquals(postSize, result.getTotal());
+        assertEquals(defaultSize, result.getContent().size());
+        for (int i = 0; i < result.getContent().size(); i++) {
+            PostCreateRequest request = postCreateRequests.get(postCreateRequests.size() - 1 - i);
+            PostListDto response = result.getContent().get(i);
+            assertEquals(request.getTitle(), response.getTitle());
+            assertEquals(request.getDescription(), response.getDescription());
+            assertEquals(request.getSeriesId(), response.getSeries().getId());
+            assertEquals(request.getMemoryDate(), response.getMemoryDate());
+        }
+    }
+
+    @Test
+    @DisplayName("page = 0, size = 10 / 포스트 목록 조회 / 가장 최근에 생성한 포스트 10개 반환")
+    void givenPage0AndSize10_whenGetPostList_thenReturn10Post() {
+        //given
+        Long albumId = 1L;
+        Long seriesOneId = 1L;
+        int postSize = 40;
+        int page = 0;
+        int size = 10;
+        List<PostCreateRequest> postCreateRequests = new ArrayList<>();
+        for (int i = 0; i < postSize; i++) {
+            List<MemoryCreateRequest> memoryRequestDtos = testRestTemplateUtils.createMemoryRequestDto(1);
+            PostCreateRequest createRequest = new PostCreateRequest(
+                    seriesOneId,
+                    String.format("포스트 %d", i),
+                    String.format("포스트 소개문 %d", i),
+                    LocalDate.of(2024, 7, 1).plusDays(i),
+                    memoryRequestDtos.get(0).getRequestId(),
+                    memoryRequestDtos
+            );
+            testRestTemplateUtils.requestCreatePost(albumId, createRequest);
+            postCreateRequests.add(createRequest);
+        }
+
+        //when
+        PostSearchResponse result =
+                testRestTemplateUtils.requestGetPostList(albumId, String.format("?page=%d&size=%d", page, size));
+
+        assertNotNull(result);
+        assertEquals(postSize, result.getTotal());
+        assertEquals(size, result.getContent().size());
+        for (int i = 0; i < result.getContent().size(); i++) {
+            PostCreateRequest request = postCreateRequests.get(postCreateRequests.size() - 1 - i);
+            PostListDto response = result.getContent().get(i);
+            assertEquals(request.getTitle(), response.getTitle());
+            assertEquals(request.getDescription(), response.getDescription());
+            assertEquals(request.getSeriesId(), response.getSeries().getId());
+            assertEquals(request.getMemoryDate(), response.getMemoryDate());
+        }
+    }
+
+    @Test
+    @DisplayName("page = 1, size = 10 / 포스트 목록 조회 / 두번째 페이지 포스트 10개 반환")
+    void givenPage1AndSize10_whenGetPostList_thenReturn10Post() {
+        //given
+        Long albumId = 1L;
+        Long seriesOneId = 1L;
+        int postSize = 40;
+        int page = 1;
+        int size = 10;
+        List<PostCreateRequest> postCreateRequests = new ArrayList<>();
+        for (int i = 0; i < postSize; i++) {
+            List<MemoryCreateRequest> memoryRequestDtos = testRestTemplateUtils.createMemoryRequestDto(1);
+            PostCreateRequest createRequest = new PostCreateRequest(
+                    seriesOneId,
+                    String.format("포스트 %d", i),
+                    String.format("포스트 소개문 %d", i),
+                    LocalDate.of(2024, 7, 1).plusDays(i),
+                    memoryRequestDtos.get(0).getRequestId(),
+                    memoryRequestDtos
+            );
+            testRestTemplateUtils.requestCreatePost(albumId, createRequest);
+            postCreateRequests.add(createRequest);
+        }
+
+        //when
+        PostSearchResponse result =
+                testRestTemplateUtils.requestGetPostList(albumId, String.format("?page=%d&size=%d", page, size));
+
+        assertNotNull(result);
+        assertEquals(postSize, result.getTotal());
+        assertEquals(size, result.getContent().size());
+        for (int i = 0; i < result.getContent().size(); i++) {
+            PostCreateRequest request = postCreateRequests.get(postCreateRequests.size() - size - i - 1);
+            PostListDto response = result.getContent().get(i);
+            assertEquals(request.getTitle(), response.getTitle());
+            assertEquals(request.getDescription(), response.getDescription());
+            assertEquals(request.getSeriesId(), response.getSeries().getId());
+            assertEquals(request.getMemoryDate(), response.getMemoryDate());
+        }
+    }
+
+    @Test
+    @DisplayName("seriesId=1&sort=memoryDate,asc / 포스트 목록 조회 / 시리즈의 1 포스트 20개 기억 일시 오름차순 반환")
+    void givenSeriesId_whenGetPostList_thenReturn10Post() {
+        //given
+        Long albumId = 1L;
+        Long seriesOneId = 1L;
+        Long seriesTowId = 2L;
+        int postSize = 20;
+        List<PostCreateRequest> postCreateRequests = new ArrayList<>();
+        for (int i = 0; i < postSize; i++) {
+            List<MemoryCreateRequest> memoryRequestDtos = testRestTemplateUtils.createMemoryRequestDto(1);
+            PostCreateRequest createRequest = new PostCreateRequest(
+                    seriesOneId,
+                    String.format("시리즈 1 포스트 %d", i),
+                    String.format("시리즈 1 포스트 소개문 %d", i),
+                    LocalDate.of(2024, 7, 1).plusDays(i),
+                    memoryRequestDtos.get(0).getRequestId(),
+                    memoryRequestDtos
+            );
+            testRestTemplateUtils.requestCreatePost(albumId, createRequest);
+            postCreateRequests.add(createRequest);
+        }
+        for (int i = 0; i < postSize; i++) {
+            List<MemoryCreateRequest> memoryRequestDtos = testRestTemplateUtils.createMemoryRequestDto(1);
+            PostCreateRequest createRequest = new PostCreateRequest(
+                    seriesTowId,
+                    String.format("시리즈 2 포스트 %d", i),
+                    String.format("시리즈 2 소개문 %d", i),
+                    LocalDate.of(2024, 7, 1).plusDays(i),
+                    memoryRequestDtos.get(0).getRequestId(),
+                    memoryRequestDtos
+            );
+            testRestTemplateUtils.requestCreatePost(albumId, createRequest);
+        }
+
+        //when
+        PostSearchResponse result =
+                testRestTemplateUtils.requestGetPostList(albumId, "?seriesId=1&sort=memoryDate,asc");
+
+        assertNotNull(result);
+        assertEquals(postSize, result.getTotal());
+        assertEquals(postSize, result.getContent().size());
+        for (int i = 0; i < result.getContent().size(); i++) {
+            PostCreateRequest request = postCreateRequests.get(i);
+            PostListDto response = result.getContent().get(i);
+            assertEquals(request.getTitle(), response.getTitle());
+            assertEquals(request.getDescription(), response.getDescription());
+            assertEquals(request.getSeriesId(), response.getSeries().getId());
+            assertEquals(request.getMemoryDate(), response.getMemoryDate());
+        }
     }
 }

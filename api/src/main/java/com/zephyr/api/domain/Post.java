@@ -43,7 +43,7 @@ public class Post extends BaseTimeEntity {
     @JoinColumn(name = "MEMORY_ID", nullable = false)
     private Memory coverMemory;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "post", cascade = CascadeType.ALL)
     private List<Memory> memories = new ArrayList<>();
 
     @Builder
