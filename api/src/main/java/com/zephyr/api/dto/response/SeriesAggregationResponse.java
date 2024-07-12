@@ -1,4 +1,4 @@
-package com.zephyr.api.dto;
+package com.zephyr.api.dto.response;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
-public class SeriesAggregationDto {
+public class SeriesAggregationResponse {
 
     private Long id;
     private String name;
