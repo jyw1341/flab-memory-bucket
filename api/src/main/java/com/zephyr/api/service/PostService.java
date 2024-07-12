@@ -61,7 +61,7 @@ public class PostService {
 
     public Post get(Long postId) {
         return postRepository.findByIdFetchMemberAndSeriesAndMemories(postId)
-                .orElseThrow(() -> new PostNotFoundException(messageSource));
+                .orElseThrow(PostNotFoundException::new);
     }
 
     public Page<Post> getList(PostSearchServiceDto dto) {
@@ -71,7 +71,7 @@ public class PostService {
     @Transactional
     public void update(PostUpdateServiceDto dto) {
         Post post = postRepository.findById(dto.getPostId())
-                .orElseThrow(() -> new PostNotFoundException(messageSource));
+                .orElseThrow(PostNotFoundException::new);
         Series series = seriesService.get(dto.getSeriesId());
 
         post.setSeries(series);
@@ -83,7 +83,7 @@ public class PostService {
             Memory newCoverMemory = post.getMemories().stream()
                     .filter(memory -> memory.getId().equals(dto.getCoverMemoryId()))
                     .findFirst()
-                    .orElseThrow(() -> new MemoryNotFoundException(messageSource));
+                    .orElseThrow(MemoryNotFoundException::new);
             post.setCoverMemory(newCoverMemory);
         }
     }
@@ -95,7 +95,7 @@ public class PostService {
     @Transactional
     public void updateMemories(Long postId, List<MemoryUpdateServiceDto> dtos) {
         Post post = postRepository.findByIdFetchMemories(postId)
-                .orElseThrow(() -> new PostNotFoundException(messageSource));
+                .orElseThrow(PostNotFoundException::new);
         Map<Long, Memory> memories = post.getMemories()
                 .stream()
                 .collect(Collectors.toMap(Memory::getId, memory -> memory));
