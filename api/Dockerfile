@@ -4,4 +4,6 @@ WORKDIR /re-memory
 
 COPY build/libs/*SNAPSHOT.jar app.jar
 
+EXPOSE 8080
+
 ENTRYPOINT ["java", "-jar", "/re-memory/app.jar"]
