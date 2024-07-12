@@ -1,8 +1,6 @@
-package com.zephyr.api.dto;
+package com.zephyr.api.dto.response;
 
 import com.zephyr.api.domain.Post;
-import com.zephyr.api.dto.response.MemberResponse;
-import com.zephyr.api.dto.response.SeriesResponse;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-public class PostListDto {
+public class PostListResponse {
 
     private Long postId;
     private String title;
@@ -22,7 +20,7 @@ public class PostListDto {
     private LocalDate memoryDate;
     private String thumbnailUrl;
 
-    public PostListDto(Post post) {
+    public PostListResponse(Post post) {
         this.postId = post.getId();
         this.title = post.getTitle();
         this.author = new MemberResponse(post.getAuthor());

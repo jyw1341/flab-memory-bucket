@@ -114,12 +114,12 @@ public class TestRestTemplateUtils {
         ).getBody();
     }
 
-    public PostSearchResponse requestGetPostList(Long albumId, String params) {
+    public RestPageImpl<PostListResponse> requestGetPostList(Long albumId, String params) {
         return restTemplate.exchange(
                 createUrl(port, String.format("/albums/%d/posts", albumId), params),
                 HttpMethod.GET,
                 new HttpEntity<>(null),
-                new ParameterizedTypeReference<PostSearchResponse>() {
+                new ParameterizedTypeReference<RestPageImpl<PostListResponse>>() {
                 }
         ).getBody();
     }
