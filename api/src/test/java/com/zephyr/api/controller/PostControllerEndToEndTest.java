@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import(TestConfig.class)
 
 @Sql(scripts = "PostControllerTestSql.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
-class PostControllerTest {
+class PostControllerEndToEndTest {
 
     @Autowired
     private TestRestTemplateUtils testRestTemplateUtils;

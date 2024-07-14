@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "SeriesControllerTestSql.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 @Import(TestConfig.class)
-class SeriesControllerTest {
+class SeriesControllerEndToEndTest {
 
     @Autowired
     private TestRestTemplateUtils testRestTemplateUtils;
