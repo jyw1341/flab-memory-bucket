@@ -2,12 +2,10 @@ package com.zephyr.api.service;
 
 import com.zephyr.api.domain.*;
 import com.zephyr.api.dto.*;
-import com.zephyr.api.exception.MemoryNotFoundException;
 import com.zephyr.api.exception.PostNotFoundException;
 import com.zephyr.api.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +24,6 @@ public class PostService {
     private final MemberService memberService;
     private final AlbumService albumService;
     private final SeriesService seriesService;
-    private final MessageSource messageSource;
 
     @Transactional
     public Post create(PostCreateServiceDto dto) {
@@ -42,6 +39,7 @@ public class PostService {
                 .memoryDate(dto.getMemoryDate())
                 .build();
 
+        validateCoverMemory(dto);
         for (MemoryCreateServiceDto memoryCreateServiceDto : dto.getMemoryCreateServiceDtos()) {
             Memory memory = Memory.builder()
                     .contentType(memoryCreateServiceDto.getContentType())
@@ -54,9 +52,19 @@ public class PostService {
             }
             post.addMemory(memory);
         }
+
         postRepository.save(post);
 
         return post;
+    }
+
+    private void validateCoverMemory(PostCreateServiceDto postDto) {
+        List<MemoryCreateServiceDto> result = postDto.getMemoryCreateServiceDtos().stream()
+                .filter(memoryDto -> memoryDto.getRequestId().equals(postDto.getCoverMemoryRequestId()))
+                .toList();
+        if (result.size() != 1) {
+            throw new IllegalArgumentException();
+        }
     }
 
     public Post get(Long postId) {
@@ -83,7 +91,7 @@ public class PostService {
             Memory newCoverMemory = post.getMemories().stream()
                     .filter(memory -> memory.getId().equals(dto.getCoverMemoryId()))
                     .findFirst()
-                    .orElseThrow(MemoryNotFoundException::new);
+                    .orElseThrow(IllegalArgumentException::new);
             post.setCoverMemory(newCoverMemory);
         }
     }

@@ -29,7 +29,8 @@ public class Album extends BaseTimeEntity {
     private String thumbnailUrl;
 
     @Builder
-    private Album(String title, Member owner, String description, String thumbnailUrl) {
+    private Album(Long id, String title, Member owner, String description, String thumbnailUrl) {
+        this.id = id;
         this.title = title;
         this.owner = owner;
         this.description = description;
