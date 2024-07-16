@@ -15,4 +15,6 @@ out/
 !**/src/test/**/out/
 
 postgres_data
-api/aws
+.aws
+*.env
+*local.yml
