@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.time.LocalDate;
@@ -31,9 +32,9 @@ import static com.zephyr.api.utils.TestConstant.TEST_POST_TITLE;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
+@ActiveProfiles("local")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestConfig.class)
-
 @Sql(scripts = "PostControllerTestSql.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 class PostControllerEndToEndTest {
 
