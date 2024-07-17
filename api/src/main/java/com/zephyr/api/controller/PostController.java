@@ -7,8 +7,8 @@ import com.zephyr.api.dto.request.MemoryUpdateRequest;
 import com.zephyr.api.dto.request.PostCreateRequest;
 import com.zephyr.api.dto.request.PostSearchRequest;
 import com.zephyr.api.dto.request.PostUpdateRequest;
+import com.zephyr.api.dto.response.PostListResponse;
 import com.zephyr.api.dto.response.PostResponse;
-import com.zephyr.api.dto.response.PostSearchResponse;
 import com.zephyr.api.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,11 +48,11 @@ public class PostController {
     }
 
     @GetMapping("/albums/{albumId}/posts")
-    public PostSearchResponse getList(@PathVariable Long albumId, PostSearchRequest request, Pageable pageable) {
+    public Page<PostListResponse> getList(@PathVariable Long albumId, PostSearchRequest request, Pageable pageable) {
         PostSearchServiceDto serviceDto = PostListMapper.INSTANCE.toPostListServiceDto(albumId, pageable, request);
         Page<Post> result = postService.getList(serviceDto);
 
-        return new PostSearchResponse(result);
+        return result.map(PostListResponse::new);
     }
 
 

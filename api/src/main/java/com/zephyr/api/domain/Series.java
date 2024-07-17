@@ -20,7 +20,8 @@ public class Series extends BaseTimeEntity {
     private String name;
 
     @Builder
-    private Series(Album album, String name) {
+    private Series(Long id, Album album, String name) {
+        this.id = id;
         this.album = album;
         this.name = name;
     }

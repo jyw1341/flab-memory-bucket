@@ -1,14 +1,13 @@
 package com.zephyr.api.exception;
 
-import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
-
-import java.util.Locale;
 
 public class MemoryNotFoundException extends BaseException {
 
-    public MemoryNotFoundException(MessageSource messageSource) {
-        super(messageSource.getMessage("notFound", null, Locale.KOREA));
+    public static final String MESSAGE = "메모리를 찾을 수 없습니다.";
+
+    public MemoryNotFoundException() {
+        super(MESSAGE);
     }
 
     @Override

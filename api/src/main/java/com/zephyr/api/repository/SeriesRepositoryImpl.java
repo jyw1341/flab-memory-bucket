@@ -1,6 +1,6 @@
 package com.zephyr.api.repository;
 
-import com.zephyr.api.dto.SeriesAggregationDto;
+import com.zephyr.api.dto.response.SeriesAggregationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
@@ -16,7 +16,7 @@ public class SeriesRepositoryImpl implements SeriesCustomRepository {
     private final NamedParameterJdbcTemplate template;
 
     @Override
-    public List<SeriesAggregationDto> findSeriesAggregationDto(Long albumId) {
+    public List<SeriesAggregationResponse> findSeriesAggregationDto(Long albumId) {
         String sql = "SELECT S.ID, " +
                 "       S.NAME, " +
                 "       COUNT(P.ID) AS POST_COUNT, " +
@@ -39,7 +39,7 @@ public class SeriesRepositoryImpl implements SeriesCustomRepository {
         return template.query(sql, param, seriesPostDtoRowMapper());
     }
 
-    private RowMapper<SeriesAggregationDto> seriesPostDtoRowMapper() {
-        return BeanPropertyRowMapper.newInstance(SeriesAggregationDto.class);
+    private RowMapper<SeriesAggregationResponse> seriesPostDtoRowMapper() {
+        return BeanPropertyRowMapper.newInstance(SeriesAggregationResponse.class);
     }
 }

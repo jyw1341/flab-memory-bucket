@@ -1,0 +1,28 @@
+services:
+  re-memory-server:
+    container_name: re-memory-server
+    build: api
+    ports:
+      - 8080:8080
+    env_file: ./api/.env
+    volumes:
+      - type: bind
+        source: ./.aws/credentials
+        target: /root/.aws/credentials
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres
+    env_file:
+      - path: ./api/.env
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U zephyr -d re-memory-dev" ]
+      interval: 5s
+      timeout: 10s
+      retries: 3
